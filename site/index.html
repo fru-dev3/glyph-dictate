@@ -80,17 +80,16 @@ h1 em{font-style:normal;color:var(--green)}
 .pill{display:inline-flex;align-items:center;gap:4px;height:64px;padding:0 28px;border-radius:999px;background:#0B0F0C;color:#fff;font:600 20px -apple-system,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap;box-shadow:0 18px 40px rgba(0,0,0,.25)}
 .pill i{display:block;width:5px;height:8px;border-radius:3px;background:#fff}
 .pill span{opacity:.55;margin-left:12px;font-weight:500}.pill b{margin-left:16px}
-.vs{display:flex;gap:14px;align-items:stretch}
-.vs>div{display:flex;flex-direction:column;justify-content:center;border-radius:22px;padding:14px 26px;min-width:150px}
-.vs small{font-size:14px;font-weight:600;opacity:.75}
-.vs .them{background:#fff;border:1px solid var(--line);color:var(--dim)}
-.vs .them s{font:800 clamp(26px,4.4vh,36px)/1.1 "Bricolage Grotesque",sans-serif;text-decoration-color:#D2452B;text-decoration-thickness:4px}
-.vs .us{background:var(--green);color:#fff;box-shadow:0 14px 30px rgba(0,128,0,.3)}
-.vs .us b{font:800 clamp(30px,5vh,42px)/1.05 "Bricolage Grotesque",sans-serif}
 .badges{display:flex;gap:8px 20px;flex-wrap:wrap;justify-content:center;margin:0;padding:0;list-style:none;color:var(--soft);font-size:15px;font-weight:600}
-.badges li{display:flex;align-items:center;gap:7px}
+.badges li,.badges a{display:flex;align-items:center;gap:7px}
+.badges a{color:var(--soft);text-decoration:none}.badges a:hover{color:var(--green)}
+.badges .count{font-weight:700;color:var(--green)}
+h1 em{white-space:nowrap;display:block}
+@media (max-width:959px){h1{font-size:clamp(44px,min(9vh,13.5vw),96px)}}
+.caret{display:inline-block;width:.07em;height:.8em;margin-left:.04em;background:var(--green);vertical-align:-.02em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
 .badges svg{width:19px;height:19px;color:var(--green)}
-@media (max-width:520px){.pill{height:54px;padding:0 22px;font-size:17px}.vs>div{min-width:0;padding:12px 20px}}
+@media (max-width:520px){.pill{height:54px;padding:0 22px;font-size:17px}}
 
 footer{position:fixed;left:0;right:0;bottom:0;z-index:30;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 footer .bar{max-width:1180px;margin:0 auto;height:44px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--dim)}
@@ -110,9 +109,7 @@ footer nav a.home{color:var(--ink);font-weight:600}
   h1 em{display:block}
   .icon{width:clamp(64px,9vh,96px)}
   .pill{height:clamp(64px,8vh,84px);font-size:clamp(20px,2.4vh,26px);padding:0 clamp(28px,3vh,36px)}
-  .vs>div{padding:clamp(14px,2vh,22px) clamp(26px,2.4vw,40px);min-width:clamp(150px,13vw,220px)}
-  .vs .them s{font-size:clamp(30px,5vh,48px)}
-  .vs .us b{font-size:clamp(36px,6vh,58px)}
+
   .btn{height:clamp(54px,7vh,68px);font-size:clamp(17px,2.2vh,21px);padding:0 clamp(22px,2vw,32px)}
   .badges{font-size:clamp(15px,1.9vh,18px)}
 }
@@ -123,21 +120,17 @@ footer nav a.home{color:var(--ink);font-weight:600}
   <div class="left">
   <div class="top">
     <img class="icon" src="icon-512.png" width="72" height="72" alt="Jot">
-    <h1>Talk. <em>It types.</em></h1>
+    <h1>Talk. <em><span id="said">It types.</span><i class="caret" aria-hidden="true"></i></em></h1>
   </div>
-  <div class="pill big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b>0:04</b><span>9 words</span></div>
-  <div class="vs" aria-label="Others cost 15 dollars a month. Jot is free.">
-    <div class="them"><small>Wispr Flow</small><s>$15/mo</s></div>
-    <div class="us"><small>Jot</small><b>Free</b></div>
-  </div>
+  <div class="pill big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div>
   <div class="cta">
     <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download for Mac</a>
-    <a class="btn gh star" href="https://github.com/fru-dev3/jot" aria-label="Star Jot on GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg><span class="count" id="stars" hidden></span></a>
   </div>
   <ul class="badges">
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>Free</li>
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>Private</li>
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>Open source</li>
-    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0M3 3l18 18"/></svg>No account</li>
+    <li><a class="star" href="https://github.com/fru-dev3/jot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Star<span class="count" id="stars" hidden></span></a></li>
   </ul>
   </div>
   <div class="right"><img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: today's dictations into Slack, Terminal, Mail and Notes" fetchpriority="high"></div>
@@ -159,7 +152,28 @@ footer nav a.home{color:var(--ink);font-weight:600}
   </div>
 </footer>
 <script>
-const bars=document.querySelectorAll(".pill i");if(!matchMedia("(prefers-reduced-motion: reduce)").matches)(function t(){bars.forEach((b,i)=>b.style.height=(7+Math.abs(Math.sin(Date.now()/140+i*1.3))*26).toFixed(1)+"px");requestAnimationFrame(t)})();
+// The headline is dictated: the pill hears it, the green line types it, then the next one.
+const bars=document.querySelectorAll(".pill i"), said=document.getElementById("said");
+const tEl=document.getElementById("t"), wEl=document.getElementById("w");
+const lines=["It types.","It's free.","It's private."];
+let talking=false;
+(function wave(){bars.forEach((b,i)=>b.style.height=(talking?7+Math.abs(Math.sin(Date.now()/140+i*1.3))*26:7).toFixed(1)+"px");requestAnimationFrame(wave)})();
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function dictate(){
+  for(let n=0;;n=(n+1)%lines.length){
+    const line=lines[n], t0=Date.now(); talking=true; said.textContent="";
+    for(let k=1;k<=line.length;k++){
+      said.textContent=line.slice(0,k);
+      tEl.textContent="0:0"+Math.floor((Date.now()-t0)/1000);
+      wEl.textContent=said.textContent.trim().split(/\s+/).length+" words";
+      await wait(95);
+    }
+    talking=false; await wait(2200);
+    for(let k=line.length;k>=0;k--){said.textContent=line.slice(0,k);await wait(28)}
+    await wait(250);
+  }
+}
+if(!matchMedia("(prefers-reduced-motion: reduce)").matches)dictate();else{tEl.textContent="0:02";wEl.textContent="2 words"}
 fetch("https://api.github.com/repos/fru-dev3/jot").then(r=>r.ok?r.json():null).then(d=>{
   if(d&&typeof d.stargazers_count==="number"&&d.stargazers_count>0){const s=document.getElementById("stars");s.textContent=d.stargazers_count.toLocaleString();s.hidden=false}
 }).catch(()=>{});
