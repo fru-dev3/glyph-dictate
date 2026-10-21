@@ -4,7 +4,9 @@
   "buildCommand": "",
   "installCommand": "",
   "outputDirectory": "site",
-  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/agents", "destination": "/agents.html" }
+  ],
   "redirects": [
     { "source": "/download", "destination": "https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg", "permanent": false }
   ],
