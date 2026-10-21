@@ -6,3 +6,5 @@ Mac/Info.plist
 .DS_Store
 .unlazy/
 .unlazy-archive/
+.vercel
+.env*

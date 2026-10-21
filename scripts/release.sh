@@ -14,7 +14,8 @@ version=$(awk '/MARKETING_VERSION/{gsub(/"/,"",$2); print $2; exit}' project.yml
 echo "building Jot $version"
 xcodegen generate --quiet
 xcodebuild -project Jot.xcodeproj -scheme Jot -configuration Release -derivedDataPath build -quiet \
-  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$identity" DEVELOPMENT_TEAM="$team" OTHER_CODE_SIGN_FLAGS=--timestamp build
+  CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="$identity" DEVELOPMENT_TEAM="$team" OTHER_CODE_SIGN_FLAGS=--timestamp \
+  CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO build # no get-task-allow: notarization refuses it
 app=build/Build/Products/Release/Jot.app
 codesign --verify --strict --deep "$app"
 
@@ -26,7 +27,13 @@ hdiutil create -volname "Jot $version" -srcfolder dist/stage -fs HFS+ -format UD
 codesign --sign "$identity" --timestamp "$dmg"
 
 echo "notarizing (a few minutes)"
-xcrun notarytool submit "$dmg" --key "$ASC_KEY_PATH" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID" --wait --timeout 20m
+result=$(xcrun notarytool submit "$dmg" --key "$ASC_KEY_PATH" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID" --wait --timeout 20m)
+echo "$result"
+if ! grep -q "status: Accepted" <<<"$result"; then
+  id=$(awk '/^ *id:/{print $2; exit}' <<<"$result")
+  xcrun notarytool log "$id" --key "$ASC_KEY_PATH" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID"
+  echo "notarization was not accepted (log above)"; exit 1
+fi
 xcrun stapler staple "$dmg"
 
 echo "checking a downloaded copy passes Gatekeeper"
