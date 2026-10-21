@@ -1,0 +1,14 @@
+# Jot
+
+> Free, open source voice dictation for the Mac that runs entirely on-device. Hold Fn and talk; the words are typed wherever the cursor is, in any app. Made by fru.dev. MIT license.
+
+- Download: https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg
+- Source: https://github.com/fru-dev3/jot
+- Requires: macOS 26 or later on Apple silicon; Apple Intelligence for clean-up, Command Mode, asking history and filling forms.
+
+## What it does
+- Hold Fn to dictate into any app; double-press Fn for hands-free; Esc cancels.
+- Fn + Shift saves a thought as Markdown; Fn + Control is Command Mode (rewrite the selection or write on request); Fn + Option asks your dictation history.
+- "Fill the form, name ..., email ..." fills a whole form; ending with "press enter" presses Return.
+- On-device speech (Apple SpeechAnalyzer) and clean-up (Apple Foundation Models); no audio saved; no network requests of its own.
+- Learns spellings from your fixes; personal Dictionary, Snippets, per-app styles, searchable History.

@@ -1,0 +1,6 @@
+build/
+dist/
+Jot.xcodeproj/
+Mac/Info.plist
+.vercel/
+.DS_Store

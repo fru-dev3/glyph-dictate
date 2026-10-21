@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "",
+  "outputDirectory": "site",
+  "redirects": [
+    { "source": "/download", "destination": "https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg", "permanent": false }
+  ],
+  "headers": [
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" } ] },
+    { "source": "/(.*)\\.png", "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }] }
+  ]
+}

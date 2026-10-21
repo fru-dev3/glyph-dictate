@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://jot.fru.dev/sitemap.xml
