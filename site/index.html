@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jot | Private Dictation for Mac</title>
-<meta name="description" content="Hold Fn and talk: Jot types your words wherever your cursor is, in any app. Free, open source voice dictation for Mac that runs entirely on-device. Nothing leaves your Mac.">
+<meta name="description" content="Talk and Jot writes it: clean text in any app, forms filled, terminal commands, notes saved, your history answered. Free, open source voice dictation for Mac that runs entirely on-device.">
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="canonical" href="https://jot.fru.dev/">
@@ -15,16 +15,16 @@
 <meta property="og:site_name" content="fru.dev">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Jot | Private Dictation for Mac">
-<meta property="og:description" content="Hold Fn and talk. Your words appear wherever you type. Nothing leaves your Mac.">
+<meta property="og:description" content="Talk messy, get clean writing in any app on your Mac. Free, open source, and nothing leaves your Mac.">
 <meta property="og:url" content="https://jot.fru.dev/">
 <meta property="og:image" content="https://jot.fru.dev/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Jot: a white microphone on office green, beside the line Hold Fn and talk">
+<meta property="og:image:alt" content="Jot: a white microphone on office green, beside the line Think out loud, Jot writes it">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@fru">
 <meta name="twitter:title" content="Jot | Private Dictation for Mac">
-<meta name="twitter:description" content="Hold Fn and talk. Your words appear wherever you type. Nothing leaves your Mac.">
+<meta name="twitter:description" content="Talk messy, get clean writing in any app on your Mac. Free, open source, and nothing leaves your Mac.">
 <meta name="twitter:image" content="https://jot.fru.dev/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,11 +35,11 @@
  {"@type":"WebSite","@id":"https://jot.fru.dev/#website","name":"Jot","url":"https://jot.fru.dev/","publisher":{"@id":"https://fru.dev/#org"}},
  {"@type":"SoftwareApplication","@id":"https://jot.fru.dev/#app","name":"Jot","alternateName":"Jot for Mac",
   "applicationCategory":"ProductivityApplication","operatingSystem":"macOS 26 or later (Apple silicon)",
-  "softwareVersion":"0.7.1","url":"https://jot.fru.dev/",
+  "softwareVersion":"0.7.2","url":"https://jot.fru.dev/",
   "downloadUrl":"https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg",
   "codeRepository":"https://github.com/fru-dev3/jot","programmingLanguage":"Swift",
   "image":"https://jot.fru.dev/og-image.png","screenshot":"https://jot.fru.dev/img/app-ask.webp",
-  "description":"Voice dictation for the Mac that runs entirely on-device: hold Fn, talk, and the words are typed wherever your cursor is. Command Mode, a personal dictionary, snippets, per-app styles and a searchable history, with no cloud and no subscription.",
+  "description":"Voice dictation for the Mac that runs entirely on-device: talk, and clean text is typed wherever your cursor is. Command Mode, a personal dictionary, snippets, per-app styles and a searchable history, with no cloud and no subscription.",
   "license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,
   "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
   "publisher":{"@id":"https://fru.dev/#org"},"author":{"@id":"https://fru.dev/#org"},
@@ -119,25 +119,64 @@ p{margin:0}
 .pill i{display:block;width:3.5px;height:6px;border-radius:2px;background:#fff}
 .pill b{font-weight:600;margin-left:12px}.pill span{opacity:.55;margin-left:8px}
 
-/* hold-to-talk demo on office green */
+/* talk messy, it comes out clean: on office green */
 .demo{background:var(--green);color:#fff;padding:clamp(64px,9vw,112px) 0;position:relative;overflow:hidden}
 .demo::before{content:"";position:absolute;inset:-40% -10% auto auto;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,rgba(184,242,124,.35),transparent)}
-.demo .wrap{display:grid;grid-template-columns:auto 1fr;gap:clamp(28px,6vw,80px);align-items:center;position:relative}
-.key{width:clamp(130px,16vw,180px);aspect-ratio:1;border-radius:26px;border:0;cursor:pointer;
-  background:linear-gradient(#fbfdfb,#dfe8e1);color:#14301d;box-shadow:0 12px 0 #8fae98,0 26px 40px rgba(0,0,0,.35);
-  display:grid;grid-template-rows:1fr auto;padding:16px 18px;text-align:left;font:600 clamp(26px,3vw,34px) var(--sans);
-  transition:transform .12s var(--out),box-shadow .12s var(--out);touch-action:none;-webkit-user-select:none;user-select:none}
-.key small{font:500 14px var(--sans);color:#4b6352;display:flex;align-items:center;gap:6px}
-.key svg{width:18px;height:18px}
-.key.down{transform:translateY(10px);box-shadow:0 2px 0 #8fae98,0 10px 20px rgba(0,0,0,.3)}
-.demo h2{font-size:clamp(34px,5vw,60px);max-width:14ch}
-.demo .say{margin-top:22px;background:#fff;color:#0d1a12;border-radius:16px;padding:18px 20px;min-height:5.2em;font-size:clamp(17px,2vw,20px);box-shadow:0 18px 40px rgba(0,0,0,.25);position:relative}
-.demo .say .caret{display:inline-block;width:2px;height:1.1em;background:var(--green);vertical-align:-3px;margin-left:1px;animation:blink 1s steps(1) infinite}
+.demo .wrap{position:relative}
+.demo .head{text-align:center;max-width:760px;margin:0 auto clamp(28px,4vw,44px)}
+.demo h2{font-size:clamp(36px,5.4vw,64px)}
+.demo .head p{color:#E6F5E8;font-size:clamp(17px,2vw,20px);margin:16px auto 0;max-width:52ch}
+.tabs{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.tabs button{font:600 16px var(--sans);color:#fff;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:10px 18px;cursor:pointer;transition:background .2s var(--out)}
+.tabs button:hover{background:rgba(0,0,0,.28)}
+@media (max-width:420px){.tabs{gap:6px}.tabs button{font-size:15px;padding:9px 13px}}
+.tabs button[aria-selected=true]{background:#fff;color:#0b3d12;border-color:#fff}
+.flow{display:grid;grid-template-columns:1fr auto 1.15fr;gap:clamp(14px,2.4vw,28px);align-items:stretch;max-width:1040px;margin:0 auto}
+.said-box{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:22px 24px;display:flex;flex-direction:column;gap:14px}
+.said-box h3,.out h3{font:600 14px var(--sans);letter-spacing:0;color:#D5EFD8;display:flex;align-items:center;gap:8px}
+.said-box h3 svg{width:16px;height:16px}
+.raw{font-size:clamp(18px,2vw,21px);line-height:1.55;min-height:6.2em}
+.raw span{transition:opacity .4s var(--out),color .4s var(--out)}
+.raw .w{opacity:0}.raw .w.in{opacity:1}
+.raw.clean .drop{opacity:.42;text-decoration:line-through;text-decoration-thickness:2px}
+.raw.clean .fix{color:var(--lime);font-weight:600}
+.said-box .pill{align-self:flex-start;height:38px;padding:0 16px;font-size:13px;transform-origin:left}
+.arrow{display:grid;place-items:center;color:var(--lime)}
+.arrow svg{width:34px;height:34px}
+.out{background:#fff;color:#14201a;border-radius:22px;box-shadow:0 24px 50px rgba(0,0,0,.28);overflow:hidden;display:flex;flex-direction:column}
+.out .bar{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid #e5ece7;font:600 14px var(--sans);color:#5d6f63}
+.out .bar img{width:22px;height:22px;border-radius:6px}
+.out .bar .dot{width:10px;height:10px;border-radius:50%}
+.out .body{padding:20px 22px 24px;font-size:clamp(17px,1.9vw,19px);line-height:1.6;white-space:pre-wrap;flex:1;min-height:9em}
+.out.term{background:#101712;color:#e6efe8}.out.term .bar{border-color:rgba(255,255,255,.08);color:#93a598}
+.out.term .body{font:16px/1.7 var(--mono)}.out.term .p{color:var(--leaf)}
+.out .file{display:inline-block;font:13px var(--mono);color:#41604a;background:#eef5f0;border-radius:6px;padding:3px 8px;margin-top:12px}
+.out .caret{display:inline-block;width:2px;height:1.05em;background:currentColor;vertical-align:-3px;margin-left:1px;animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
-.demo .hint{margin-top:16px;color:rgba(255,255,255,.88);font-size:15px}
-.demo .pill{position:absolute;right:18px;bottom:-22px;transform:scale(.92);transform-origin:right;opacity:0;transition:opacity .25s var(--out)}
-.demo .say.on .pill{opacity:1}
-@media (max-width:760px){.demo .wrap{grid-template-columns:1fr;justify-items:center;text-align:center}.demo h2{margin:0 auto}.demo .say{text-align:left;width:100%}}
+.demo .note{text-align:center;margin-top:22px;color:#E6F5E8;font-size:15px}
+@media (max-width:820px){.flow{grid-template-columns:1fr}.arrow svg{transform:rotate(90deg)}}
+
+/* more than typing: three colored cards */
+.more{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.card{border-radius:28px;padding:clamp(22px,2.6vw,32px);display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.card h3{font-size:clamp(24px,2.4vw,30px)}
+.card > p{font-size:16px}
+.card .vis{margin-top:auto;background:rgba(255,255,255,.96);color:#17201b;border-radius:16px;padding:16px 18px;font-size:15px;line-height:1.55;box-shadow:0 16px 34px rgba(0,0,0,.25)}
+.card .vis small{display:block;font:600 12px var(--sans);color:#5f6f65;margin-bottom:4px}
+.card .vis .sel{background:#d9d3ff;border-radius:3px;padding:0 2px}
+.card .vis .ask{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:10px}
+.card .vis .ask svg{width:16px;height:16px;flex:none}
+.card .vis hr{border:0;border-top:1px solid #e3e8e5;margin:10px 0}
+.card .vis pre{margin:0;font:13px/1.6 var(--mono);white-space:pre-wrap;color:#3d5045}
+.card.rw{background:var(--violet);color:var(--violet-ink)}
+.card.th{background:#0F5FA8;color:#E3F1FF}
+.card.ak{background:#B4412B;color:#FFE9E3}
+.card .said-q{font:600 15px var(--sans);display:flex;gap:8px;align-items:flex-start}
+.card .said-q svg{width:17px;height:17px;flex:none;margin-top:3px}
+@media (max-width:960px){.more{grid-template-columns:1fr;max-width:620px;margin:0 auto}}
+.start{max-width:900px;margin:clamp(28px,4vw,44px) auto 0;text-align:center;color:var(--soft);font-size:16px}
+.start .row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px}
+.start .row span{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;color:var(--ink)}
 
 /* sections */
 .sec{padding:clamp(72px,10vw,128px) 0}
@@ -166,15 +205,7 @@ p{margin:0}
 .place .said-line svg{width:18px;height:18px;flex:none;margin-top:3px}
 @media (max-width:860px){.places{grid-template-columns:1fr}.place.form img{margin:0 -10% -18% 0}}
 
-/* keys: the whole product in a few chords */
-.chords{max-width:900px;margin:0 auto;display:grid;gap:10px}
-.chord{display:grid;grid-template-columns:minmax(220px,auto) 1fr;gap:24px;align-items:center;padding:18px 22px;border-radius:18px;background:var(--panel);border:1px solid var(--line)}
-.chord .k{display:flex;align-items:center;gap:8px;font-size:22px;color:var(--soft);white-space:nowrap}
-.chord .k .plus{font-size:16px}
-.chord b{font:700 19px var(--sans);color:var(--ink);display:block}
-.chord p{color:var(--soft);font-size:15px;margin-top:2px;max-width:62ch}
-.chord .tone{width:10px;height:10px;border-radius:50%;flex:none;margin-right:6px}
-@media (max-width:640px){.chord{grid-template-columns:1fr;gap:10px}}
+
 
 /* the app itself, on teal */
 .app-sec{background:var(--teal);color:var(--teal-ink)}
@@ -240,7 +271,7 @@ footer nav a.home{color:var(--ink);font-weight:600}
   <div class="wrap">
     <a class="brand" href="/"><img src="icon-512.png" alt="" width="30" height="30">Jot</a>
     <nav aria-label="Main">
-      <a class="hide-s" href="#keys">How it works</a>
+      <a class="hide-s" href="#how">How it works</a>
       <a class="hide-s" href="#privacy">Privacy</a>
       <a class="star" href="https://github.com/fru-dev3/jot">GitHub</a>
       <a class="pill-btn dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg">Download</a>
@@ -251,8 +282,8 @@ footer nav a.home{color:var(--ink);font-weight:600}
 <main>
 <section class="hero">
   <div class="wrap">
-    <h1>Hold Fn. Talk. <em>It's typed.</em></h1>
-    <p class="sub">Free, open source dictation for the Mac. Your words land wherever your cursor is, and never leave your Mac.</p>
+    <h1>Think out loud. <em>Jot writes it.</em></h1>
+    <p class="sub">Talk the way you think, ums and all. Clean writing lands in any app on your Mac, and never leaves it. Free and open source.</p>
     <div class="cta">
       <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>
@@ -263,7 +294,7 @@ footer nav a.home{color:var(--ink);font-weight:600}
         Star on GitHub <span class="count" id="stars" hidden></span>
       </a>
     </div>
-    <p class="meta">Version 0.7.1 · macOS 26 or later, Apple silicon · MIT license</p>
+    <p class="meta">Version 0.7.2 · macOS 26 or later, Apple silicon · MIT license</p>
   </div>
   <div class="stage">
     <img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: an answer to the question When is the launch now, above a day of dictations into Slack, Terminal, Mail and Notes" fetchpriority="high">
@@ -271,16 +302,23 @@ footer nav a.home{color:var(--ink);font-weight:600}
   </div>
 </section>
 
-<section class="demo" aria-labelledby="try">
+<section class="demo" id="how" aria-labelledby="try">
   <div class="wrap">
-    <button class="key" id="fn" type="button" aria-describedby="try-hint">fn<small><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>hold me</small></button>
-    <div>
-      <h2 id="try">Try it: hold the key.</h2>
-      <div class="say" id="say"><span id="typed"></span><span class="caret"></span>
-        <div class="pill" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div>
-      </div>
-      <p class="hint" id="try-hint">On your Mac it's the Fn key. Hold it, talk, let go: the words land where your cursor is.</p>
+    <div class="head">
+      <h2 id="try">Talk messy. It comes out clean.</h2>
+      <p>Fillers go, "no wait" fixes itself, lists become lists, and each app gets the right tone. Pick one.</p>
     </div>
+    <div class="tabs" role="tablist" aria-label="Where it lands" id="tabs"></div>
+    <div class="flow">
+      <div class="said-box">
+        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>What you said</h3>
+        <div class="raw" id="raw" aria-live="off"></div>
+        <div class="pill" id="dpill" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div>
+      </div>
+      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15m0 0l-6-6m6 6l-6 6"/></svg></div>
+      <div class="out" id="out" role="tabpanel" aria-live="polite"><div class="bar" id="obar"></div><div class="body" id="obody"></div></div>
+    </div>
+    <p class="note">Made-up examples. Everything runs on your Mac with Apple's on-device models.</p>
   </div>
 </section>
 
@@ -313,18 +351,39 @@ footer nav a.home{color:var(--ink);font-weight:600}
   </div>
 </section>
 
-<section class="sec" id="keys" style="padding-top:clamp(32px,5vw,56px)">
+<section class="sec" id="more" style="padding-top:clamp(32px,5vw,56px)" aria-labelledby="more-h">
   <div class="wrap">
     <div class="head">
-      <h2>One key. A few chords.</h2>
-      <p>Everything Jot does starts from the key you already have.</p>
+      <h2 id="more-h">More than typing.</h2>
+      <p>The same voice rewrites, remembers and answers.</p>
     </div>
-    <div class="chords">
-      <div class="chord"><div class="k"><span class="tone" style="background:var(--leaf)"></span>Hold <span class="kbd">fn</span></div><div><b>Dictate anywhere</b><p>Talk, let go, it's typed. Fillers out, "no wait" corrections fixed.</p></div></div>
-      <div class="chord"><div class="k"><span class="tone" style="background:var(--lime)"></span><span class="kbd">fn</span><span class="kbd">fn</span></div><div><b>Hands-free</b><p>Double-press to keep talking until you press it again.</p></div></div>
-      <div class="chord"><div class="k"><span class="tone" style="background:var(--sky)"></span><span class="kbd">fn</span><span class="plus">+</span><span class="kbd">shift</span></div><div><b>Save a thought</b><p>A quick note to yourself, saved as Markdown. Nothing is typed.</p></div></div>
-      <div class="chord"><div class="k"><span class="tone" style="background:#9a8cff"></span><span class="kbd">fn</span><span class="plus">+</span><span class="kbd">control</span></div><div><b>Command Mode</b><p>Select text and say "make this friendlier" or "turn it into bullets".</p></div></div>
-      <div class="chord"><div class="k"><span class="tone" style="background:#2fd0c8"></span><span class="kbd">fn</span><span class="plus">+</span><span class="kbd">option</span></div><div><b>Ask your history</b><p>"When is the launch now?" Answered from what you've dictated.</p></div></div>
+    <div class="more">
+      <div class="card rw">
+        <h3>Rewrite what's on screen.</h3>
+        <p>Select some text and say what you want instead.</p>
+        <p class="said-q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>"Make it confident."</p>
+        <div class="vis"><small>Before</small><span class="sel">I think we should maybe probably move the review to next week, if that works?</span><hr><small>After</small>Let's move the review to next week.</div>
+      </div>
+      <div class="card th">
+        <h3>Thoughts, straight into your notes.</h3>
+        <p>Catch an idea without opening anything. It's saved as a Markdown note in any folder you pick, an Obsidian vault too.</p>
+        <div class="vis"><small>Ideas/2026-10-21 09-14.md</small><pre>---
+kind: voice
+source: jot
+---
+
+Pitch the newsletter as a weekly five-minute read, not a digest.</pre></div>
+      </div>
+      <div class="card ak">
+        <h3>Ask what you said.</h3>
+        <p>Your dictations become memory you can question, answered on your Mac.</p>
+        <p class="said-q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>"When is the launch now?"</p>
+        <div class="vis"><small>Answer, from 2 dictations</small>The fourteenth. You told Sam in Mail this morning, and the press kit is in the shared folder.</div>
+      </div>
+    </div>
+    <div class="start">
+      Everything starts from one key you choose: Fn, Right Option, Right Command or Right Control.
+      <div class="row"><span>Hold to talk</span><span>Double-press for hands-free</span><span>+ Shift: a thought</span><span>+ Control: rewrite</span><span>+ Option: ask</span></div>
     </div>
   </div>
 </section>
@@ -380,7 +439,7 @@ footer nav a.home{color:var(--ink);font-weight:600}
     <div class="steps">
       <div class="step"><span class="n">1</span><h3>Download</h3><p>Open <a class="dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg">Jot.dmg</a> and drag Jot to Applications.</p></div>
       <div class="step"><span class="n">2</span><h3>Allow</h3><p>Settings asks for Input Monitoring, Accessibility and the microphone.</p></div>
-      <div class="step"><span class="n">3</span><h3>Talk</h3><p>Click into any text box, hold <span class="kbd">fn</span>, and say it.</p></div>
+      <div class="step"><span class="n">3</span><h3>Talk</h3><p>Click into any text box, hold your talk key (<span class="kbd">fn</span> to start), and say it.</p></div>
     </div>
     <div class="again">
       <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download for Mac</a>
@@ -428,38 +487,51 @@ function bars(pill, level){ pill.querySelectorAll("i").forEach((b, i) => {
 const hero = document.querySelector("[data-live]");
 if (hero && !still) (function tick(){ bars(hero, 0.85); requestAnimationFrame(tick); })();
 
-// Hold the key: the pill comes up, words arrive, let go and they land.
-const key = document.getElementById("fn"), say = document.getElementById("say"), typed = document.getElementById("typed");
-const pill = say.querySelector(".pill"), tEl = document.getElementById("t"), wEl = document.getElementById("w");
-const lines = [
-  "Thanks for the intro, Priya. Tuesday or Thursday afternoon both work for me.",
-  "Refactor the upload handler so retries back off, then run the tests.",
-  "The launch moved to the fourteenth, and the press kit is in the shared folder.",
+// Talk messy, it comes out clean. Each scene: what was said (d = dropped, f = the fix), the app, what lands.
+const scenes = [
+  {tab:"Mail", app:"Mail", icon:"#3BA3F5", raw:[["um",'d'],["so",'d'],"hi Sam, the launch is on the",["twelfth",'d'],["no wait",'d'],["the fourteenth",'f'],"and",["uh",'d'],"the press kit is in the shared folder"],
+   out:"Hi Sam,\n\nThe launch is on the fourteenth, and the press kit is in the shared folder."},
+  {tab:"Slack", app:"Slack, #design", icon:"#9a8cff", raw:["can you look at the PR before lunch",["like",'d'],["one",'f'],"the tests",["two",'f'],"the copy",["thanks",'f']],
+   out:"can you look at the PR before lunch?\n1. the tests\n2. the copy\nthanks!"},
+  {tab:"Terminal", app:"Terminal", icon:"#3FA34D", term:true, raw:["npm run build",["dash dash",'f'],"watch",["send it",'f']],
+   out:"npm run build --watch"},
+  {tab:"Notes", app:"Thought saved", icon:"#2fd0c8", raw:[["okay",'d'],"idea for the newsletter",["um",'d'],"pitch it as a weekly five minute read",["not",'f'],"a digest"],
+   out:"Pitch the newsletter as a weekly five-minute read, not a digest.", file:"Ideas/2026-10-21 09-14.md"},
 ];
-let n = 0, holding = false, start = 0, raf = 0, auto = true;
-function loop(){
-  if (!holding) return;
-  const s = (Date.now() - start) / 1000, line = lines[n % lines.length];
-  const shown = line.slice(0, Math.min(line.length, Math.floor(s * 22)));
-  typed.textContent = shown;
-  tEl.textContent = "0:" + String(Math.floor(s)).padStart(2, "0");
-  const words = shown.trim() ? shown.trim().split(/\s+/).length : 0;
-  wEl.textContent = words + (words === 1 ? " word" : " words");
-  bars(pill, still ? 0 : 1);
-  raf = requestAnimationFrame(loop);
+const tabsEl = document.getElementById("tabs"), raw = document.getElementById("raw"), out = document.getElementById("out");
+const obar = document.getElementById("obar"), obody = document.getElementById("obody"), dpill = document.getElementById("dpill");
+const tEl = document.getElementById("t"), wEl = document.getElementById("w");
+let cur = 0, run = 0, auto = true, seen = false;
+scenes.forEach((sc, i) => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.textContent = sc.tab;
+  b.onclick = () => { auto = false; play(i); gtag("event","demo_tab",{tab:sc.tab}); }; tabsEl.appendChild(b); });
+const wait = ms => new Promise(r => setTimeout(r, still ? 0 : ms));
+async function play(i){
+  const me = ++run, sc = scenes[i]; cur = i;
+  [...tabsEl.children].forEach((b, k) => b.setAttribute("aria-selected", k === i));
+  raw.classList.remove("clean"); raw.innerHTML = "";
+  const words = sc.raw.flatMap(p => { const [t, k] = Array.isArray(p) ? p : [p, ""];
+    return t.split(" ").map(w => { const s = document.createElement("span"); s.className = "w " + (k === "d" ? "drop" : k === "f" ? "fix" : ""); s.textContent = w + " "; raw.appendChild(s); return s; }); });
+  out.className = "out" + (sc.term ? " term" : "");
+  obar.innerHTML = '<span class="dot" style="background:' + sc.icon + '"></span>' + sc.app;
+  obody.innerHTML = '<span class="caret"></span>';
+  const t0 = Date.now(); let level = 1;
+  const tick = () => { if (me !== run) return; const s = (Date.now() - t0) / 1000;
+    tEl.textContent = "0:" + String(Math.floor(s)).padStart(2, "0"); bars(dpill, still ? 0 : level); if (level) requestAnimationFrame(tick); };
+  tick();
+  for (let k = 0; k < words.length; k++) { words[k].classList.add("in"); wEl.textContent = (k + 1) + (k ? " words" : " word"); await wait(170); if (me !== run) return; }
+  level = 0; bars(dpill, 0);
+  await wait(350); if (me !== run) return;
+  raw.classList.add("clean");
+  await wait(600); if (me !== run) return;
+  const text = sc.out, pre = sc.term ? '<span class="p">~/app %</span> ' : "";
+  for (let k = 1; k <= text.length; k += 2) { obody.innerHTML = pre + esc(text.slice(0, k)) + '<span class="caret"></span>'; await wait(18); if (me !== run) return; }
+  obody.innerHTML = pre + esc(text) + (sc.term ? '\n<span class="p">~/app %</span> <span class="caret"></span>' : "") + (sc.file ? '\n<span class="file">' + sc.file + '</span>' : "");
+  await wait(3600); if (me !== run || !auto) return;
+  play((i + 1) % scenes.length);
 }
-function down(e){ if (e) { e.preventDefault(); auto = false; } if (holding) return;
-  holding = true; start = Date.now(); key.classList.add("down"); say.classList.add("on"); typed.textContent = ""; loop(); }
-function up(){ if (!holding) return; holding = false; cancelAnimationFrame(raf);
-  key.classList.remove("down"); say.classList.remove("on"); typed.textContent = lines[n % lines.length]; n++; }
-key.addEventListener("pointerdown", down);
-addEventListener("pointerup", up); addEventListener("pointercancel", up);
-key.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat) down(e); });
-key.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter") up(); });
-// Until someone tries it, it plays itself once, when the section comes into view.
-new IntersectionObserver((entries, io) => { if (entries[0].isIntersecting && auto) {
-  io.disconnect(); setTimeout(() => { if (!auto) return; down(); setTimeout(() => auto && up(), 3900); }, 500); } },
-  { threshold: .6 }).observe(say);
+function esc(s){ return s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]); }
+// Plays when it comes into view, then keeps cycling until someone picks a tab.
+new IntersectionObserver((entries, io) => { if (entries[0].isIntersecting && !seen) { seen = true; io.disconnect(); play(0); } }, { threshold: .4 }).observe(out);
 
 // the star count, from GitHub (shown once there is one)
 fetch("https://api.github.com/repos/fru-dev3/jot").then(r=>r.ok?r.json():null).then(d=>{
@@ -470,7 +542,6 @@ gtag("consent","default",{analytics_storage:"denied",ad_storage:"denied",ad_user
 if(location.hostname==="jot.fru.dev")addEventListener("load",()=>(window.requestIdleCallback||setTimeout)(()=>{const s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-FN8TZMJ0F4";document.head.appendChild(s);gtag("js",new Date());gtag("config","G-FN8TZMJ0F4",{site_name:"jot",content_group:"jot"})}));
 document.querySelectorAll("a.dl").forEach(a=>a.addEventListener("click",()=>gtag("event","file_download",{file_name:"Jot.dmg"})));
 document.querySelectorAll("a.star").forEach(a=>a.addEventListener("click",()=>gtag("event","star_on_github",{link_url:a.href})));
-key.addEventListener("pointerdown",()=>gtag("event","try_hold_key"),{once:true});
 </script>
 </body>
 </html>
