@@ -13,7 +13,13 @@ enum FormFill {
 
     @MainActor
     static func run(_ said: String, app: NSRunningApplication?) async throws -> Int {
-        let fields = Self.fields(in: app)
+        // A browser builds a page's accessibility tree only once something asks for it, so the
+        // first look at a freshly opened page can come back empty: look again.
+        var fields = Self.fields(in: app)
+        for _ in 0..<3 where fields.isEmpty {
+            try? await Task.sleep(for: .milliseconds(400))
+            fields = Self.fields(in: app)
+        }
         log.info("form: \(fields.count) fields")
         guard !fields.isEmpty else { throw JotError("No form here. Click into the form's first field, then try again.") }
         let plan = try await AI.fill(said, labels: fields.map(\.label))
@@ -22,12 +28,13 @@ enum FormFill {
         var filled = 0
         for value in plan where fields.indices.contains(value.field) && !value.value.isEmpty {
             let field = fields[value.field].element
+            let text = Self.normalCase(value.value)
             AXUIElementSetAttributeValue(field, kAXFocusedAttribute as CFString, kCFBooleanTrue)
             try? await Task.sleep(for: .milliseconds(120))
             // Typed like a paste, so web forms see the change (setting the value directly can be ignored).
             Paste.press(kVK_ANSI_A, .maskCommand)
             pb.clearContents()
-            pb.setString(value.value, forType: .string)
+            pb.setString(text, forType: .string)
             Paste.press(kVK_ANSI_V, .maskCommand)
             try? await Task.sleep(for: .milliseconds(150))
             filled += 1
@@ -35,6 +42,14 @@ enum FormFill {
         try? await Task.sleep(for: .milliseconds(300))
         Clipboard.restore(saved)
         return filled
+    }
+
+    /// Emails are lowercase ("Sam@example.com" from speech), and shouting is undone ("SAM LEE"
+    /// becomes "Sam Lee").
+    static func normalCase(_ value: String) -> String {
+        if value.contains("@"), !value.contains(" ") { return value.lowercased() }
+        guard value.contains(where: \.isLetter), value == value.uppercased() else { return value }
+        return value.capitalized
     }
 
     private static let textRoles: Set<String> = ["AXTextField", "AXTextArea", "AXComboBox"]
@@ -64,20 +79,35 @@ enum FormFill {
             for child in children(element) { walk(child, depth: depth + 1) }
         }
         walk(root, depth: 0)
+        log.info("form: looked at \(seen) elements under \(string(root, kAXRoleAttribute) ?? "?", privacy: .public)")
         return fields
     }
 
-    /// The web page the field is on (so the address bar isn't a field), or else its window.
+    /// The web page in the field's window (the address bar is never a form field), or else the
+    /// window itself. Found from the window down: climbing up from a field inside the page
+    /// lands on a web area whose children come back empty in Safari.
     private static func form(around element: AXUIElement) -> AXUIElement? {
+        var window = Self.element(element, kAXWindowAttribute)
         var current: AXUIElement? = element
-        var window: AXUIElement?
-        while let e = current {
-            let role = string(e, kAXRoleAttribute)
-            if role == "AXWebArea" { return e }
-            if role == "AXWindow" { window = e; break }
+        while window == nil, let e = current {
+            if string(e, kAXRoleAttribute) == "AXWindow" { window = e }
             current = parent(of: e)
         }
-        return window
+        guard let window else { return nil }
+        return webArea(in: window) ?? window
+    }
+
+    /// The first web page inside a window, breadth first.
+    private static func webArea(in window: AXUIElement) -> AXUIElement? {
+        var queue = [window]
+        var seen = 0
+        while !queue.isEmpty, seen < 2000 {
+            let e = queue.removeFirst()
+            seen += 1
+            if string(e, kAXRoleAttribute) == "AXWebArea" { return e }
+            queue += children(e)
+        }
+        return nil
     }
 
     private static func string(_ element: AXUIElement, _ attribute: String) -> String? {

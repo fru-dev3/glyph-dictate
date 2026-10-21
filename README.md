@@ -93,6 +93,8 @@ from fixes), `Ask.swift`, `FormFill.swift`, `Pill.swift`, `Settings.swift`, `His
 
 ## Versions
 
+- **0.7.1** (2026-10-21): forms fill from any browser page (also just opened, or with the address bar in focus), emails lowercase;
+  "get commit" in a terminal is `git commit`; answers show their bold text.
 - **0.7** (2026-10-21): fill a whole form by voice.
 - **0.6**: ask your history (Fn + Option, or Ask on Home).
 - **0.5**: never lose a ramble (drafts every 10 s, recovery after a crash), Undo Last

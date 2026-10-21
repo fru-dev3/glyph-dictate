@@ -191,7 +191,7 @@ enum AI {
         You fill in a form from what the user said. You get the form's fields, numbered, and their words.
         Give a value only for fields they said something for. Never invent a value.
         Write values the way they're typed into a form: "sam at example dot com" is sam@example.com,
-        phone numbers as digits, names and places capitalized.
+        phone numbers as digits, names and places in normal case ("Sam Lee", "Austin"), never all capitals.
         """)
         return try await session.respond(to: "Fields:\n\(list)\n\nThey said: \(said)", generating: FormPlan.self,
                                          options: GenerationOptions(temperature: 0)).content.fields

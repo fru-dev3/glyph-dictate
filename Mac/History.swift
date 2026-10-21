@@ -128,7 +128,10 @@ private struct AskCard: View {
             if ask.busy && ask.answer.isEmpty {
                 ProgressView().controlSize(.small)
             } else {
-                Text(ask.answer).textSelection(.enabled)
+                // The model writes a little Markdown (**bold**); show it, not the asterisks.
+                Text((try? AttributedString(markdown: ask.answer, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
+                     ?? AttributedString(ask.answer))
+                    .textSelection(.enabled)
             }
             if !ask.sources.isEmpty {
                 DisclosureGroup("From \(ask.sources.count) dictation\(ask.sources.count == 1 ? "" : "s")") {

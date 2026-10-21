@@ -88,7 +88,10 @@ enum Rules {
                 s = s.replacingOccurrences(of: pattern, with: "$1\(symbol)", options: [.regularExpression, .caseInsensitive])
             }
         }
-        return s.replacingOccurrences(of: "\\btilde\\s*/", with: "~/", options: [.regularExpression, .caseInsensitive])
+        s = s.replacingOccurrences(of: "\\btilde\\s*/", with: "~/", options: [.regularExpression, .caseInsensitive])
+        // Speech hears "git commit" as "get commit".
+        return s.replacingOccurrences(of: "\\bget\\s+(commit|push|pull|status|checkout|switch|add|diff|log|stash|rebase|merge|clone|fetch|reset|branch|tag)\\b",
+                                      with: "git $1", options: [.regularExpression, .caseInsensitive])
     }
 
     /// "... press enter" at the very end (or "send it" in a terminal) presses Return after pasting.

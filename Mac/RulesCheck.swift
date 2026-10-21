@@ -33,6 +33,8 @@ check(Rules.codeSpeak("git commit dash dash no dash verify"), "git commit --no-v
 check(Rules.codeSpeak("run scripts slash ship dot sh now"), "run scripts/ship.sh now")
 check(Rules.codeSpeak("open tilde slash notes underscore old dot md"), "open ~/notes_old.md")
 check(Rules.codeSpeak("Fix the dash in the title."), "Fix the dash in the title.")
+check(Rules.codeSpeak("Get commit dash dash no dash verify"), "git commit --no-verify")
+check(Rules.codeSpeak("I get it, push later."), "I get it, push later.")
 check(Rules.splitEnter("Run the tests, press enter.", code: false).text, "Run the tests")
 assert(Rules.splitEnter("Run the tests, press enter.", code: false).enter)
 assert(Rules.splitEnter("ship it and send it", code: true) == ("ship it", true))
