@@ -138,8 +138,16 @@ code{font:.9em var(--mono);background:var(--well);border-radius:5px;padding:1px 
 .faq details[open] summary::after{content:"\2212"}
 .faq p{color:var(--dim);margin:10px 0 0}
 
-footer{border-top:1px solid var(--hair);padding:28px var(--pad);text-align:center;color:var(--faint);font-size:14px}
-footer a{color:var(--dim);text-decoration:none;margin:0 8px}
+/* one footer, fixed to the bottom, carrying the freshness; the page ends above it */
+body{padding-bottom:calc(45px + env(safe-area-inset-bottom))}
+footer{position:fixed;left:0;right:0;bottom:0;z-index:30;border-top:1px solid var(--hair);padding-bottom:env(safe-area-inset-bottom);
+  background:color-mix(in srgb,var(--paper) 82%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+footer .bar{max-width:1080px;margin:0 auto;height:44px;padding:0 var(--pad);display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--faint)}
+footer nav{display:flex;align-items:center;gap:4px}
+footer nav a{color:var(--dim);text-decoration:none;padding:6px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:6px}
+footer nav a:hover{background:var(--well);color:var(--ink)}
+footer nav a.home{color:var(--ink);font-weight:600}
+@media (max-width:520px){footer .opt{display:none}}
 </style>
 </head>
 <body>
@@ -237,10 +245,19 @@ footer a{color:var(--dim);text-decoration:none;margin:0 8px}
 
 </main>
 <footer>
-  <a href="https://github.com/fru-dev3/jot">GitHub</a>
-  <a href="https://github.com/fru-dev3/jot/releases">Releases</a>
-  <a href="privacy.html">Privacy</a>
-  <a href="https://fru.dev">fru.dev</a>
+  <div class="bar">
+    <span>Updated Oct 21, 2026</span>
+    <nav aria-label="Footer">
+      <a class="home" href="https://fru.dev">fru.dev</a>
+      <a class="opt" href="https://github.com/fru-dev3/jot">GitHub</a>
+      <a class="opt" href="/privacy.html">Privacy</a>
+      <a href="https://github.com/fru-dev3/jot/issues" title="Contact: open an issue">Contact</a>
+      <a href="/agents" title="For AI agents" aria-label="For AI agents">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4M9 13h.01M15 13h.01"/></svg>
+        <span class="opt">Agents</span>
+      </a>
+    </nav>
+  </div>
 </footer>
 <script>
 // the star count on the button, from GitHub (shown only once it's known)
