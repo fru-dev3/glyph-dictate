@@ -50,6 +50,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 case "undo": Dictation.shared.undoLast()
                 case "raw": Dictation.shared.useWhatISaid()
                 case "stop": Dictation.shared.handle(.stop, locked: false, mode: Dictation.shared.mode)
+                // "fail:N": the next N speech starts fail; "mute:N": the next N hear silence (a stall).
+                case "fail": Breakage.fail.withLock { $0 = Int(said.last ?? "") ?? 1 }
+                case "mute": Breakage.mute.withLock { $0 = Int(said.last ?? "") ?? 1 }
                 default:
                     let mode: Mode = switch said.last {
                     case "thought": .thought

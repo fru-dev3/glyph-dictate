@@ -99,6 +99,9 @@ from fixes), `Ask.swift`, `FormFill.swift`, `Pill.swift`, `Settings.swift`, `His
 
 - **0.7.1** (2026-10-21): forms fill from any browser page (also just opened, or with the address bar in focus), emails lowercase;
   "get commit" in a terminal is `git commit`; answers show their bold text.
+- **0.7.3** (2026-10-21): a running timer always means you're heard. When Apple's speech service stops
+  answering, Jot starts it again on everything you said so far (kept in memory only, never saved), and if it
+  still won't answer, says so on the pill and relaunches itself.
 - **0.7.2** (2026-10-21): with no text field (Finder, a page, the desktop) your words always stay on
   the clipboard; any folder can hold your notes, an Obsidian vault too.
 - **0.7** (2026-10-21): fill a whole form by voice.

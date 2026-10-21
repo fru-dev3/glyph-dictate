@@ -100,6 +100,9 @@ enum Transcription {
     /// recording: on the Mac those calls have been seen to never answer now and then.
     private static var resolvedLocale: Locale?
 
+    /// Look the language up again next time (after speech has stopped answering).
+    static func forget() { resolvedLocale = nil }
+
     private static func resolved(_ supported: (Locale) async -> Locale?) async -> Locale? {
         if let resolvedLocale { return resolvedLocale }
         guard let locale = await locale(supported) else { return nil }

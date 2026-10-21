@@ -8,8 +8,8 @@ settings:
   base:
     CODE_SIGN_STYLE: Automatic
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.7.2"
-    CURRENT_PROJECT_VERSION: "9"
+    MARKETING_VERSION: "0.7.3"
+    CURRENT_PROJECT_VERSION: "10"
 targets:
   Jot:
     type: application

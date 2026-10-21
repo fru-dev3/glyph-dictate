@@ -45,6 +45,10 @@ private struct PillView: View {
             switch dictation.state {
             case .finishing:
                 ProgressView().controlSize(.small).tint(.white)
+            case .done where dictation.problem != nil:
+                Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 12, weight: .semibold)).foregroundStyle(.orange)
+                Text(dictation.problem ?? "").font(.system(size: 12, weight: .medium)).foregroundStyle(.white)
+                    .padding(.leading, 5)
             case .done where dictation.copiedOnly:
                 // No text field had focus: it's on the clipboard instead.
                 Image(systemName: "doc.on.clipboard").font(.system(size: 12, weight: .semibold)).foregroundStyle(.white)
@@ -63,15 +67,23 @@ private struct PillView: View {
                     Capsule().fill(.white)
                         .frame(width: 3, height: 4 + CGFloat(dictation.levels[i]) * 16)
                 }
-                // How long and how many words so far, quiet beside the voice.
-                TimelineView(.periodic(from: dictation.startedAt, by: 1)) { context in
-                    Text(Duration.seconds(context.date.timeIntervalSince(dictation.startedAt))
-                        .formatted(.time(pattern: .minuteSecond)))
-                        .foregroundStyle(.white.opacity(0.9))
+                if dictation.hearing {
+                    // How long and how many words so far, quiet beside the voice. Shown only
+                    // while speech is turning your voice into words.
+                    TimelineView(.periodic(from: dictation.startedAt, by: 1)) { context in
+                        Text(Duration.seconds(context.date.timeIntervalSince(dictation.startedAt))
+                            .formatted(.time(pattern: .minuteSecond)))
+                            .foregroundStyle(.white.opacity(0.9))
+                    }
+                    .padding(.leading, 10)
+                    Text("\(dictation.words) words").foregroundStyle(.white.opacity(0.55))
+                        .padding(.leading, 6)
+                } else {
+                    // Keep talking: the sound is kept and heard once speech is back.
+                    Text(dictation.reconnecting ? "Reconnecting, keep talking" : "Starting")
+                        .foregroundStyle(dictation.reconnecting ? .orange : .white.opacity(0.7))
+                        .padding(.leading, 10)
                 }
-                .padding(.leading, 10)
-                Text("\(dictation.words) words").foregroundStyle(.white.opacity(0.55))
-                    .padding(.leading, 6)
             }
         }
         .font(.system(size: 11, weight: .medium).monospacedDigit())
@@ -86,7 +98,7 @@ private struct PillView: View {
     private var label: String {
         switch dictation.state {
         case .finishing: "Writing"
-        case .done: dictation.copiedOnly ? "Copied" : "Done"
+        case .done: dictation.problem ?? (dictation.copiedOnly ? "Copied" : "Done")
         default: dictation.mode == .thought ? "Listening for a thought" : dictation.mode == .command ? "Listening for a command" : "Listening"
         }
     }
