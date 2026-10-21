@@ -47,244 +47,75 @@
 ]}
 </script>
 <style>
-:root{
-  --night:#07100B; --deep:#0C1A12; --panel:#122219; --line:rgba(255,255,255,.10);
-  --ink:#F2F7F3; --soft:#B5C4BA; --dim:#8A9B90;
-  --green:#008000; --leaf:#3FA34D; --lime:#B8F27C;
-  --violet:#5B4BE8; --violet-ink:#EAE7FF; --teal:#0A6463; --teal-ink:#DDF7F5; --sky:#3BA3F5;
-  --display:"Bricolage Grotesque",-apple-system,BlinkMacSystemFont,sans-serif;
-  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
-  --pad:clamp(16px,4.4vw,56px); --max:1180px;
-  --out:cubic-bezier(.16,1,.3,1);
-}
+:root{--bg:#07100B;--card:#0F1C14;--line:rgba(255,255,255,.10);--ink:#F2F7F3;--soft:#B5C4BA;--dim:#8A9B90;--green:#008000;--leaf:#3FA34D;--lime:#B8F27C}
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-body{margin:0;background:var(--night);color:var(--ink);font:17px/1.6 var(--sans);overflow-x:hidden;padding-bottom:calc(45px + env(safe-area-inset-bottom))}
-::selection{background:var(--leaf);color:#04140A}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;padding-bottom:calc(45px + env(safe-area-inset-bottom))}
 a{color:var(--lime);text-underline-offset:3px}
 :focus-visible{outline:2px solid var(--lime);outline-offset:3px;border-radius:6px}
 img{display:block;max-width:100%;height:auto}
-h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.03em;line-height:1.02;margin:0;text-wrap:balance}
-p{margin:0}
-.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
-/* top bar */
-.top{position:absolute;inset:0 0 auto;z-index:5}
-.top .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
-.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font:800 20px var(--display)}
-.brand img{width:30px;height:30px}
-.top nav{display:flex;align-items:center;gap:6px}
-.top nav a{color:var(--soft);text-decoration:none;font-size:15px;padding:8px 12px;border-radius:999px}
-.top nav a:hover{color:var(--ink);background:rgba(255,255,255,.06)}
-.top nav a.pill-btn{color:#04140A;background:var(--lime);font-weight:700}
-@media (max-width:640px){.top nav .hide-s{display:none}}
-
-/* hero */
-.hero{position:relative;padding:128px 0 0;text-align:center;overflow:hidden;
-  background:
-    radial-gradient(60% 50% at 50% 78%,rgba(0,128,0,.55),transparent 70%),
-    radial-gradient(40% 35% at 18% 30%,rgba(0,128,0,.28),transparent 70%),
-    radial-gradient(35% 30% at 85% 25%,rgba(91,75,232,.30),transparent 70%),
-    var(--night)}
-.hero h1{font-size:clamp(48px,9vw,104px);max-width:12ch;margin:0 auto}
-.hero h1 em{font-style:normal;color:var(--lime)}
-.hero .sub{color:#DCE6DF;font-size:clamp(18px,2.2vw,22px);max-width:34ch;margin:22px auto 0}
-.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:32px}
-.btn{display:inline-flex;align-items:center;gap:10px;height:54px;padding:0 24px;border-radius:14px;font:700 17px var(--sans);text-decoration:none;transition:transform .3s var(--out),box-shadow .3s var(--out)}
+main{max-width:760px;margin:0 auto;padding:clamp(48px,9vw,96px) 16px 56px;text-align:center}
+.icon{width:88px;height:88px;margin:0 auto 22px;border-radius:20px;box-shadow:0 14px 34px rgba(0,128,0,.35)}
+h1{font:800 clamp(44px,8vw,72px)/1.02 "Bricolage Grotesque",-apple-system,sans-serif;letter-spacing:-.03em;margin:0;text-wrap:balance}
+h1 em{font-style:normal;color:var(--lime)}
+.sub{color:#DCE6DF;font-size:clamp(18px,2.4vw,21px);max-width:32ch;margin:18px auto 0}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:30px}
+.btn{display:inline-flex;align-items:center;gap:10px;height:54px;padding:0 24px;border-radius:14px;font-family:inherit;font-weight:700;font-size:17px;text-decoration:none}
 .btn svg{width:20px;height:20px}
-.btn.go{background:var(--leaf);color:#03130A;box-shadow:0 8px 20px rgba(0,0,0,.35)}
-.btn.go:hover{transform:translateY(-2px);box-shadow:0 14px 28px rgba(0,0,0,.4)}
-.btn.gh{background:rgba(255,255,255,.08);color:var(--ink);border:1px solid var(--line)}
-.btn.gh:hover{background:rgba(255,255,255,.13)}
-.btn .count{font:700 14px var(--mono);color:var(--soft);padding-left:10px;border-left:1px solid var(--line)}
-.meta{color:#B0C0B5;font-size:14px;margin-top:16px}
-.stage{position:relative;max-width:1000px;margin:56px auto 0;padding:0 var(--pad)}
-.stage .shot{filter:drop-shadow(0 30px 60px rgba(0,0,0,.55));margin-bottom:-6%}
-.float-pill{position:absolute;left:50%;bottom:9%;transform:translateX(-50%);z-index:2}
-@media (max-width:640px){.float-pill{transform:translateX(-50%) scale(.72);bottom:6%}.stage{padding:0 8px}.app-grid img,.app-row img{margin:0 -8px}}
-
-/* the pill, as Jot draws it */
-.pill{display:inline-flex;align-items:center;gap:3px;height:44px;padding:0 20px;border-radius:999px;background:rgba(0,0,0,.88);
-  color:#fff;font:500 14px var(--sans);font-variant-numeric:tabular-nums;white-space:nowrap;box-shadow:0 14px 34px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.08)}
-.pill i{display:block;width:3.5px;height:6px;border-radius:2px;background:#fff}
-.pill b{font-weight:600;margin-left:12px}.pill span{opacity:.55;margin-left:8px}
-
-/* talk messy, it comes out clean: on office green */
-.demo{background:var(--green);color:#fff;padding:clamp(64px,9vw,112px) 0;position:relative;overflow:hidden}
-.demo::before{content:"";position:absolute;inset:-40% -10% auto auto;width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,rgba(184,242,124,.35),transparent)}
-.demo .wrap{position:relative}
-.demo .head{text-align:center;max-width:760px;margin:0 auto clamp(28px,4vw,44px)}
-.demo h2{font-size:clamp(36px,5.4vw,64px)}
-.demo .head p{color:#E6F5E8;font-size:clamp(17px,2vw,20px);margin:16px auto 0;max-width:52ch}
-.tabs{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:22px}
-.tabs button{font:600 16px var(--sans);color:#fff;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:10px 18px;cursor:pointer;transition:background .2s var(--out)}
-.tabs button:hover{background:rgba(0,0,0,.28)}
-@media (max-width:420px){.tabs{gap:6px}.tabs button{font-size:15px;padding:9px 13px}}
-.tabs button[aria-selected=true]{background:#fff;color:#0b3d12;border-color:#fff}
-.flow{display:grid;grid-template-columns:1fr auto 1.15fr;gap:clamp(14px,2.4vw,28px);align-items:stretch;max-width:1040px;margin:0 auto}
-.said-box{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:22px 24px;display:flex;flex-direction:column;gap:14px}
-.said-box h3,.out h3{font:600 14px var(--sans);letter-spacing:0;color:#D5EFD8;display:flex;align-items:center;gap:8px}
-.said-box h3 svg{width:16px;height:16px}
-.raw{font-size:clamp(18px,2vw,21px);line-height:1.55;min-height:6.2em}
-.raw span{transition:opacity .4s var(--out),color .4s var(--out)}
-.raw .w{opacity:0}.raw .w.in{opacity:1}
-.raw.clean .drop{opacity:.42;text-decoration:line-through;text-decoration-thickness:2px}
-.raw.clean .fix{color:var(--lime);font-weight:600}
-.said-box .pill{align-self:flex-start;height:38px;padding:0 16px;font-size:13px;transform-origin:left}
-.arrow{display:grid;place-items:center;color:var(--lime)}
-.arrow svg{width:34px;height:34px}
-.out{background:#fff;color:#14201a;border-radius:22px;box-shadow:0 24px 50px rgba(0,0,0,.28);overflow:hidden;display:flex;flex-direction:column}
-.out .bar{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid #e5ece7;font:600 14px var(--sans);color:#5d6f63}
-.out .bar img{width:22px;height:22px;border-radius:6px}
-.out .bar .dot{width:10px;height:10px;border-radius:50%}
-.out .body{padding:20px 22px 24px;font-size:clamp(17px,1.9vw,19px);line-height:1.6;white-space:pre-wrap;flex:1;min-height:9em}
-.out.term{background:#101712;color:#e6efe8}.out.term .bar{border-color:rgba(255,255,255,.08);color:#93a598}
-.out.term .body{font:16px/1.7 var(--mono)}.out.term .p{color:var(--leaf)}
-.out .file{display:inline-block;font:13px var(--mono);color:#41604a;background:#eef5f0;border-radius:6px;padding:3px 8px;margin-top:12px}
-.out .caret{display:inline-block;width:2px;height:1.05em;background:currentColor;vertical-align:-3px;margin-left:1px;animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-.demo .note{text-align:center;margin-top:22px;color:#E6F5E8;font-size:15px}
-@media (max-width:820px){.flow{grid-template-columns:1fr}.arrow svg{transform:rotate(90deg)}}
-
-
-
-/* sections */
-.sec{padding:clamp(72px,10vw,128px) 0}
-.sec .head{text-align:center;max-width:760px;margin:0 auto clamp(36px,5vw,56px)}
-.sec h2{font-size:clamp(36px,5.4vw,64px)}
-.sec .head p{color:var(--soft);font-size:clamp(17px,2vw,20px);margin:16px auto 0;max-width:58ch}
-
-
-
-
-
-/* the comparison */
-.cmp{max-width:980px;margin:0 auto;overflow-x:auto;border-radius:22px;border:1px solid var(--line);background:var(--deep)}
-.cmp table{width:100%;border-collapse:collapse;min-width:620px;font-size:16px}
-.cmp th,.cmp td{text-align:left;padding:16px 20px;border-bottom:1px solid var(--line);vertical-align:middle}
-.cmp thead th{font:600 14px var(--sans);color:var(--dim);background:var(--panel)}
-.cmp tbody th{font-weight:700;white-space:nowrap}
-.cmp tbody tr:last-child th,.cmp tbody tr:last-child td{border-bottom:0}
-.cmp td{color:var(--soft)}
-.cmp td.no{color:#E9A79B}
-.cmp tr.us{background:linear-gradient(90deg,rgba(0,128,0,.55),rgba(0,128,0,.25))}
-.cmp tr.us th,.cmp tr.us td{color:#fff;font-size:17px}
-.cmp tr.us th img{display:inline-block;vertical-align:-5px;margin-right:10px;border-radius:5px}
-.cmp-note{max-width:62ch;margin:28px auto 0;text-align:center;color:var(--ink);font-size:clamp(17px,2vw,19px)}
-.cmp-src{text-align:center;color:var(--dim);font-size:14px;margin-top:12px}
-#compare .cta{margin-top:36px}
-@media (max-width:640px){
-  .cmp{overflow:visible}
-  .cmp table{min-width:0}
-  .cmp thead{display:none}
-  .cmp tr,.cmp th,.cmp td{display:block}
-  .cmp tr{padding:16px 18px;border-bottom:1px solid var(--line)}
-  .cmp tbody tr:last-child{border-bottom:0}
-  .cmp th,.cmp td{padding:0;border:0}
-  .cmp tbody th{margin-bottom:6px;font-size:17px}
-  .cmp td{font-size:15px;line-height:1.7}
-  .cmp td::before{content:attr(data-l) ": ";color:var(--dim)}
-  .cmp tr.us td::before{color:#cfe9d2}
-}
-
-/* one footer, fixed to the bottom, carrying the freshness; the page ends above it */
-footer{position:fixed;left:0;right:0;bottom:0;z-index:30;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);
-  background:rgba(7,16,11,.86);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-footer .bar{max-width:var(--max);margin:0 auto;height:44px;padding:0 var(--pad);display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--dim)}
+.btn.go{background:var(--leaf);color:#03130A}
+.btn.go:hover{background:#4DB65B}
+.btn.gh{background:rgba(255,255,255,.07);color:var(--ink);border:1px solid var(--line)}
+.btn.gh:hover{background:rgba(255,255,255,.12)}
+.btn .count{color:var(--soft);padding-left:10px;border-left:1px solid var(--line);font-weight:600}
+.meta{color:var(--dim);font-size:14px;margin-top:14px}
+.shot{margin:48px auto 0;filter:drop-shadow(0 24px 48px rgba(0,0,0,.55))}
+h2{font:800 clamp(30px,5vw,44px)/1.1 "Bricolage Grotesque",-apple-system,sans-serif;letter-spacing:-.02em;margin:72px 0 22px;text-wrap:balance}
+.prices{list-style:none;margin:0 auto;padding:0;max-width:520px;border:1px solid var(--line);border-radius:20px;background:var(--card);text-align:left;overflow:hidden}
+.prices li{display:flex;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid var(--line);color:var(--soft)}
+.prices li span:last-child{text-decoration:line-through;text-decoration-color:rgba(233,167,155,.8);white-space:nowrap}
+.prices li.us{border-bottom:0;background:var(--green);color:#fff;font-weight:700;font-size:19px}
+.prices li.us span:last-child{text-decoration:none}
+.why{color:var(--soft);max-width:44ch;margin:18px auto 0}
+.steps{list-style:none;counter-reset:s;margin:0 auto;padding:0;max-width:520px;text-align:left}
+.steps li{counter-increment:s;display:flex;gap:14px;align-items:baseline;padding:10px 0;color:var(--soft)}
+.steps li::before{content:counter(s);flex:none;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--leaf);color:#03130A;font-weight:800}
+.steps b{color:var(--ink)}
+footer{position:fixed;left:0;right:0;bottom:0;z-index:30;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);background:rgba(7,16,11,.88);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+footer .bar{max-width:1180px;margin:0 auto;height:44px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--dim)}
 footer nav{display:flex;align-items:center;gap:4px}
 footer nav a{color:var(--soft);text-decoration:none;padding:6px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:6px}
 footer nav a:hover{background:rgba(255,255,255,.07);color:var(--ink)}
 footer nav a.home{color:var(--ink);font-weight:600}
 @media (max-width:520px){footer .opt{display:none}}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-
-<header class="top">
-  <div class="wrap">
-    <a class="brand" href="/"><img src="icon-512.png" alt="" width="30" height="30">Jot</a>
-    <nav aria-label="Main">
-      <a class="hide-s" href="#how">How it works</a>
-      <a class="hide-s" href="#compare">Compare</a>
-      <a class="star" href="https://github.com/fru-dev3/jot">GitHub</a>
-      <a class="pill-btn dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg">Download</a>
-    </nav>
-  </div>
-</header>
-
 <main>
-<section class="hero">
-  <div class="wrap">
-    <h1>Think out loud. <em>Jot writes it.</em></h1>
-    <p class="sub">Talk the way you think, ums and all. Clean writing lands in any app on your Mac, and never leaves it. Free and open source.</p>
-    <div class="cta">
-      <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>
-        Download for Mac
-      </a>
-      <a class="btn gh star" href="https://github.com/fru-dev3/jot">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>
-        Star on GitHub <span class="count" id="stars" hidden></span>
-      </a>
-    </div>
-    <p class="meta">Version 0.7.3 · macOS 26, Apple silicon · Signed and notarized by Apple</p>
+  <img class="icon" src="icon-512.png" width="88" height="88" alt="Jot">
+  <h1>Hold a key, talk. <em>It types.</em></h1>
+  <p class="sub">Free dictation for your Mac. Works in every app, cleans up your ums, and never leaves your Mac.</p>
+  <div class="cta">
+    <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download for Mac</a>
+    <a class="btn gh star" href="https://github.com/fru-dev3/jot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Star on GitHub<span class="count" id="stars" hidden></span></a>
   </div>
-  <div class="stage">
-    <img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: an answer to the question When is the launch now, above a day of dictations into Slack, Terminal, Mail and Notes" fetchpriority="high">
-    <div class="float-pill" aria-hidden="true"><div class="pill" data-live><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b>0:04</b><span>9 words</span></div></div>
-  </div>
-</section>
+  <p class="meta">Version 0.7.3 · macOS 26, Apple silicon · open source</p>
+  <img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: today's dictations into Slack, Terminal, Mail and Notes, with an answer to When is the launch now" fetchpriority="high">
 
-<section class="demo" id="how" aria-labelledby="try">
-  <div class="wrap">
-    <div class="head">
-      <h2 id="try">Talk messy. It comes out clean.</h2>
-      <p>Fillers go, "no wait" fixes itself, lists become lists, and each app gets the right tone. Pick one.</p>
-    </div>
-    <div class="tabs" role="tablist" aria-label="Where it lands" id="tabs"></div>
-    <div class="flow">
-      <div class="said-box">
-        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>What you said</h3>
-        <div class="raw" id="raw" aria-live="off"></div>
-        <div class="pill" id="dpill" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div>
-      </div>
-      <div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15m0 0l-6-6m6 6l-6 6"/></svg></div>
-      <div class="out" id="out" role="tabpanel" aria-live="polite"><div class="bar" id="obar"></div><div class="body" id="obody"></div></div>
-    </div>
-    <p class="note">Made-up examples. Everything runs on your Mac with Apple's on-device models.</p>
-  </div>
-</section>
+  <h2>Why pay for dictation?</h2>
+  <ul class="prices">
+    <li><span>Wispr Flow</span><span>$15 a month</span></li>
+    <li><span>Willow Voice</span><span>$15 a month</span></li>
+    <li><span>Aqua Voice</span><span>$10 a month</span></li>
+    <li><span>Superwhisper</span><span>$8.49 a month</span></li>
+    <li class="us"><span>Jot</span><span>Free</span></li>
+  </ul>
+  <p class="why">No subscription, no account, no word limit. Your voice is never sent anywhere: Jot uses the speech and Apple Intelligence models already on your Mac.</p>
 
-<section class="sec" id="compare" aria-labelledby="cmp-h">
-  <div class="wrap">
-    <div class="head">
-      <h2 id="cmp-h">Free, open and yours.</h2>
-      <p>How Jot compares with the dictation apps people pay for.</p>
-    </div>
-    <div class="cmp" role="region" aria-label="Comparison" tabindex="0">
-      <table>
-        <thead><tr><th scope="col">App</th><th scope="col">Cost</th><th scope="col">Your voice goes</th><th scope="col">Open source</th></tr></thead>
-        <tbody>
-          <tr class="us"><th scope="row"><img src="icon-512.png" alt="" width="22" height="22">Jot</th><td data-l="Cost"><b>Free</b></td><td data-l="Your voice"><b>Nowhere. It stays on your Mac</b></td><td data-l="Open source"><b>Yes, MIT</b></td></tr>
-          <tr><th scope="row">Wispr Flow</th><td data-l="Cost">$15 a month</td><td data-l="Your voice" class="no">To their cloud</td><td data-l="Open source" class="no">No</td></tr>
-          <tr><th scope="row">Willow Voice</th><td data-l="Cost">$15 a month</td><td data-l="Your voice" class="no">To their cloud</td><td data-l="Open source" class="no">No</td></tr>
-          <tr><th scope="row">Aqua Voice</th><td data-l="Cost">$10 a month</td><td data-l="Your voice" class="no">To their cloud</td><td data-l="Open source" class="no">No</td></tr>
-          <tr><th scope="row">Superwhisper</th><td data-l="Cost">$8.49 a month, or $249.99 once</td><td data-l="Your voice">Your Mac, or their cloud</td><td data-l="Open source" class="no">No</td></tr>
-          <tr><th scope="row">VoiceInk</th><td data-l="Cost">$25 to $69 once</td><td data-l="Your voice">Your Mac</td><td data-l="Open source">Yes, GPL</td></tr>
-          <tr><th scope="row">Handy</th><td data-l="Cost">Free</td><td data-l="Your voice">Your Mac</td><td data-l="Open source">Yes</td></tr>
-          <tr><th scope="row">Apple Dictation</th><td data-l="Cost">Free, built in</td><td data-l="Your voice">Your Mac</td><td data-l="Open source" class="no">No</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="cmp-note">What Jot adds over the free ones: it cleans up as you talk, fixes "no wait", fills forms, speaks terminal and answers questions about what you said. Nothing to download: it uses the speech and Apple Intelligence models already on your Mac.</p>
-    <p class="cmp-src">Prices from each app's public pricing, October 2026. No account, no word limits, no subscription.</p>
-    <div class="cta">
-      <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download for Mac</a>
-      <a class="btn gh star" href="https://github.com/fru-dev3/jot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Star on GitHub</a>
-    </div>
-  </div>
-</section>
+  <h2>Ready in a minute.</h2>
+  <ol class="steps">
+    <li><span><b>Download</b> Jot.dmg and drag Jot to Applications.</span></li>
+    <li><span><b>Allow</b> the mic, Accessibility and Input Monitoring when it asks.</span></li>
+    <li><span><b>Hold Fn</b> in any text box, talk, and let go.</span></li>
+  </ol>
 </main>
 
 <footer>
@@ -304,61 +135,6 @@ footer nav a.home{color:var(--ink);font-weight:600}
 </footer>
 
 <script>
-// The voice bars on every pill.
-const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-function bars(pill, level){ pill.querySelectorAll("i").forEach((b, i) => {
-  const h = level === 0 ? 6 : 5 + Math.abs(Math.sin(Date.now() / 140 + i * 1.3)) * 20 * level;
-  b.style.height = h.toFixed(1) + "px"; }); }
-const hero = document.querySelector("[data-live]");
-if (hero && !still) (function tick(){ bars(hero, 0.85); requestAnimationFrame(tick); })();
-
-// Talk messy, it comes out clean. Each scene: what was said (d = dropped, f = the fix), the app, what lands.
-const scenes = [
-  {tab:"Mail", app:"Mail", icon:"#3BA3F5", raw:[["um",'d'],["so",'d'],"hi Sam, the launch is on the",["twelfth",'d'],["no wait",'d'],["the fourteenth",'f'],"and",["uh",'d'],"the press kit is in the shared folder"],
-   out:"Hi Sam,\n\nThe launch is on the fourteenth, and the press kit is in the shared folder."},
-  {tab:"Slack", app:"Slack, #design", icon:"#9a8cff", raw:["can you look at the PR before lunch",["like",'d'],["one",'f'],"the tests",["two",'f'],"the copy",["thanks",'f']],
-   out:"can you look at the PR before lunch?\n1. the tests\n2. the copy\nthanks!"},
-  {tab:"Terminal", app:"Terminal", icon:"#3FA34D", term:true, raw:["npm run build",["dash dash",'f'],"watch",["send it",'f']],
-   out:"npm run build --watch"},
-  {tab:"Notes", app:"Thought saved", icon:"#2fd0c8", raw:[["okay",'d'],"idea for the newsletter",["um",'d'],"pitch it as a weekly five minute read",["not",'f'],"a digest"],
-   out:"Pitch the newsletter as a weekly five-minute read, not a digest.", file:"Ideas/2026-10-21 09-14.md"},
-];
-const tabsEl = document.getElementById("tabs"), raw = document.getElementById("raw"), out = document.getElementById("out");
-const obar = document.getElementById("obar"), obody = document.getElementById("obody"), dpill = document.getElementById("dpill");
-const tEl = document.getElementById("t"), wEl = document.getElementById("w");
-let cur = 0, run = 0, auto = true, seen = false;
-scenes.forEach((sc, i) => { const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.textContent = sc.tab;
-  b.onclick = () => { auto = false; play(i); gtag("event","demo_tab",{tab:sc.tab}); }; tabsEl.appendChild(b); });
-const wait = ms => new Promise(r => setTimeout(r, still ? 0 : ms));
-async function play(i){
-  const me = ++run, sc = scenes[i]; cur = i;
-  [...tabsEl.children].forEach((b, k) => b.setAttribute("aria-selected", k === i));
-  raw.classList.remove("clean"); raw.innerHTML = "";
-  const words = sc.raw.flatMap(p => { const [t, k] = Array.isArray(p) ? p : [p, ""];
-    return t.split(" ").map(w => { const s = document.createElement("span"); s.className = "w " + (k === "d" ? "drop" : k === "f" ? "fix" : ""); s.textContent = w + " "; raw.appendChild(s); return s; }); });
-  out.className = "out" + (sc.term ? " term" : "");
-  obar.innerHTML = '<span class="dot" style="background:' + sc.icon + '"></span>' + sc.app;
-  obody.innerHTML = '<span class="caret"></span>';
-  const t0 = Date.now(); let level = 1;
-  const tick = () => { if (me !== run) return; const s = (Date.now() - t0) / 1000;
-    tEl.textContent = "0:" + String(Math.floor(s)).padStart(2, "0"); bars(dpill, still ? 0 : level); if (level) requestAnimationFrame(tick); };
-  tick();
-  for (let k = 0; k < words.length; k++) { words[k].classList.add("in"); wEl.textContent = (k + 1) + (k ? " words" : " word"); await wait(170); if (me !== run) return; }
-  level = 0; bars(dpill, 0);
-  await wait(350); if (me !== run) return;
-  raw.classList.add("clean");
-  await wait(600); if (me !== run) return;
-  const text = sc.out, pre = sc.term ? '<span class="p">~/app %</span> ' : "";
-  for (let k = 1; k <= text.length; k += 2) { obody.innerHTML = pre + esc(text.slice(0, k)) + '<span class="caret"></span>'; await wait(18); if (me !== run) return; }
-  obody.innerHTML = pre + esc(text) + (sc.term ? '\n<span class="p">~/app %</span> <span class="caret"></span>' : "") + (sc.file ? '\n<span class="file">' + sc.file + '</span>' : "");
-  await wait(3600); if (me !== run || !auto) return;
-  play((i + 1) % scenes.length);
-}
-function esc(s){ return s.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]); }
-// Plays when it comes into view, then keeps cycling until someone picks a tab.
-new IntersectionObserver((entries, io) => { if (entries[0].isIntersecting && !seen) { seen = true; io.disconnect(); play(0); } }, { threshold: .4 }).observe(out);
-
-// the star count, from GitHub (shown once there is one)
 fetch("https://api.github.com/repos/fru-dev3/jot").then(r=>r.ok?r.json():null).then(d=>{
   if(d&&typeof d.stargazers_count==="number"&&d.stargazers_count>0){const s=document.getElementById("stars");s.textContent=d.stargazers_count.toLocaleString();s.hidden=false}
 }).catch(()=>{});
