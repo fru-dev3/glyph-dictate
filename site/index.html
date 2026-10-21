@@ -60,6 +60,9 @@ a{color:var(--green)}
 :focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:6px}
 main{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(14px,2.6vh,26px);
   padding:clamp(16px,3vh,40px) 16px calc(56px + env(safe-area-inset-bottom));text-align:center}
+.left{display:flex;flex-direction:column;align-items:center;gap:clamp(14px,2.6vh,28px)}
+.right{display:none}
+.shot{width:100%;height:auto;max-height:calc(100svh - 120px);object-fit:contain;filter:drop-shadow(0 30px 60px rgba(11,26,16,.25))}
 .top{display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.6vh,14px)}
 .icon{width:clamp(52px,8vh,72px);height:auto;border-radius:22%;box-shadow:0 10px 24px rgba(0,128,0,.3)}
 h1{font:800 clamp(34px,min(8.5vh,12.5vw),80px)/1 "Bricolage Grotesque",-apple-system,sans-serif;letter-spacing:-.035em;margin:0}
@@ -97,10 +100,27 @@ footer nav a:hover{background:rgba(11,26,16,.06);color:var(--ink)}
 footer nav a.home{color:var(--ink);font-weight:600}
 @media (max-width:520px){footer .opt{display:none}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important}}
+@media (min-width:960px) and (min-height:560px){
+  main{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:clamp(32px,5vw,96px);
+    max-width:1680px;margin:0 auto;padding-left:clamp(32px,5vw,96px);padding-right:clamp(32px,5vw,96px);text-align:left}
+  .left,.top{align-items:flex-start}
+  .right{display:block}
+  .cta,.badges{justify-content:flex-start}
+  h1{font-size:clamp(64px,min(12vh,7.2vw),150px)}
+  h1 em{display:block}
+  .icon{width:clamp(64px,9vh,96px)}
+  .pill{height:clamp(64px,8vh,84px);font-size:clamp(20px,2.4vh,26px);padding:0 clamp(28px,3vh,36px)}
+  .vs>div{padding:clamp(14px,2vh,22px) clamp(26px,2.4vw,40px);min-width:clamp(150px,13vw,220px)}
+  .vs .them s{font-size:clamp(30px,5vh,48px)}
+  .vs .us b{font-size:clamp(36px,6vh,58px)}
+  .btn{height:clamp(54px,7vh,68px);font-size:clamp(17px,2.2vh,21px);padding:0 clamp(22px,2vw,32px)}
+  .badges{font-size:clamp(15px,1.9vh,18px)}
+}
 </style>
 </head>
 <body>
 <main>
+  <div class="left">
   <div class="top">
     <img class="icon" src="icon-512.png" width="72" height="72" alt="Jot">
     <h1>Talk. <em>It types.</em></h1>
@@ -119,6 +139,8 @@ footer nav a.home{color:var(--ink);font-weight:600}
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>Open source</li>
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0M3 3l18 18"/></svg>No account</li>
   </ul>
+  </div>
+  <div class="right"><img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: today's dictations into Slack, Terminal, Mail and Notes" fetchpriority="high"></div>
 </main>
 
 <footer>
