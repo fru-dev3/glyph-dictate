@@ -4,3 +4,5 @@ Jot.xcodeproj/
 Mac/Info.plist
 .vercel/
 .DS_Store
+.unlazy/
+.unlazy-archive/
