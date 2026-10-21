@@ -1,0 +1,7 @@
+build
+dist
+Jot.xcodeproj
+Mac
+scripts
+.unlazy
+.unlazy-archive
