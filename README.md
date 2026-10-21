@@ -10,6 +10,8 @@
   <a href="#build-from-source">Build from source</a>
 </p>
 
+<p align="center"><img src="site/img/app-ask.webp" width="760" alt="Jot's window: an answer from your history above a day of dictations into Slack, Terminal, Mail and Notes"></p>
+
 Jot is voice dictation for the Mac that runs entirely on your Mac. Hold the Fn key, talk, let
 go, and the words are typed where your cursor is: any app, any form, the terminal, an AI
 coding agent's prompt. Speech recognition is Apple's on-device model; clean-up, Command Mode
