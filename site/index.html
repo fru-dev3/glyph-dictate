@@ -70,28 +70,24 @@ h1 em{font-style:normal;color:var(--green)}
 .btn svg{width:20px;height:20px}
 .btn.go{background:var(--green);color:#fff;box-shadow:0 10px 22px rgba(0,128,0,.28)}
 .btn.go:hover{background:#006E00}
-.btn.gh{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.gh{padding:0 18px;background:#fff;color:var(--ink);border:1px solid var(--line)}
 .btn.gh:hover{background:#F1F5F1}
 .btn .count{color:var(--dim);padding-left:9px;border-left:1px solid var(--line);font-weight:600}
 
-/* the one picture: what you said, what it typed */
-.card{position:relative;margin-top:12px;width:min(560px,100%);background:#fff;border-radius:22px;box-shadow:0 20px 50px rgba(11,26,16,.14);padding:clamp(18px,3vh,26px) clamp(18px,3vw,28px) clamp(16px,2.6vh,22px);text-align:left}
-.said{color:var(--dim);font-size:clamp(15px,2vh,17px)}
-.said s{color:#C0573F;text-decoration-thickness:2px}
-.typed{font-size:clamp(18px,2.6vh,22px);font-weight:600;margin-top:6px}
-.typed::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--green);margin-right:10px;vertical-align:2px}
-.pill{position:absolute;left:50%;top:0;transform:translate(-50%,-55%);display:inline-flex;align-items:center;gap:3px;height:38px;padding:0 16px;border-radius:999px;background:#0B0F0C;color:#fff;font:600 13px -apple-system,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap;box-shadow:0 10px 24px rgba(0,0,0,.25)}
-.pill i{display:block;width:3px;height:6px;border-radius:2px;background:#fff}
-.pill span{opacity:.55;margin-left:8px;font-weight:500}.pill b{margin-left:10px}
-
-/* the prices */
-.prices{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:640px;margin:0;padding:0;list-style:none}
-.prices li{background:rgba(255,255,255,.75);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:15px;color:var(--soft)}
-.prices li s{text-decoration-color:#C0573F;text-decoration-thickness:2px;margin-left:4px}
-.prices li.us{background:var(--green);border-color:var(--green);color:#fff;font-weight:800;font-size:16px}
-.steps{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;margin:0;padding:0;list-style:none;color:var(--soft);font-size:15px}
-.steps li{display:flex;align-items:center;gap:7px}
-.steps svg{width:18px;height:18px;color:var(--green)}
+.pill{display:inline-flex;align-items:center;gap:4px;height:64px;padding:0 28px;border-radius:999px;background:#0B0F0C;color:#fff;font:600 20px -apple-system,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap;box-shadow:0 18px 40px rgba(0,0,0,.25)}
+.pill i{display:block;width:5px;height:8px;border-radius:3px;background:#fff}
+.pill span{opacity:.55;margin-left:12px;font-weight:500}.pill b{margin-left:16px}
+.vs{display:flex;gap:14px;align-items:stretch}
+.vs>div{display:flex;flex-direction:column;justify-content:center;border-radius:22px;padding:14px 26px;min-width:150px}
+.vs small{font-size:14px;font-weight:600;opacity:.75}
+.vs .them{background:#fff;border:1px solid var(--line);color:var(--dim)}
+.vs .them s{font:800 clamp(26px,4.4vh,36px)/1.1 "Bricolage Grotesque",sans-serif;text-decoration-color:#D2452B;text-decoration-thickness:4px}
+.vs .us{background:var(--green);color:#fff;box-shadow:0 14px 30px rgba(0,128,0,.3)}
+.vs .us b{font:800 clamp(30px,5vh,42px)/1.05 "Bricolage Grotesque",sans-serif}
+.badges{display:flex;gap:8px 20px;flex-wrap:wrap;justify-content:center;margin:0;padding:0;list-style:none;color:var(--soft);font-size:15px;font-weight:600}
+.badges li{display:flex;align-items:center;gap:7px}
+.badges svg{width:19px;height:19px;color:var(--green)}
+@media (max-width:520px){.pill{height:54px;padding:0 22px;font-size:17px}.vs>div{min-width:0;padding:12px 20px}}
 
 footer{position:fixed;left:0;right:0;bottom:0;z-index:30;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);background:rgba(255,255,255,.8);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 footer .bar{max-width:1180px;margin:0 auto;height:44px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--dim)}
@@ -99,7 +95,7 @@ footer nav{display:flex;align-items:center;gap:4px}
 footer nav a{color:var(--soft);text-decoration:none;padding:6px 8px;border-radius:8px;display:inline-flex;align-items:center;gap:6px}
 footer nav a:hover{background:rgba(11,26,16,.06);color:var(--ink)}
 footer nav a.home{color:var(--ink);font-weight:600}
-@media (max-width:520px){footer .opt{display:none}.btn.gh .lbl{display:none}.prices{gap:6px}.prices li{font-size:14px;padding:5px 11px}.steps{font-size:14px;gap:4px 14px}}
+@media (max-width:520px){footer .opt{display:none}}
 @media (prefers-reduced-motion: reduce){*{animation:none!important}}
 </style>
 </head>
@@ -108,25 +104,21 @@ footer nav a.home{color:var(--ink);font-weight:600}
   <div class="top">
     <img class="icon" src="icon-512.png" width="72" height="72" alt="Jot">
     <h1>Talk. <em>It types.</em></h1>
-    <p class="sub">Free dictation for your Mac. In every app, no subscription, nothing leaves your Mac.</p>
+  </div>
+  <div class="pill big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b>0:04</b><span>9 words</span></div>
+  <div class="vs" aria-label="Others cost 15 dollars a month. Jot is free.">
+    <div class="them"><small>Wispr Flow</small><s>$15/mo</s></div>
+    <div class="us"><small>Jot</small><b>Free</b></div>
   </div>
   <div class="cta">
     <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download for Mac</a>
-    <a class="btn gh star" href="https://github.com/fru-dev3/jot" aria-label="Star Jot on GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg><span class="lbl">Star on GitHub</span><span class="count" id="stars" hidden></span></a>
+    <a class="btn gh star" href="https://github.com/fru-dev3/jot" aria-label="Star Jot on GitHub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg><span class="count" id="stars" hidden></span></a>
   </div>
-  <div class="card" role="img" aria-label="You said: um so thanks Priya, Tuesday, no wait, Thursday works. Jot typed: Thanks Priya, Thursday works.">
-    <div class="pill" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b>0:04</b><span>9 words</span></div>
-    <div class="said">"<s>um so</s> thanks Priya, <s>Tuesday, no wait,</s> Thursday works"</div>
-    <div class="typed">Thanks Priya, Thursday works.</div>
-  </div>
-  <ul class="prices" aria-label="What others cost">
-    <li>Wispr Flow<s>$15/mo</s></li><li>Willow<s>$15/mo</s></li><li>Aqua<s>$10/mo</s></li><li>Superwhisper<s>$8.49/mo</s></li><li class="us">Jot: Free</li>
+  <ul class="badges">
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>Private</li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>Open source</li>
+    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0M3 3l18 18"/></svg>No account</li>
   </ul>
-  <ol class="steps" aria-label="How to start">
-    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download</li>
-    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>Allow the mic</li>
-    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>Hold Fn and talk</li>
-  </ol>
 </main>
 
 <footer>
@@ -145,7 +137,7 @@ footer nav a.home{color:var(--ink);font-weight:600}
   </div>
 </footer>
 <script>
-const bars=document.querySelectorAll(".pill i");if(!matchMedia("(prefers-reduced-motion: reduce)").matches)(function t(){bars.forEach((b,i)=>b.style.height=(5+Math.abs(Math.sin(Date.now()/140+i*1.3))*16).toFixed(1)+"px");requestAnimationFrame(t)})();
+const bars=document.querySelectorAll(".pill i");if(!matchMedia("(prefers-reduced-motion: reduce)").matches)(function t(){bars.forEach((b,i)=>b.style.height=(7+Math.abs(Math.sin(Date.now()/140+i*1.3))*26).toFixed(1)+"px");requestAnimationFrame(t)})();
 fetch("https://api.github.com/repos/fru-dev3/jot").then(r=>r.ok?r.json():null).then(d=>{
   if(d&&typeof d.stargazers_count==="number"&&d.stargazers_count>0){const s=document.getElementById("stars");s.textContent=d.stargazers_count.toLocaleString();s.hidden=false}
 }).catch(()=>{});
