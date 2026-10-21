@@ -109,12 +109,12 @@ private struct GeneralTab: View {
             Section("Where your words go") {
                 LabeledContent {
                     HStack {
-                        Text(DictationLog.vault?.path(percentEncoded: false) ?? "None").foregroundStyle(.secondary).lineLimit(1)
+                        Text(DictationLog.chosen?.path(percentEncoded: false) ?? "None").foregroundStyle(.secondary).lineLimit(1)
                         Button("Choose…") { chooseVault() }
                     }
                 } label: {
                     Text("Notes folder")
-                    Text("Optional. Dictations, your Dictionary and thoughts go here, laid out like a Prevail vault.")
+                    Text("Optional. Any folder, an Obsidian vault too: thoughts are saved in it as Markdown notes, and Jot keeps its own files in a hidden .jot folder there, so they sync with it.")
                 }
                 LabeledContent("Every dictation", value: DictationLog.folder.path(percentEncoded: false))
                 LabeledContent("Thoughts", value: Thoughts.folder.path(percentEncoded: false))
@@ -135,7 +135,13 @@ private struct GeneralTab: View {
         panel.canChooseFiles = false
         panel.prompt = "Use This Folder"
         guard panel.runModal() == .OK, let url = panel.url else { return }
+        // Your Dictionary comes along to the new folder.
+        let words = Words.url
         UserDefaults.standard.set(url.path(percentEncoded: false), forKey: "vaultPath")
+        if !FileManager.default.fileExists(atPath: Words.url.path) {
+            try? FileManager.default.createDirectory(at: Words.url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try? FileManager.default.copyItem(at: words, to: Words.url)
+        }
         Words.shared.load()
         refresh += 1
     }

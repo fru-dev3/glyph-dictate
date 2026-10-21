@@ -133,7 +133,7 @@ final class Dictation {
                         let polished = await Polish.text(heard, app: target, live: live)
                         let (body, enter) = Rules.splitEnter(polished, code: code)
                         text = body
-                        let field = Paste.insert(text, into: target)
+                        let field = await Paste.insert(text, into: target)
                         copiedOnly = field == nil
                         if enter, field != nil {
                             try? await Task.sleep(for: .milliseconds(150))
@@ -149,7 +149,7 @@ final class Dictation {
                     let saved = Clipboard.save()
                     let selection = await Paste.copySelection()
                     text = try await AI.command(heard, selection: selection)
-                    Paste.insert(text, into: target, restoring: saved)
+                    await Paste.insert(text, into: target, restoring: saved)
                 case .ask:
                     text = heard
                     Task { await Ask.shared.run(heard) }
@@ -218,7 +218,7 @@ final class Dictation {
     }
 
     func pasteLast() {
-        if let text = recent.first { Paste.insert(text, into: NSWorkspace.shared.frontmostApplication) }
+        if let text = recent.first { Task { await Paste.insert(text, into: NSWorkspace.shared.frontmostApplication) } }
     }
 
     /// Takes the last dictation back out (Cmd-Z in the app it went to).
@@ -231,8 +231,9 @@ final class Dictation {
         guard !lastHeard.isEmpty else { return }
         Paste.press(kVK_ANSI_Z, .maskCommand)
         let heard = lastHeard
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            Paste.insert(heard, into: NSWorkspace.shared.frontmostApplication)
+        Task {
+            try? await Task.sleep(for: .milliseconds(150))
+            await Paste.insert(heard, into: NSWorkspace.shared.frontmostApplication)
         }
     }
 
@@ -486,47 +487,55 @@ enum Clipboard {
 /// Puts text into the focused field: clipboard + Cmd-V, then the old clipboard back.
 /// Works in native apps, browsers, Electron and terminals alike. Needs Accessibility.
 enum Paste {
-    /// Pastes where you are. With no text field in focus it pastes anyway (the check can miss
-    /// fields in some apps) and also leaves the text on the clipboard; returns false then.
+    /// Pastes where you are, then checks it landed: the field's text must have changed. When it
+    /// didn't (no text field, or one that only looks like it, as Finder's window does), the
+    /// words stay on the clipboard to paste yourself and this returns nil. Only a paste that
+    /// landed gets your old clipboard back.
     @MainActor @discardableResult
-    static func insert(_ text: String, into app: NSRunningApplication?, restoring saved: Clipboard.Snapshot? = nil) -> AXUIElement? {
+    static func insert(_ text: String, into app: NSRunningApplication?, restoring saved: Clipboard.Snapshot? = nil) async -> AXUIElement? {
+        let pb = NSPasteboard.general
         // A password field has secure input on: never type a dictation into it.
         guard !IsSecureEventInputEnabled() else {
-            Dictation.shared.error = "Not pasted into a password field. It's in the menu under Recent."
+            pb.clearContents()
+            pb.setString(text, forType: .string)
+            Dictation.shared.error = "Not pasted into a password field. It's on the clipboard."
             return nil
         }
-        let field = textFieldFocused(in: app)
+        let el = focusedElement(in: app)
+        let before = el.flatMap(value)
         let saved = saved ?? Clipboard.save()
-        let pb = NSPasteboard.general
         pb.clearContents()
         pb.setString(text, forType: .string)
         let ours = pb.changeCount
         if let app, app != NSWorkspace.shared.frontmostApplication { app.activate() }
         press(kVK_ANSI_V, .maskCommand)
-        // Give the app time to read the clipboard, then put back what was there,
-        // unless something else has been copied meanwhile.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if field != nil, pb.changeCount == ours { Clipboard.restore(saved) }
+        // Give the app time to take the paste, then look.
+        try? await Task.sleep(for: .milliseconds(350))
+        guard let el else {
+            log.info("paste: no focused element, left on the clipboard")
+            return nil
         }
-        return field
+        let role = string(el, kAXRoleAttribute) ?? "?"
+        let after = value(el)
+        let landed = before != nil && after != nil ? before != after : textRoles.contains(role)
+        log.info("paste: focused \(role, privacy: .public), landed \(landed)")
+        guard landed else { return nil }
+        // Put back what was there, unless something else has been copied meanwhile.
+        try? await Task.sleep(for: .milliseconds(150))
+        if pb.changeCount == ours { Clipboard.restore(saved) }
+        return el
     }
 
     private static let textRoles: Set<String> = ["AXTextField", "AXTextArea", "AXComboBox", "AXSearchField"]
 
-    /// The front app's focused text field, or nil when none has focus.
-    static func textFieldFocused(in app: NSRunningApplication?) -> AXUIElement? {
-        guard let el = focusedElement(in: app) else {
-            log.info("paste: no focused element")
-            return nil
-        }
-        var role: CFTypeRef?
-        AXUIElementCopyAttributeValue(el, kAXRoleAttribute as CFString, &role)
-        var range: CFTypeRef?
-        let hasRange = AXUIElementCopyAttributeValue(el, kAXSelectedTextRangeAttribute as CFString, &range) == .success
-        let r = role as? String ?? "?"
-        log.info("paste: focused \(r, privacy: .public), text range \(hasRange)")
-        return textRoles.contains(r) || hasRange ? el : nil
+    private static func string(_ el: AXUIElement, _ attribute: String) -> String? {
+        var v: CFTypeRef?
+        AXUIElementCopyAttributeValue(el, attribute as CFString, &v)
+        return v as? String
     }
+
+    /// A field's text, to tell whether a paste went in.
+    private static func value(_ el: AXUIElement) -> String? { string(el, kAXValueAttribute) }
 
     /// The front app's focused element, by Accessibility. Chrome and Electron apps only expose
     /// their fields once asked to (AXManualAccessibility).
@@ -564,13 +573,14 @@ enum Paste {
     }
 }
 
-/// A thought (talk key + Shift) goes where the phone's memos go:
-/// `<vault>/data/domains/notes/source/jot/<date time>.md` in a Prevail vault, with the same
-/// frontmatter as Jot on the iPhone's memos, so both read alike. Without a vault, in
-/// `~/Documents/Jot/Thoughts`.
+/// A thought (talk key + Shift) is a Markdown note with the same frontmatter as Jot on the
+/// iPhone's memos. It goes in the notes folder chosen in Settings (any folder: an Obsidian
+/// vault works), or `<vault>/data/domains/notes/source/jot` when that folder is a Prevail
+/// vault, or `~/Documents/Jot/Thoughts` when none is chosen.
 enum Thoughts {
     static var folder: URL {
         DictationLog.vault?.appending(path: "data/domains/notes/source/jot")
+            ?? DictationLog.chosen
             ?? URL.documentsDirectory.appending(path: "Jot/Thoughts")
     }
 
@@ -610,20 +620,27 @@ enum Draft {
     }
 }
 
-/// Every dictation, one JSON line each, in the vault: `data/apps/jot/dictations/<YYYY-MM>.<host>.jsonl`.
-/// One file per Mac, so syncing the vault between Macs never conflicts. If no vault is set up,
-/// the log stays in Application Support.
+/// Every dictation, one JSON line each: `<YYYY-MM>.<host>.jsonl`, one file per Mac so syncing
+/// the folder between Macs never conflicts. Beside it are the Dictionary and the draft. They live
+/// in `data/apps/jot/` in a Prevail vault, in a hidden `.jot/` in any other notes folder (so they
+/// sync with it but stay out of your notes), and in Application Support when none is chosen.
 enum DictationLog {
-    /// The notes folder Jot keeps its files in, laid out like a Prevail vault: the one chosen in
-    /// Settings, else this Mac's own (`LocalVault`), else none (Application Support).
-    static var vault: URL? {
+    /// The notes folder: the one chosen in Settings, else this Mac's own (`LocalVault`).
+    static var chosen: URL? {
         guard let path = UserDefaults.standard.string(forKey: "vaultPath") ?? LocalVault.path,
               FileManager.default.fileExists(atPath: path) else { return nil }
         return URL(filePath: path)
     }
 
+    /// The notes folder when it is a Prevail vault (it has `data/domains`).
+    static var vault: URL? {
+        chosen.flatMap { FileManager.default.fileExists(atPath: $0.appending(path: "data/domains").path) ? $0 : nil }
+    }
+
     static var folder: URL {
-        vault?.appending(path: "data/apps/jot/dictations") ?? URL.applicationSupportDirectory.appending(path: "Jot/dictations")
+        vault?.appending(path: "data/apps/jot/dictations")
+            ?? chosen?.appending(path: ".jot/dictations")
+            ?? URL.applicationSupportDirectory.appending(path: "Jot/dictations")
     }
 
     /// Same host naming as Prevail's prompt streams: "Mac-Name.local" -> "mac-name-local".

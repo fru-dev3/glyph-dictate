@@ -71,9 +71,11 @@ your history and filling forms need Apple Intelligence turned on; plain dictatio
   `~/Library/Application Support/Jot/dictations/`, with what was heard before clean-up, so you
   can always get your exact words back. Thoughts are Markdown files in `~/Documents/Jot/Thoughts`.
 - Jot never types into a password field, and puts your clipboard back after each paste.
-- Keep them with your notes: choose a folder in **Settings > Where your words go** and
-  dictations, the Dictionary and thoughts live there, laid out like a
-  [Prevail](https://prevail.sh) vault.
+  With no text field to type into, what you said stays on the clipboard to paste yourself.
+- Keep them with your notes: choose any folder in **Settings > Where your words go** (an
+  Obsidian vault works). Thoughts are saved in it as Markdown notes, and Jot keeps its own
+  files (dictations, Dictionary) in a hidden `.jot/` folder there, so they sync with it.
+  A [Prevail](https://prevail.sh) vault gets its own layout.
 
 ## Build from source
 
@@ -97,6 +99,8 @@ from fixes), `Ask.swift`, `FormFill.swift`, `Pill.swift`, `Settings.swift`, `His
 
 - **0.7.1** (2026-10-21): forms fill from any browser page (also just opened, or with the address bar in focus), emails lowercase;
   "get commit" in a terminal is `git commit`; answers show their bold text.
+- **0.7.2** (2026-10-21): with no text field (Finder, a page, the desktop) your words always stay on
+  the clipboard; any folder can hold your notes, an Obsidian vault too.
 - **0.7** (2026-10-21): fill a whole form by voice.
 - **0.6**: ask your history (Fn + Option, or Ask on Home).
 - **0.5**: never lose a ramble (drafts every 10 s, recovery after a crash), Undo Last
