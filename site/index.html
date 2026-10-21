@@ -43,13 +43,7 @@
   "license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,
   "offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},
   "publisher":{"@id":"https://fru.dev/#org"},"author":{"@id":"https://fru.dev/#org"},
-  "keywords":"dictation, speech to text, voice typing, Mac, on-device, private, open source, Apple Intelligence, push to talk"},
- {"@type":"FAQPage","mainEntity":[
-  {"@type":"Question","name":"Does Jot send my voice to the cloud?","acceptedAnswer":{"@type":"Answer","text":"No. Speech recognition is Apple's on-device model and clean-up uses Apple Intelligence on your Mac. Jot makes no network requests of its own and never saves audio."}},
-  {"@type":"Question","name":"What does Jot cost?","acceptedAnswer":{"@type":"Answer","text":"Nothing. Jot is free and open source under the MIT license, with no account and no subscription."}},
-  {"@type":"Question","name":"Which Macs does Jot run on?","acceptedAnswer":{"@type":"Answer","text":"Macs with Apple silicon on macOS 26 or later. Clean-up of corrections, Command Mode, asking your history and filling forms need Apple Intelligence turned on; plain dictation does not."}},
-  {"@type":"Question","name":"Where does Jot type?","acceptedAnswer":{"@type":"Answer","text":"Wherever your cursor is: any app, browser form, terminal or AI coding agent. With no text field in focus, the words go to the clipboard."}}
- ]}
+  "keywords":"dictation, speech to text, voice typing, Mac, on-device, private, open source, Apple Intelligence, push to talk"}
 ]}
 </script>
 <style>
@@ -74,10 +68,6 @@ img{display:block;max-width:100%;height:auto}
 h1,h2,h3{font-family:var(--display);font-weight:800;letter-spacing:-.03em;line-height:1.02;margin:0;text-wrap:balance}
 p{margin:0}
 .wrap{max-width:var(--max);margin:0 auto;padding:0 var(--pad)}
-.kbd{display:inline-grid;place-items:center;min-width:2.1em;height:2.1em;padding:0 .55em;border-radius:.45em;
-  font:600 .82em var(--sans);color:#1a2a20;background:linear-gradient(#fff,#e3ebe5);
-  box-shadow:0 .14em 0 #9fb3a6,0 .3em .6em rgba(0,0,0,.35);vertical-align:middle}
-
 /* top bar */
 .top{position:absolute;inset:0 0 auto;z-index:5}
 .top .wrap{display:flex;align-items:center;justify-content:space-between;height:68px}
@@ -156,27 +146,7 @@ p{margin:0}
 .demo .note{text-align:center;margin-top:22px;color:#E6F5E8;font-size:15px}
 @media (max-width:820px){.flow{grid-template-columns:1fr}.arrow svg{transform:rotate(90deg)}}
 
-/* more than typing: three colored cards */
-.more{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
-.card{border-radius:28px;padding:clamp(22px,2.6vw,32px);display:flex;flex-direction:column;gap:14px;overflow:hidden}
-.card h3{font-size:clamp(24px,2.4vw,30px)}
-.card > p{font-size:16px}
-.card .vis{margin-top:auto;background:rgba(255,255,255,.96);color:#17201b;border-radius:16px;padding:16px 18px;font-size:15px;line-height:1.55;box-shadow:0 16px 34px rgba(0,0,0,.25)}
-.card .vis small{display:block;font:600 12px var(--sans);color:#5f6f65;margin-bottom:4px}
-.card .vis .sel{background:#d9d3ff;border-radius:3px;padding:0 2px}
-.card .vis .ask{display:flex;align-items:center;gap:8px;font-weight:600;margin-bottom:10px}
-.card .vis .ask svg{width:16px;height:16px;flex:none}
-.card .vis hr{border:0;border-top:1px solid #e3e8e5;margin:10px 0}
-.card .vis pre{margin:0;font:13px/1.6 var(--mono);white-space:pre-wrap;color:#3d5045}
-.card.rw{background:var(--violet);color:var(--violet-ink)}
-.card.th{background:#0F5FA8;color:#E3F1FF}
-.card.ak{background:#B4412B;color:#FFE9E3}
-.card .said-q{font:600 15px var(--sans);display:flex;gap:8px;align-items:flex-start}
-.card .said-q svg{width:17px;height:17px;flex:none;margin-top:3px}
-@media (max-width:960px){.more{grid-template-columns:1fr;max-width:620px;margin:0 auto}}
-.start{max-width:900px;margin:clamp(28px,4vw,44px) auto 0;text-align:center;color:var(--soft);font-size:16px}
-.start .row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px}
-.start .row span{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:14px;color:var(--ink)}
+
 
 /* sections */
 .sec{padding:clamp(72px,10vw,128px) 0}
@@ -184,74 +154,38 @@ p{margin:0}
 .sec h2{font-size:clamp(36px,5.4vw,64px)}
 .sec .head p{color:var(--soft);font-size:clamp(17px,2vw,20px);margin:16px auto 0;max-width:58ch}
 
-/* where you type: two big tiles in their own colors */
-.places{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}
-.place{border-radius:28px;padding:clamp(22px,3vw,36px);overflow:hidden;position:relative;display:flex;flex-direction:column;gap:18px}
-.place h3{font-size:clamp(24px,2.6vw,32px)}
-.place p{font-size:16px;max-width:60ch}
-.place.form{background:var(--violet);color:var(--violet-ink)}
-.place.form img{border-radius:14px;margin:auto -6% -14% 0;box-shadow:0 20px 40px rgba(0,0,0,.35)}
-.place.term{background:#0B140F;border:1px solid var(--line)}
-.place.term p{color:var(--soft)}
-.term-win{margin-top:auto;border-radius:14px;background:#151b17;border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 50px rgba(0,0,0,.5);overflow:hidden}
-.term-bar{display:flex;gap:7px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
-.term-bar i{width:11px;height:11px;border-radius:50%;background:#ff5f57}.term-bar i:nth-child(2){background:#febc2e}.term-bar i:nth-child(3){background:#28c840}
-.term-body{padding:18px 18px 22px;font:15px/1.7 var(--mono);color:#d8e6dc;overflow-x:auto}
-.term-body .p{color:var(--leaf)} .term-body .said{color:var(--dim)}
-.term-body .typed{color:#fff;background:rgba(63,163,77,.22);border-radius:4px;padding:1px 4px;white-space:nowrap}
-.term-body > div{white-space:nowrap}
-.term-body .said{white-space:normal}
-.place .said-line{font:600 15px var(--sans);display:flex;align-items:flex-start;gap:10px}
-.place .said-line svg{width:18px;height:18px;flex:none;margin-top:3px}
-@media (max-width:860px){.places{grid-template-columns:1fr}.place.form img{margin:0 -10% -18% 0}}
 
 
 
-/* the app itself, on teal */
-.app-sec{background:var(--teal);color:var(--teal-ink)}
-.app-sec .head p{color:#d2f4f1}
-.app-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(18px,3vw,40px);align-items:center}
-.app-grid img,.app-row img{filter:drop-shadow(0 30px 50px rgba(0,30,30,.55))}
-.app-notes{display:grid;gap:22px}
-.app-notes h3{font-size:clamp(22px,2.4vw,28px);color:#fff}
-.app-notes p{color:#e8faf8;margin-top:6px;max-width:46ch}
-@media (max-width:860px){.app-grid{grid-template-columns:1fr}}
-.app-row{display:grid;grid-template-columns:1fr 1fr;gap:clamp(18px,3vw,40px);margin-top:clamp(28px,4vw,48px)}
-.app-row figure{margin:0}
-.app-row figcaption{text-align:center;color:#e0f7f5;font-size:15px;margin-top:4px}
-@media (max-width:760px){.app-row{grid-template-columns:1fr}}
 
-/* small things */
-.bits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:22px;overflow:hidden}
-.bit{background:var(--deep);padding:26px 24px}
-.bit svg{width:26px;height:26px;margin-bottom:14px}
-.bit h3{font:700 19px var(--sans);letter-spacing:0;margin-bottom:6px}
-.bit p{color:var(--soft);font-size:15px}
-@media (max-width:860px){.bits{grid-template-columns:1fr 1fr}}
-@media (max-width:560px){.bits{grid-template-columns:1fr}}
-
-/* privacy on green */
-.priv{background:radial-gradient(70% 90% at 50% 0%,#0a7414,#005200);color:#fff;text-align:center;padding:clamp(80px,11vw,140px) 0}
-.priv h2{font-size:clamp(40px,7vw,84px);max-width:13ch;margin:0 auto}
-.priv .lines{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:34px auto 0;max-width:820px}
-.priv .lines span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:10px 18px;font-size:16px}
-.priv p.small{color:#e4f7e6;max-width:58ch;margin:28px auto 0;font-size:16px}
-
-/* install + faq */
-.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;max-width:1000px;margin:0 auto}
-.step{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:26px}
-.step .n{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--leaf);color:#03130A;font:800 18px var(--display);margin-bottom:14px}
-.step h3{font:700 20px var(--sans);letter-spacing:0;margin-bottom:6px}
-.step p{color:var(--soft);font-size:15px}
-@media (max-width:760px){.steps{grid-template-columns:1fr}}
-.again{text-align:center;margin-top:40px}
-.faq{max-width:780px;margin:0 auto}
-.faq details{border-bottom:1px solid var(--line);padding:20px 0}
-.faq summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:16px;font:700 19px var(--sans)}
-.faq summary::-webkit-details-marker{display:none}
-.faq summary::after{content:"+";color:var(--lime);font-weight:400;font-size:24px;line-height:1}
-.faq details[open] summary::after{content:"\2212"}
-.faq p{color:var(--soft);margin-top:10px;max-width:68ch}
+/* the comparison */
+.cmp{max-width:980px;margin:0 auto;overflow-x:auto;border-radius:22px;border:1px solid var(--line);background:var(--deep)}
+.cmp table{width:100%;border-collapse:collapse;min-width:620px;font-size:16px}
+.cmp th,.cmp td{text-align:left;padding:16px 20px;border-bottom:1px solid var(--line);vertical-align:middle}
+.cmp thead th{font:600 14px var(--sans);color:var(--dim);background:var(--panel)}
+.cmp tbody th{font-weight:700;white-space:nowrap}
+.cmp tbody tr:last-child th,.cmp tbody tr:last-child td{border-bottom:0}
+.cmp td{color:var(--soft)}
+.cmp td.no{color:#E9A79B}
+.cmp tr.us{background:linear-gradient(90deg,rgba(0,128,0,.55),rgba(0,128,0,.25))}
+.cmp tr.us th,.cmp tr.us td{color:#fff;font-size:17px}
+.cmp tr.us th img{display:inline-block;vertical-align:-5px;margin-right:10px;border-radius:5px}
+.cmp-note{max-width:62ch;margin:28px auto 0;text-align:center;color:var(--ink);font-size:clamp(17px,2vw,19px)}
+.cmp-src{text-align:center;color:var(--dim);font-size:14px;margin-top:12px}
+#compare .cta{margin-top:36px}
+@media (max-width:640px){
+  .cmp{overflow:visible}
+  .cmp table{min-width:0}
+  .cmp thead{display:none}
+  .cmp tr,.cmp th,.cmp td{display:block}
+  .cmp tr{padding:16px 18px;border-bottom:1px solid var(--line)}
+  .cmp tbody tr:last-child{border-bottom:0}
+  .cmp th,.cmp td{padding:0;border:0}
+  .cmp tbody th{margin-bottom:6px;font-size:17px}
+  .cmp td{font-size:15px;line-height:1.7}
+  .cmp td::before{content:attr(data-l) ": ";color:var(--dim)}
+  .cmp tr.us td::before{color:#cfe9d2}
+}
 
 /* one footer, fixed to the bottom, carrying the freshness; the page ends above it */
 footer{position:fixed;left:0;right:0;bottom:0;z-index:30;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);
@@ -272,7 +206,7 @@ footer nav a.home{color:var(--ink);font-weight:600}
     <a class="brand" href="/"><img src="icon-512.png" alt="" width="30" height="30">Jot</a>
     <nav aria-label="Main">
       <a class="hide-s" href="#how">How it works</a>
-      <a class="hide-s" href="#privacy">Privacy</a>
+      <a class="hide-s" href="#compare">Compare</a>
       <a class="star" href="https://github.com/fru-dev3/jot">GitHub</a>
       <a class="pill-btn dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg">Download</a>
     </nav>
@@ -294,7 +228,7 @@ footer nav a.home{color:var(--ink);font-weight:600}
         Star on GitHub <span class="count" id="stars" hidden></span>
       </a>
     </div>
-    <p class="meta">Version 0.7.3 · macOS 26 or later, Apple silicon · MIT license</p>
+    <p class="meta">Version 0.7.3 · macOS 26, Apple silicon · Signed and notarized by Apple</p>
   </div>
   <div class="stage">
     <img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: an answer to the question When is the launch now, above a day of dictations into Slack, Terminal, Mail and Notes" fetchpriority="high">
@@ -322,141 +256,32 @@ footer nav a.home{color:var(--ink);font-weight:600}
   </div>
 </section>
 
-<section class="sec" id="places">
+<section class="sec" id="compare" aria-labelledby="cmp-h">
   <div class="wrap">
     <div class="head">
-      <h2>Anywhere you can type.</h2>
-      <p>Forms, email, chat, the terminal, the prompt of your AI coding agent. Jot pastes into whatever has your cursor.</p>
+      <h2 id="cmp-h">Free, open and yours.</h2>
+      <p>How Jot compares with the dictation apps people pay for.</p>
     </div>
-    <div class="places">
-      <div class="place form">
-        <h3>Fill a whole form in one breath.</h3>
-        <p class="said-line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>"Fill the form, name Sam Lee, company Northwind, city Austin, phone 512 555 0100, email sam at northwind dot com."</p>
-        <img src="img/form.webp" width="1600" height="909" alt="A web sign-up form in Safari, every field filled by voice; the password field left empty" loading="lazy">
-      </div>
-      <div class="place term">
-        <h3>Speaks terminal.</h3>
-        <p>Say the symbols, get the command. End with "send it" and Jot presses Return.</p>
-        <div class="term-win" role="img" aria-label="A terminal: the spoken words dash dash no dash verify become git commit --no-verify">
-          <div class="term-bar"><i></i><i></i><i></i></div>
-          <div class="term-body">
-            <div class="said"># "git commit dash dash no dash verify, send it"</div>
-            <div><span class="p">~/app %</span> <span class="typed">git commit --no-verify</span></div>
-            <div class="said"># "scripts slash ship dot sh"</div>
-            <div><span class="p">~/app %</span> <span class="typed">scripts/ship.sh</span></div>
-          </div>
-        </div>
-      </div>
+    <div class="cmp" role="region" aria-label="Comparison" tabindex="0">
+      <table>
+        <thead><tr><th scope="col">App</th><th scope="col">Cost</th><th scope="col">Your voice goes</th><th scope="col">Open source</th></tr></thead>
+        <tbody>
+          <tr class="us"><th scope="row"><img src="icon-512.png" alt="" width="22" height="22">Jot</th><td data-l="Cost"><b>Free</b></td><td data-l="Your voice"><b>Nowhere. It stays on your Mac</b></td><td data-l="Open source"><b>Yes, MIT</b></td></tr>
+          <tr><th scope="row">Wispr Flow</th><td data-l="Cost">$15 a month</td><td data-l="Your voice" class="no">To their cloud</td><td data-l="Open source" class="no">No</td></tr>
+          <tr><th scope="row">Willow Voice</th><td data-l="Cost">$15 a month</td><td data-l="Your voice" class="no">To their cloud</td><td data-l="Open source" class="no">No</td></tr>
+          <tr><th scope="row">Aqua Voice</th><td data-l="Cost">$10 a month</td><td data-l="Your voice" class="no">To their cloud</td><td data-l="Open source" class="no">No</td></tr>
+          <tr><th scope="row">Superwhisper</th><td data-l="Cost">$8.49 a month, or $249.99 once</td><td data-l="Your voice">Your Mac, or their cloud</td><td data-l="Open source" class="no">No</td></tr>
+          <tr><th scope="row">VoiceInk</th><td data-l="Cost">$25 to $69 once</td><td data-l="Your voice">Your Mac</td><td data-l="Open source">Yes, GPL</td></tr>
+          <tr><th scope="row">Handy</th><td data-l="Cost">Free</td><td data-l="Your voice">Your Mac</td><td data-l="Open source">Yes</td></tr>
+          <tr><th scope="row">Apple Dictation</th><td data-l="Cost">Free, built in</td><td data-l="Your voice">Your Mac</td><td data-l="Open source" class="no">No</td></tr>
+        </tbody>
+      </table>
     </div>
-  </div>
-</section>
-
-<section class="sec" id="more" style="padding-top:clamp(32px,5vw,56px)" aria-labelledby="more-h">
-  <div class="wrap">
-    <div class="head">
-      <h2 id="more-h">More than typing.</h2>
-      <p>The same voice rewrites, remembers and answers.</p>
-    </div>
-    <div class="more">
-      <div class="card rw">
-        <h3>Rewrite what's on screen.</h3>
-        <p>Select some text and say what you want instead.</p>
-        <p class="said-q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>"Make it confident."</p>
-        <div class="vis"><small>Before</small><span class="sel">I think we should maybe probably move the review to next week, if that works?</span><hr><small>After</small>Let's move the review to next week.</div>
-      </div>
-      <div class="card th">
-        <h3>Thoughts, straight into your notes.</h3>
-        <p>Catch an idea without opening anything. It's saved as a Markdown note in any folder you pick, an Obsidian vault too.</p>
-        <div class="vis"><small>Ideas/2026-10-21 09-14.md</small><pre>---
-kind: voice
-source: jot
----
-
-Pitch the newsletter as a weekly five-minute read, not a digest.</pre></div>
-      </div>
-      <div class="card ak">
-        <h3>Ask what you said.</h3>
-        <p>Your dictations become memory you can question, answered on your Mac.</p>
-        <p class="said-q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>"When is the launch now?"</p>
-        <div class="vis"><small>Answer, from 2 dictations</small>The fourteenth. You told Sam in Mail this morning, and the press kit is in the shared folder.</div>
-      </div>
-    </div>
-    <div class="start">
-      Everything starts from one key you choose: Fn, Right Option, Right Command or Right Control.
-      <div class="row"><span>Hold to talk</span><span>Double-press for hands-free</span><span>+ Shift: a thought</span><span>+ Control: rewrite</span><span>+ Option: ask</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="sec app-sec" aria-labelledby="app-h">
-  <div class="wrap">
-    <div class="head">
-      <h2 id="app-h">Everything you've said, kept for you.</h2>
-      <p>A real Mac app: your history with words per minute, your own dictionary and snippets, and every setting in one place.</p>
-    </div>
-    <div class="app-grid">
-      <img src="img/app-home.webp" width="1600" height="1189" alt="Jot's Home: 212 words, 15 dictations, 123 words a minute, and a list of today's dictations by app" loading="lazy">
-      <div class="app-notes">
-        <div><h3>Learns your words.</h3><p>Fix a word Jot typed and it remembers the spelling. Names a letter off match your Dictionary.</p></div>
-        <div><h3>Styles per app.</h3><p>Formal in Mail, casual in Slack and Messages, exact in the terminal.</p></div>
-        <div><h3>Your exact words, always.</h3><p>Every dictation keeps what you said before clean-up. One shortcut swaps it back.</p></div>
-      </div>
-    </div>
-    <div class="app-row">
-      <figure><img src="img/app-dictionary.webp" width="1600" height="1189" alt="Jot's Dictionary: names like Priya, Postgres and Kubernetes, one marked learned" loading="lazy"><figcaption>Dictionary, with words it learned from your fixes</figcaption></figure>
-      <figure><img src="img/app-settings.webp" width="1600" height="1189" alt="Jot's Settings: the talk key and every shortcut" loading="lazy"><figcaption>Settings: pick your talk key, see every shortcut</figcaption></figure>
-    </div>
-  </div>
-</section>
-
-<section class="sec" aria-labelledby="bits-h">
-  <div class="wrap">
-    <div class="head"><h2 id="bits-h">The small things that make it fast.</h2></div>
-    <div class="bits">
-      <div class="bit"><svg viewBox="0 0 24 24" fill="none" stroke="#B8F27C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><h3>Never misses a word</h3><p>The mic stays ready, so even the word you said as the key went down is there.</p></div>
-      <div class="bit"><svg viewBox="0 0 24 24" fill="none" stroke="#3BA3F5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg><h3>Cleans up as you talk</h3><p>Long rambles are cleaned in the background and land about a second after you let go.</p></div>
-      <div class="bit"><svg viewBox="0 0 24 24" fill="none" stroke="#9a8cff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h6M7 13h10M7 17h4"/></svg><h3>Live time and words</h3><p>The pill shows your voice, the time and the word count while you talk.</p></div>
-      <div class="bit"><svg viewBox="0 0 24 24" fill="none" stroke="#2fd0c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 100 18 9 9 0 000-18zM12 7v5l3 2"/></svg><h3>Never loses a ramble</h3><p>Saved every 10 seconds while you talk. If anything goes wrong, it's on your clipboard.</p></div>
-      <div class="bit"><svg viewBox="0 0 24 24" fill="none" stroke="#ff8a7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="3" width="8" height="5" rx="1"/><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg><h3>Clipboard when there's no field</h3><p>Nowhere to type? The words wait on your clipboard. Your own clipboard comes back after each paste.</p></div>
-      <div class="bit"><svg viewBox="0 0 24 24" fill="none" stroke="#B8F27C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg><h3>Never in a password field</h3><p>Jot sees secure input and refuses to type into it.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="priv" id="privacy" aria-labelledby="priv-h">
-  <div class="wrap">
-    <h2 id="priv-h">Nothing leaves your Mac.</h2>
-    <div class="lines">
-      <span>Apple's on-device speech</span><span>Apple Intelligence on your Mac</span><span>No account</span><span>No audio saved</span><span>No subscription</span><span>Open source</span>
-    </div>
-    <p class="small">Jot makes no network requests of its own. Your dictations stay on your Mac as plain text you own, with what you said before clean-up, so you can always get your exact words back.</p>
-  </div>
-</section>
-
-<section class="sec" id="install" aria-labelledby="inst-h">
-  <div class="wrap">
-    <div class="head"><h2 id="inst-h">Talking in a minute.</h2><p>Signed and notarized by Apple.</p></div>
-    <div class="steps">
-      <div class="step"><span class="n">1</span><h3>Download</h3><p>Open <a class="dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg">Jot.dmg</a> and drag Jot to Applications.</p></div>
-      <div class="step"><span class="n">2</span><h3>Allow</h3><p>Settings asks for Input Monitoring, Accessibility and the microphone.</p></div>
-      <div class="step"><span class="n">3</span><h3>Talk</h3><p>Click into any text box, hold your talk key (<span class="kbd">fn</span> to start), and say it.</p></div>
-    </div>
-    <div class="again">
+    <p class="cmp-note">What Jot adds over the free ones: it cleans up as you talk, fixes "no wait", fills forms, speaks terminal and answers questions about what you said. Nothing to download: it uses the speech and Apple Intelligence models already on your Mac.</p>
+    <p class="cmp-src">Prices from each app's public pricing, October 2026. No account, no word limits, no subscription.</p>
+    <div class="cta">
       <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download for Mac</a>
-      <p class="meta">Or <a href="https://github.com/fru-dev3/jot#build-from-source">build it from source</a> with Xcode 26.</p>
-    </div>
-  </div>
-</section>
-
-<section class="sec" id="faq" style="padding-top:clamp(32px,5vw,56px)" aria-labelledby="faq-h">
-  <div class="wrap">
-    <div class="head"><h2 id="faq-h">Questions</h2></div>
-    <div class="faq">
-      <details><summary>Does Jot send my voice to the cloud?</summary><p>No. Speech recognition and clean-up run on your Mac with Apple's on-device models. Jot makes no network requests of its own and never writes audio to disk. macOS may download Apple's speech model once.</p></details>
-      <details><summary>What does it cost?</summary><p>Nothing. Jot is free and open source under the MIT license. There's no account and no subscription.</p></details>
-      <details><summary>Which Macs does it run on?</summary><p>Macs with Apple silicon on macOS 26 or later. Plain dictation works on all of them. Correction clean-up, Command Mode, asking your history and filling forms need Apple Intelligence turned on.</p></details>
-      <details><summary>Where are my dictations kept?</summary><p>On your Mac, as plain JSON lines in Application Support, with what you said before clean-up. Thoughts are Markdown files in Documents. Or choose any folder in Settings, an Obsidian vault too: thoughts land in it as Markdown notes and Jot's own files sit in a hidden .jot folder beside them.</p></details>
-      <details><summary>Can I use a key other than Fn?</summary><p>Yes. Settings offers Right Option, Right Command or Right Control. Jot sets the Globe key to Do Nothing so a double-press doesn't open the emoji picker.</p></details>
+      <a class="btn gh star" href="https://github.com/fru-dev3/jot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Star on GitHub</a>
     </div>
   </div>
 </section>
