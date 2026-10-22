@@ -159,6 +159,13 @@ footer nav a.home{color:var(--ink);font-weight:600}
   .top{order:1}.alt{order:3}.cta{order:4}.badges{order:5}
   .alt,.cta{width:min(100%,440px)}
 }
+.note{order:6;margin:0;max-width:440px;font-size:12px;line-height:1.45;color:var(--dim);text-align:center}
+.left .note{align-self:center}
+footer .built{display:inline-flex;align-items:center;gap:6px;color:var(--soft);text-decoration:none;font-weight:600}
+footer .built:hover{color:var(--green)}
+footer .built svg{color:var(--green)}
+.cta .btn.go{white-space:nowrap}
+@media (max-width:400px){.star-lbl{display:none}.cta .btn.big-star{padding:0 14px}.cta .btn.go{padding:0 16px}}
 </style>
 </head>
 <body>
@@ -180,8 +187,9 @@ footer nav a.home{color:var(--ink);font-weight:600}
   </div>
   <div class="cta">
     <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download for Mac</a>
-    <a class="btn star big-star" href="https://github.com/fru-dev3/jot"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Star<span class="count" id="stars" hidden></span></a>
+    <a class="btn star big-star" href="https://github.com/fru-dev3/jot"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg><span class="star-lbl">Star</span><span class="count" id="stars" hidden></span></a>
   </div>
+  <p class="note">Logos and names belong to their owners. Prices from their sites, October 2026. Jot is not affiliated with them.</p>
   <ul class="badges">
     
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>Private</li>
@@ -193,10 +201,8 @@ footer nav a.home{color:var(--ink);font-weight:600}
 
 <footer>
   <div class="bar">
-    <span>Updated Oct 21, 2026</span>
     <nav aria-label="Footer">
       <a class="home" href="https://fru.dev">fru.dev</a>
-      <a class="opt" href="https://github.com/fru-dev3/jot">GitHub</a>
       <a class="opt" href="/privacy.html">Privacy</a>
       <a href="https://github.com/fru-dev3/jot/issues" title="Contact: open an issue">Contact</a>
       <a href="/agents" title="For AI agents" aria-label="For AI agents">
@@ -204,6 +210,7 @@ footer nav a.home{color:var(--ink);font-weight:600}
         <span class="opt">Agents</span>
       </a>
     </nav>
+    <a class="built" href="https://github.com/fru-dev3/jot"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg><span>Built with AI<span class="opt">, easy to make your own</span> on GitHub</span></a>
   </div>
 </footer>
 <script>
