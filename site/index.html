@@ -318,9 +318,12 @@ async function dictate(){
   }
 }
 if(!matchMedia("(prefers-reduced-motion: reduce)").matches)dictate();else{tEl.textContent="0:02";wEl.textContent="2 words"}
-fetch("https://api.github.com/repos/fru-dev3/jot").then(r=>r.ok?r.json():null).then(d=>{
-  if(d&&typeof d.stargazers_count==="number"&&d.stargazers_count>0){const s=document.getElementById("stars");s.textContent=d.stargazers_count.toLocaleString();s.hidden=false}
-}).catch(()=>{});
+// The star count: shields.io first (cached on their side, so no visitor hits GitHub's hourly
+// limit of 60 per network), GitHub's own API if that fails.
+function showStars(n){if(n>0){const s=document.getElementById("stars");s.textContent=n.toLocaleString();s.hidden=false}}
+fetch("https://img.shields.io/github/stars/fru-dev3/jot.json").then(r=>r.ok?r.json():Promise.reject())
+  .then(d=>{const n=parseInt(d.value,10);if(!(n>=0))throw 0;showStars(n)})
+  .catch(()=>fetch("https://api.github.com/repos/fru-dev3/jot").then(r=>r.ok?r.json():null).then(d=>d&&showStars(d.stargazers_count)).catch(()=>{}));
 window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}
 gtag("consent","default",{analytics_storage:"denied",ad_storage:"denied",ad_user_data:"denied",ad_personalization:"denied",region:["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","ES","SE","IS","LI","NO","GB","CH"]});
 if(location.hostname==="jot.fru.dev")addEventListener("load",()=>(window.requestIdleCallback||setTimeout)(()=>{const s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-FN8TZMJ0F4";document.head.appendChild(s);gtag("js",new Date());gtag("config","G-FN8TZMJ0F4",{site_name:"jot",content_group:"jot"})}));
