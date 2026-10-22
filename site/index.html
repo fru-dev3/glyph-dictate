@@ -198,16 +198,23 @@ footer a:focus:not(:focus-visible){outline:none}
 }
 /* a hand-drawn note pointing at the star */
 .cta{position:relative}
-.love{position:absolute;right:-6px;top:calc(100% + 2px);display:flex;flex-direction:column;align-items:flex-end;color:var(--green);pointer-events:none;transform:rotate(-4deg)}
-.love .arrow{width:clamp(70px,8vh,96px);height:auto;margin-right:clamp(30px,4vw,48px);transform:rotate(10deg)}
-.love .say{font:700 clamp(22px,3.2vh,30px)/1 "Caveat",cursive;white-space:nowrap;display:flex;align-items:center;gap:6px;margin-top:-6px}
+.big-star{position:relative}
+.love{position:absolute;top:calc(100% + 4px);right:50%;margin-right:-9px;display:flex;flex-direction:column;align-items:flex-end;color:var(--green);pointer-events:none}
+.love .arrow{width:clamp(48px,6vh,60px);height:auto}
+.love .say{font:700 clamp(22px,3.2vh,30px)/1 "Caveat",cursive;white-space:nowrap;display:flex;align-items:center;gap:6px;margin-top:-2px;margin-right:clamp(20px,3vh,30px);transform:rotate(-4deg)}
 .love .heart{width:.8em;height:.8em;color:#E0465B;animation:beat 1.6s ease-in-out infinite}
 @keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.15)}}
 .badges{justify-content:flex-start!important}
 .note{text-align:left!important;align-self:flex-start!important}
-@media not ((min-width:960px) and (min-height:560px)){.badges,.note{width:min(100%,440px)}.cta{margin-bottom:clamp(48px,8vh,64px)}.love .arrow{width:62px}.love .say{font-size:22px}}
+@media not ((min-width:960px) and (min-height:560px)){.badges,.note{width:min(100%,440px)}.cta{margin-bottom:clamp(48px,8vh,64px)}.love .arrow{width:48px}.love .say{font-size:22px}}
 footer .built{white-space:nowrap}
 @media (max-width:380px){footer nav a{padding:6px 5px}footer a.feat svg{display:none}footer .bar{gap:6px}}
+.btn.big-star .love svg.arrow{width:clamp(56px,7.5vh,76px);height:auto;color:var(--green)}
+.btn.big-star .love svg.heart{width:.8em;height:.8em;color:#E0465B}
+@media not ((min-width:960px) and (min-height:560px)){.btn.big-star .love svg.arrow{width:54px}}
+@media (min-width:960px) and (min-height:560px){.cta{margin-bottom:clamp(36px,6vh,60px)}}
+@media (min-width:960px) and (max-width:1180px) and (min-height:560px){.cta{margin-bottom:clamp(70px,11vh,96px)}}
+@media not ((min-width:960px) and (min-height:560px)){.cta{margin-bottom:76px}}
 </style>
 </head>
 <body>
@@ -229,11 +236,7 @@ footer .built{white-space:nowrap}
   </div>
   <div class="cta">
     <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download for Mac</a>
-    <a class="btn star big-star" href="https://github.com/fru-dev3/jot"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg><span class="star-lbl">Star</span><span class="count" id="stars" hidden></span></a>
-    <span class="love" aria-hidden="true">
-      <svg class="arrow" viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M104 62C92 30 62 14 22 12"/><path d="M34 2L20 12l13 10"/></svg>
-      <span class="say">show some love<svg class="heart" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2.3 4.5 6.2 4.5c2.4 0 4 1.4 5.8 3.5 1.8-2.1 3.4-3.5 5.8-3.5 3.9 0 5.8 3.9 4.2 7.2C19.5 16.4 12 21 12 21z"/></svg></span>
-    </span>
+    <a class="btn star big-star" href="https://github.com/fru-dev3/jot"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg><span class="star-lbl">Star</span><span class="count" id="stars" hidden></span><span class="love" aria-hidden="true"><svg class="arrow" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M52 6C51 28 32 44 8 54"/><path d="M44 14l8-10 7 10"/></svg><span class="say">show some love<svg class="heart" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2.3 4.5 6.2 4.5c2.4 0 4 1.4 5.8 3.5 1.8-2.1 3.4-3.5 5.8-3.5 3.9 0 5.8 3.9 4.2 7.2C19.5 16.4 12 21 12 21z"/></svg></span></span></a>
   </div>
   <p class="note">Logos and names belong to their owners. Prices from their sites, October 2026. Jot is not affiliated with them.</p>
   <ul class="badges">
