@@ -99,6 +99,7 @@ from fixes), `Ask.swift`, `FormFill.swift`, `Pill.swift`, `Settings.swift`, `His
 
 - **0.7.1** (2026-10-21): forms fill from any browser page (also just opened, or with the address bar in focus), emails lowercase;
   "get commit" in a terminal is `git commit`; answers show their bold text.
+- **0.7.4** (2026-10-22): a new icon, a "j" that speaks.
 - **0.7.3** (2026-10-21): a running timer always means you're heard. When Apple's speech service stops
   answering, Jot starts it again on everything you said so far (kept in memory only, never saved), and if it
   still won't answer, says so on the pill and relaunches itself.
