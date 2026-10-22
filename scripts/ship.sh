@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 #
 # Deploy the jot.fru.dev site (the static files in site/) to Vercel,
-# team fru-dev3, project jot-fru. No build step, no functions, no secrets.
+# team fru-dev3, project jot-fru. No build step, no functions, no secrets. First it refreshes
+# the download count saved in the page (scripts/fetch-downloads.mjs).
 #
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 [ -f .vercel/project.json ] || vercel link --yes --project jot-fru
+
+# The download count's floor, written into the page; committed and pushed so a deploy stays
+# the pushed code.
+node scripts/fetch-downloads.mjs
+if ! git diff --quiet -- site/index.html; then
+  git commit -qm "jot.fru.dev: download count $(grep -o 'data-baked="[0-9]*"' site/index.html | grep -o '[0-9]*')" -- site/index.html
+  git push -q
+fi
 
 echo "building"
 vercel build --prod --yes
