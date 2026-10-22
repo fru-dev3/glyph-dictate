@@ -136,7 +136,6 @@ footer nav a.home{color:var(--ink);font-weight:600}
 /* one column width: every block starts and ends on the same edges */
 .left{width:min(100%,440px);align-items:stretch}
 .left .top{align-self:center}
-.pill{display:flex;justify-content:center}
 .alt{justify-content:space-between}
 .cta{flex-wrap:nowrap;align-items:stretch}
 .cta .btn.go{flex:1;justify-content:center}
@@ -145,6 +144,20 @@ footer nav a.home{color:var(--ink);font-weight:600}
 @media (min-width:960px) and (min-height:560px){
   .left{width:clamp(400px,34vw,560px)}
   .left .top{align-self:flex-start}
+}
+/* the pill sits on the screenshot, as it does on the Mac; on phones, under the headline */
+.right{position:relative}
+@media (min-width:960px) and (min-height:560px){
+  .right{display:flex!important;flex-direction:column;align-items:center}
+  .right .pill{order:2;margin-top:-28px;z-index:2}
+  .right .shot{max-height:calc(100svh - 190px)}
+}
+@media not ((min-width:960px) and (min-height:560px)){
+  .left{display:contents}
+  .right{display:block;order:2}
+  .right .shot{display:none}
+  .top{order:1}.alt{order:3}.cta{order:4}.badges{order:5}
+  .alt,.cta{width:min(100%,440px)}
 }
 </style>
 </head>
@@ -155,7 +168,6 @@ footer nav a.home{color:var(--ink);font-weight:600}
     <div class="brand"><img class="icon" src="icon-512.png" width="72" height="72" alt=""><div><b>Jot</b><span>Free dictation for Mac</span></div></div>
     <h1>Talk. <em><span id="said">It types.</span><i class="caret" aria-hidden="true"></i></em></h1>
   </div>
-  <div class="pill big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div>
   <div class="alt" aria-label="Instead of Wispr Flow at 15 dollars a month, Superwhisper at 8.49, Willow at 15 or Aqua Voice at 10, Jot is free on GitHub">
     <div class="paid">
       <figure><img src="img/logos/wispr.webp" width="48" height="48" alt="Wispr Flow" title="Wispr Flow"><s>$15</s></figure>
@@ -176,7 +188,7 @@ footer nav a.home{color:var(--ink);font-weight:600}
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>Open source</li>
   </ul>
   </div>
-  <div class="right"><img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: today's dictations into Slack, Terminal, Mail and Notes" fetchpriority="high"></div>
+  <div class="right"><div class="pill big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div><img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: today's dictations into Slack, Terminal, Mail and Notes" fetchpriority="high"></div>
 </main>
 
 <footer>
