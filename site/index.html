@@ -225,11 +225,15 @@ footer .built{white-space:nowrap}
   .right .shot{max-height:calc(100svh - 44px - 2 * clamp(24px,5vh,56px) - 60px - clamp(80px,12vh,130px))}
 }
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-/* the download count inside the button: just the number, past a hairline */
-.dlc{display:inline-flex;align-items:center;margin-left:2px;padding-left:12px;border-left:1px solid rgba(255,255,255,.35);font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
+/* the download count: a small frosted capsule at the button's end, an arrow and the number */
+.cta .btn.go{position:relative}
+.dlc{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:4px 10px 4px 8px;border-radius:999px;background:rgba(255,255,255,.18);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22);font-size:.82em;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 .dlc[hidden]{display:none}
+.btn .dlc svg{width:.95em;height:.95em}
 .dlc b{font-weight:inherit}
 @media (max-width:520px){.formac{display:none}}
+/* the star count matches: the same small capsule, tinted green on the white pill */
+.btn.big-star .count{margin-left:2px;padding:4px 9px;border:0;border-radius:999px;background:rgba(0,128,0,.1);box-shadow:inset 0 0 0 1px rgba(0,128,0,.18);color:var(--green);font-size:.86em;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -250,7 +254,7 @@ footer .built{white-space:nowrap}
     <a class="free" href="https://github.com/fru-dev3/jot"><img src="icon-512.png" width="48" height="48" alt=""><b>Free</b><small>on GitHub</small></a>
   </div>
   <div class="cta">
-    <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg><span class="dl-lbl">Download<span class="formac"> for Mac</span></span><span class="dlc" id="dlc" data-baked="2" hidden><b id="dln"></b></span></a>
+    <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg><span class="dl-lbl">Download<span class="formac"> for Mac</span></span><span class="dlc" id="dlc" data-baked="2" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v12m0 0l-5-5m5 5l5-5"/></svg><b id="dln"></b></span></a>
     <a class="btn star big-star" href="https://github.com/fru-dev3/jot"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg><span class="star-lbl">Star</span><span class="count" id="stars" hidden></span><span class="love" aria-hidden="true"><svg class="arrow" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M52 6C51 28 32 44 8 54"/><path d="M44 14l8-10 7 10"/></svg><span class="say">show some love<svg class="heart" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2.3 4.5 6.2 4.5c2.4 0 4 1.4 5.8 3.5 1.8-2.1 3.4-3.5 5.8-3.5 3.9 0 5.8 3.9 4.2 7.2C19.5 16.4 12 21 12 21z"/></svg></span></span></a>
   </div>
   <p class="note">Logos and names belong to their owners. Prices from their sites, October 2026. Jot is not affiliated with them.</p>
