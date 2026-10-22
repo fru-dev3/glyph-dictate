@@ -236,6 +236,8 @@ footer .built{white-space:nowrap}
 .btn.big-star .count{margin-left:2px;padding:4px 9px;border:0;border-radius:999px;background:rgba(0,128,0,.1);box-shadow:inset 0 0 0 1px rgba(0,128,0,.18);color:var(--green);font-size:.86em;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
 /* the right side sits centred against the left column: equal space above and below */
 @media (min-width:960px) and (min-height:560px){.right{align-self:center}}
+@media (max-width:380px){footer .built .bw{display:none}}
+footer .built .heart-i{display:inline-block;vertical-align:-2px;margin:0 1px}
 </style>
 </head>
 <body>
@@ -305,7 +307,7 @@ footer .built{white-space:nowrap}
         <span class="opt">Agents</span>
       </a>
     </nav>
-    <a class="built" href="https://github.com/fru-dev3/jot"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg><span>Built with AI<span class="opt">, easy to make your own on GitHub</span></span></a>
+    <a class="built" href="https://github.com/fru-dev3/jot"><span><span class="bw">Built with </span><svg class="heart-i" width="14" height="14" viewBox="0 0 24 24" fill="#E0465B" aria-label="love"><path d="M12 21s-7.5-4.6-10-9.3C.4 8.4 2.3 4.5 6.2 4.5c2.4 0 4 1.4 5.8 3.5 1.8-2.1 3.4-3.5 5.8-3.5 3.9 0 5.8 3.9 4.2 7.2C19.5 16.4 12 21 12 21z"/></svg> + AI<span class="opt"> · easy to make your own on GitHub</span></span></a>
   </div>
 </footer>
 <script>
