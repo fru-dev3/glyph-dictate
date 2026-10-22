@@ -1,4 +1,4 @@
-<p align="center"><img src="site/icon-512.png" width="128" alt="Jot icon: a white microphone on office green"></p>
+<p align="center"><img src="site/icon-512.png" width="128" alt="Jot icon: a white lowercase j giving off sound, on office green"></p>
 
 <h1 align="center">Jot</h1>
 
