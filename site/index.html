@@ -215,6 +215,16 @@ footer .built{white-space:nowrap}
 @media (min-width:960px) and (min-height:560px){.cta{margin-bottom:clamp(36px,6vh,60px)}}
 @media (min-width:960px) and (max-width:1180px) and (min-height:560px){.cta{margin-bottom:clamp(70px,11vh,96px)}}
 @media not ((min-width:960px) and (min-height:560px)){.cta{margin-bottom:76px}}
+/* the apps Jot types into, above the screenshot */
+.apps{display:none}
+@media (min-width:960px) and (min-height:560px){
+  .right .apps{display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.4vh,14px);margin-bottom:clamp(16px,3vh,32px)}
+  .apps p{margin:0;font:800 clamp(17px,2.4vh,22px) "Bricolage Grotesque",sans-serif;color:var(--soft);letter-spacing:-.01em}
+  .apps .row{display:flex;gap:clamp(6px,.8vw,12px)}
+  .apps img{width:clamp(28px,min(4.8vh,3vw),54px);height:auto;filter:drop-shadow(0 6px 10px rgba(11,26,16,.16));animation:bob 4.2s ease-in-out infinite;animation-delay:calc(var(--i) * -.35s)}
+  .right .shot{max-height:calc(100svh - 44px - 2 * clamp(24px,5vh,56px) - 60px - clamp(80px,12vh,130px))}
+}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 </style>
 </head>
 <body>
@@ -245,7 +255,7 @@ footer .built{white-space:nowrap}
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>Open source</li>
   </ul>
   </div>
-  <div class="right"><div class="pill big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div><img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: today's dictations into Slack, Terminal, Mail and Notes" fetchpriority="high"></div>
+  <div class="right"><div class="apps"><p>Types into every app you use</p><div class="row"><img src="img/apps/mail.webp" width="52" height="52" alt="Mail" title="Mail" style="--i:0"><img src="img/apps/messages.webp" width="52" height="52" alt="Messages" title="Messages" style="--i:1"><img src="img/apps/notes.webp" width="52" height="52" alt="Notes" title="Notes" style="--i:2"><img src="img/apps/slack.webp" width="52" height="52" alt="Slack" title="Slack" style="--i:3"><img src="img/apps/chrome.webp" width="52" height="52" alt="Chrome" title="Chrome" style="--i:4"><img src="img/apps/safari.webp" width="52" height="52" alt="Safari" title="Safari" style="--i:5"><img src="img/apps/notion.webp" width="52" height="52" alt="Notion" title="Notion" style="--i:6"><img src="img/apps/chatgpt.webp" width="52" height="52" alt="ChatGPT" title="ChatGPT" style="--i:7"><img src="img/apps/claude.webp" width="52" height="52" alt="Claude" title="Claude" style="--i:8"><img src="img/apps/cursor.webp" width="52" height="52" alt="Cursor" title="Cursor" style="--i:9"><img src="img/apps/vscode.webp" width="52" height="52" alt="VS Code" title="VS Code" style="--i:10"><img src="img/apps/terminal.webp" width="52" height="52" alt="Terminal" title="Terminal" style="--i:11"></div></div><div class="pill big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div><img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: today's dictations into Slack, Terminal, Mail and Notes" fetchpriority="high"></div>
 </main>
 
 <dialog id="features" aria-labelledby="feat-h">
