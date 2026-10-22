@@ -133,6 +133,19 @@ footer nav a.home{color:var(--ink);font-weight:600}
   .btn{height:clamp(54px,7vh,68px);font-size:clamp(17px,2.2vh,21px);padding:0 clamp(22px,2vw,32px)}
   .badges{font-size:clamp(15px,1.9vh,18px)}
 }
+/* one column width: every block starts and ends on the same edges */
+.left{width:min(100%,440px);align-items:stretch}
+.left .top{align-self:center}
+.pill{display:flex;justify-content:center}
+.alt{justify-content:space-between}
+.cta{flex-wrap:nowrap;align-items:stretch}
+.cta .btn.go{flex:1;justify-content:center}
+.cta .btn.big-star{height:auto;align-self:stretch;padding:0 18px;border-radius:14px}
+.badges{justify-content:center}
+@media (min-width:960px) and (min-height:560px){
+  .left{width:clamp(400px,34vw,560px)}
+  .left .top{align-self:flex-start}
+}
 </style>
 </head>
 <body>
