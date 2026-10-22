@@ -169,7 +169,7 @@ footer .built svg{color:var(--green)}
 /* features: a sheet of tiles */
 footer a.feat{color:var(--green);font-weight:700}
 footer a.feat svg{color:var(--green)}
-dialog#features{outline:none;border:0;padding:0;border-radius:28px;width:min(980px,calc(100% - 24px));max-height:calc(100svh - 32px);overflow:auto;background:#fff;color:var(--ink);box-shadow:0 30px 80px rgba(11,26,16,.35)}
+dialog#features{outline:none;border:0;padding:0;border-radius:28px;width:min(720px,calc(100% - 24px));max-height:calc(100svh - 32px);overflow:auto;background:#fff;color:var(--ink);box-shadow:0 30px 80px rgba(11,26,16,.35)}
 dialog#features::backdrop{background:rgba(11,26,16,.45);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 dialog#features[open]{animation:pop .22s cubic-bezier(.16,1,.3,1)}
 @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}}
@@ -178,15 +178,24 @@ dialog#features[open]{animation:pop .22s cubic-bezier(.16,1,.3,1)}
 .fhead h2{flex:1;margin:0;font:800 clamp(22px,3vw,30px)/1.1 "Bricolage Grotesque",sans-serif;letter-spacing:-.02em}
 .fclose{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;color:var(--ink)}
 .fclose svg{width:18px;height:18px}
-.ftext{padding:8px 26px 26px;columns:2 340px;column-gap:40px}
-.ftext section{break-inside:avoid;padding-top:18px}
-.ftext h3{margin:0 0 8px;font:800 19px "Bricolage Grotesque",sans-serif;color:var(--green);letter-spacing:-.01em}
-.ftext dl{margin:0}
-.ftext dt{font-weight:700;font-size:15.5px;margin-top:8px}
-.ftext dd{margin:1px 0 0;color:var(--soft);font-size:15px;line-height:1.45}
-@media (max-width:520px){.fhead{padding:12px 16px}.fhead img{width:32px;height:32px}.ftext{padding:4px 18px 20px}}
+.flist{padding:6px 28px 24px}
+.fq{padding:16px 0;border-bottom:1px solid var(--line)}
+.fq:last-child{border-bottom:0}
+.fq h3{margin:0;font:700 18px/1.3 -apple-system,BlinkMacSystemFont,sans-serif;color:var(--ink)}
+.fq p{margin:5px 0 0;color:var(--soft);font-size:16px;line-height:1.55}
+@media (max-width:520px){.fhead{padding:12px 16px}.fhead img{width:32px;height:32px}.flist{padding:2px 18px 18px}.fq h3{font-size:17px}.fq p{font-size:15px}}
 footer a:focus:not(:focus-visible){outline:none}
 @media (min-width:960px) and (min-height:560px){footer .bar{padding:0 clamp(32px,5vw,96px)}}
+@media (min-width:960px) and (min-height:560px){
+  main{height:100svh;min-height:0;align-content:center;align-items:end;padding-top:clamp(24px,5vh,56px);padding-bottom:calc(44px + clamp(24px,5vh,56px))}
+  .right{justify-content:flex-end}
+  .right .shot{flex:none;max-height:calc(100svh - 44px - 2 * clamp(24px,5vh,56px) - 60px);width:100%;object-fit:contain}
+  .right .pill{margin-top:-30px}
+  h1{font-size:clamp(64px,min(14vh,7.6vw),170px)}
+  .left{gap:clamp(14px,3.4vh,36px)}
+  .brand b{font-size:clamp(30px,5vh,48px)}
+  .brand span{font-size:clamp(15px,2.1vh,19px)}
+}
 </style>
 </head>
 <body>
@@ -223,12 +232,24 @@ footer a:focus:not(:focus-visible){outline:none}
 <dialog id="features" aria-labelledby="feat-h">
   <div class="fhead"><img src="icon-512.png" width="40" height="40" alt=""><h2 id="feat-h">Everything Jot does</h2><button type="button" class="fclose" aria-label="Close">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-  <div class="ftext">
-    <section><h3>Talk</h3><dl><dt>Hold to talk</dt><dd>Hold your key, talk, let go. The words land wherever your cursor is, in any app.</dd><dt>Hands-free</dt><dd>Double-press to keep talking. Press once more to stop.</dd><dt>Your key</dt><dd>Fn, Right Option, Right Command or Right Control.</dd></dl></section>
-    <section><h3>Clean writing</h3><dl><dt>Cleans up as you talk</dt><dd>Ums, ahs and false starts are gone.</dd><dt>Corrections</dt><dd>Say "Tuesday, no wait, Thursday" and only Thursday stays.</dd><dt>Lists</dt><dd>Say "one" and "two" and get a numbered list.</dd><dt>Style per app</dt><dd>Formal in Mail, casual in Slack, exact in the terminal.</dd><dt>Learns your words</dt><dd>Fix a name once and Jot spells it right from then on.</dd></dl></section>
-    <section><h3>Do more by voice</h3><dl><dt>Terminal</dt><dd>Say "dash dash" or "slash" for symbols. End with "send it" to press Return.</dd><dt>Fill forms</dt><dd>"Fill the form, name Sam Lee, city Austin" fills every field.</dd><dt>Rewrite</dt><dd>Select text and say "make it shorter" or "make it friendlier".</dd><dt>Thoughts</dt><dd>Save an idea as a Markdown note in any folder, an Obsidian vault too.</dd><dt>Ask</dt><dd>"When is the launch?" is answered from what you have said.</dd></dl></section>
-    <section><h3>Never lose a word</h3><dl><dt>Always ready</dt><dd>The word you said as the key went down is kept.</dd><dt>Saved as you talk</dt><dd>A crash can't take a long ramble.</dd><dt>Clipboard</dt><dd>No text field? Your words wait on the clipboard.</dd><dt>Self-healing</dt><dd>If speech stalls, Jot restarts it and hears it all again.</dd></dl></section>
-    <section><h3>Private</h3><dl><dt>On your Mac</dt><dd>Apple's own speech and Apple Intelligence. Nothing to download.</dd><dt>Nothing kept but text</dt><dd>No account, no audio saved, no network requests.</dd><dt>Never in a password field</dt><dd>Jot refuses to type where secure input is on.</dd></dl></section>
+  <div class="flist">
+    <div class="fq"><h3>Hold to talk</h3><p>Hold your talk key, say what you want, and let go. The words are typed wherever your cursor is: email, chat, documents, forms, the terminal, any app.</p></div>
+    <div class="fq"><h3>Hands-free</h3><p>Double-press the key and keep talking for as long as you like. Press it once more to stop.</p></div>
+    <div class="fq"><h3>Your choice of key</h3><p>Fn by default, or Right Option, Right Command or Right Control.</p></div>
+    <div class="fq"><h3>Cleans up as you talk</h3><p>Ums, ahs and false starts are taken out, and long rambles are tidied while you are still talking, so the text lands about a second after you let go.</p></div>
+    <div class="fq"><h3>Corrections</h3><p>Change your mind mid-sentence. Say "Tuesday, no wait, Thursday" and only Thursday is typed.</p></div>
+    <div class="fq"><h3>Lists</h3><p>Say "one", "two", "three" as you go and get a numbered list.</p></div>
+    <div class="fq"><h3>A style for each app</h3><p>Formal in Mail, relaxed in Slack and Messages, exact in the terminal.</p></div>
+    <div class="fq"><h3>Learns your words</h3><p>Fix a name or a term Jot got wrong, and it spells it right from then on. Add your own words in the Dictionary.</p></div>
+    <div class="fq"><h3>Terminal and code</h3><p>Say "dash dash", "slash" or "dot" and get the symbols. End with "send it" and Jot presses Return.</p></div>
+    <div class="fq"><h3>Fill a whole form</h3><p>Say "Fill the form, name Sam Lee, city Austin, email sam at example dot com" and every field is filled. Password fields are left alone.</p></div>
+    <div class="fq"><h3>Rewrite what you selected</h3><p>Select some text and say what you want instead: "make it shorter", "make it friendlier", "turn it into bullets".</p></div>
+    <div class="fq"><h3>Thoughts</h3><p>Catch an idea without typing anything. It is saved as a Markdown note in the folder you choose, an Obsidian vault too.</p></div>
+    <div class="fq"><h3>Ask what you said</h3><p>"When is the launch now?" Jot answers from your own dictations, on your Mac.</p></div>
+    <div class="fq"><h3>Never misses the first word</h3><p>The mic is always ready, so the word you said as the key went down is kept.</p></div>
+    <div class="fq"><h3>Never loses a ramble</h3><p>What you say is saved as you talk. If anything goes wrong, it is on your clipboard, and if speech stalls Jot restarts it and hears it all again.</p></div>
+    <div class="fq"><h3>Nowhere to type</h3><p>No text field in focus? Your words wait on the clipboard, ready to paste.</p></div>
+    <div class="fq"><h3>Private by design</h3><p>Speech and clean-up run on your Mac with Apple's own models. Nothing to download, no account, no audio saved, and Jot never types into a password field.</p></div>
   </div>
 </dialog>
 
