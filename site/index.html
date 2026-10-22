@@ -87,6 +87,19 @@ h1 em{font-style:normal;color:var(--green)}
 .pill{display:inline-flex;align-items:center;gap:4px;height:64px;padding:0 28px;border-radius:999px;background:#0B0F0C;color:#fff;font:600 20px -apple-system,sans-serif;font-variant-numeric:tabular-nums;white-space:nowrap;box-shadow:0 18px 40px rgba(0,0,0,.25)}
 .pill i{display:block;width:5px;height:8px;border-radius:3px;background:#fff}
 .pill span{opacity:.55;margin-left:12px;font-weight:500}.pill b{margin-left:16px}
+.alt{display:flex;align-items:center;gap:clamp(10px,1.6vw,18px);background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:22px;padding:12px 16px}
+.paid{display:flex;gap:clamp(8px,1vw,12px)}
+.alt figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.alt img{width:clamp(38px,5.4vh,52px);height:auto;border-radius:24%;box-shadow:0 4px 10px rgba(0,0,0,.12)}
+.paid img{filter:saturate(.6);opacity:.85}
+.alt s{font:700 13px -apple-system,sans-serif;color:#A6402B;text-decoration-color:rgba(166,64,43,.7);text-decoration-thickness:1.5px}
+.or{font:800 clamp(16px,2.2vh,20px) "Bricolage Grotesque",sans-serif;color:var(--dim)}
+.free{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:10px;align-items:center;text-decoration:none;color:var(--ink)}
+.free img{grid-row:1/3;filter:none;opacity:1;box-shadow:0 6px 14px rgba(0,128,0,.3)}
+.free b{font:800 clamp(20px,2.8vh,26px)/1 "Bricolage Grotesque",sans-serif;color:var(--green)}
+.free small{font-size:13px;font-weight:600;color:var(--soft)}
+.free:hover small{color:var(--green)}
+@media (max-width:420px){.alt{padding:10px 12px;gap:8px}.paid{gap:6px}.alt img{width:34px}.alt s{font-size:12px}}
 .badges{display:flex;gap:8px 20px;flex-wrap:wrap;justify-content:center;margin:0;padding:0;list-style:none;color:var(--soft);font-size:15px;font-weight:600}
 .badges li,.badges a{display:flex;align-items:center;gap:7px}
 .badges a{color:var(--soft);text-decoration:none}.badges a:hover{color:var(--green)}
@@ -130,12 +143,22 @@ footer nav a.home{color:var(--ink);font-weight:600}
     <h1>Talk. <em><span id="said">It types.</span><i class="caret" aria-hidden="true"></i></em></h1>
   </div>
   <div class="pill big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div>
+  <div class="alt" aria-label="Instead of Wispr Flow at 15 dollars a month, Superwhisper at 8.49, Willow at 15 or Aqua Voice at 10, Jot is free on GitHub">
+    <div class="paid">
+      <figure><img src="img/logos/wispr.webp" width="48" height="48" alt="Wispr Flow" title="Wispr Flow"><s>$15</s></figure>
+      <figure><img src="img/logos/superwhisper.webp" width="48" height="48" alt="Superwhisper" title="Superwhisper"><s>$8.49</s></figure>
+      <figure><img src="img/logos/willow.webp" width="48" height="48" alt="Willow Voice" title="Willow Voice"><s>$15</s></figure>
+      <figure><img src="img/logos/aqua.webp" width="48" height="48" alt="Aqua Voice" title="Aqua Voice"><s>$10</s></figure>
+    </div>
+    <span class="or">or</span>
+    <a class="free" href="https://github.com/fru-dev3/jot"><img src="icon-512.png" width="48" height="48" alt=""><b>Free</b><small>on GitHub</small></a>
+  </div>
   <div class="cta">
     <a class="btn go dl" href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M5 21h14"/></svg>Download for Mac</a>
     <a class="btn star big-star" href="https://github.com/fru-dev3/jot"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></svg>Star<span class="count" id="stars" hidden></span></a>
   </div>
   <ul class="badges">
-    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg>Free</li>
+    
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>Private</li>
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>Open source</li>
   </ul>
