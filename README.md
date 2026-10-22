@@ -2,7 +2,7 @@
 
 <h1 align="center">Jot</h1>
 
-<p align="center"><b>Hold Fn and talk. Your words appear wherever you type. Nothing leaves your Mac.</b></p>
+<p align="center"><b>Talk. It types. Free dictation for your Mac that never leaves it.</b></p>
 
 <p align="center">
   <a href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg">Download for Mac</a> ·
