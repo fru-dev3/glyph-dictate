@@ -238,6 +238,31 @@ footer .built{white-space:nowrap}
 @media (min-width:960px) and (min-height:560px){.right{align-self:center}}
 @media (max-width:380px){footer .built .bw{display:none}}
 footer .built .heart-i{display:inline-block;vertical-align:-2px;margin:0 1px}
+/* the showcase: Mac, iPhone and the keyboard take turns; on phones only the pill shows */
+.stage,.tabs{display:none}
+.slide{margin:0}
+@media (min-width:960px) and (min-height:560px){
+  .right{--h:calc(100svh - 44px - 2 * clamp(24px,5vh,56px) - 60px - clamp(80px,12vh,130px) - 52px)}
+  .stage{display:grid;width:100%;justify-items:center;align-items:end}
+  .slide{grid-area:1/1;display:flex;align-items:center;justify-content:center;gap:clamp(16px,2.4vw,40px);opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .6s ease,transform .6s ease,visibility 0s .6s}
+  .slide.on{opacity:1;visibility:visible;transform:none;transition:opacity .6s ease,transform .6s ease}
+  .slide.mac{flex-direction:column;gap:0}
+  .right .slide.mac .shot{max-height:var(--h);width:auto;max-width:100%}
+  .right .slide.mac .pill{margin-top:-30px;z-index:2}
+  .phone{height:calc(var(--h) + 20px);width:auto;border-radius:clamp(26px,4.4vh,44px);border:clamp(5px,.8vh,8px) solid #0B0F0C;background:#0B0F0C;box-shadow:0 30px 60px rgba(11,26,16,.25)}
+  .phones .phone:nth-child(2){transform:translateY(-4%)}
+  .slide figcaption{max-width:16ch;font-size:clamp(16px,2.1vh,19px);color:var(--soft);line-height:1.35}
+  .slide figcaption b{display:block;font:800 clamp(26px,4vh,40px)/1.05 "Bricolage Grotesque",sans-serif;color:var(--ink);letter-spacing:-.02em;margin-bottom:10px}
+  .tabs{display:flex;gap:6px;margin-top:clamp(14px,2.4vh,22px);padding:5px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid var(--line)}
+  .tabs button{position:relative;overflow:hidden;font:700 15px -apple-system,sans-serif;color:var(--soft);background:none;border:0;border-radius:999px;padding:8px 18px;cursor:pointer}
+  .tabs button small{font-size:11px;font-weight:700;color:var(--green);background:rgba(0,128,0,.1);padding:2px 7px;border-radius:999px;margin-left:4px}
+  .tabs button[aria-selected=true]{background:var(--ink);color:#fff}
+  .tabs button[aria-selected=true] small{background:rgba(255,255,255,.18);color:#C9F7B5}
+  .tabs button[aria-selected=true]::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:100%;background:#3FA34D;transform-origin:left;animation:fill 6s linear forwards}
+  .tabs.hold button::after{animation-play-state:paused}
+}
+@keyframes fill{from{transform:scaleX(0)}}
+@media not ((min-width:960px) and (min-height:560px)){.stage{display:block}.slide:not(.mac){display:none}.slide.mac .shot{display:none}}
 </style>
 </head>
 <body>
@@ -268,7 +293,12 @@ footer .built .heart-i{display:inline-block;vertical-align:-2px;margin:0 1px}
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>Open source</li>
   </ul>
   </div>
-  <div class="right"><div class="apps"><p>Types into every app you use</p><div class="row"><img src="img/apps/mail.webp" width="52" height="52" alt="Mail" title="Mail" style="--i:0"><img src="img/apps/messages.webp" width="52" height="52" alt="Messages" title="Messages" style="--i:1"><img src="img/apps/notes.webp" width="52" height="52" alt="Notes" title="Notes" style="--i:2"><img src="img/apps/slack.webp" width="52" height="52" alt="Slack" title="Slack" style="--i:3"><img src="img/apps/chrome.webp" width="52" height="52" alt="Chrome" title="Chrome" style="--i:4"><img src="img/apps/safari.webp" width="52" height="52" alt="Safari" title="Safari" style="--i:5"><img src="img/apps/notion.webp" width="52" height="52" alt="Notion" title="Notion" style="--i:6"><img src="img/apps/chatgpt.webp" width="52" height="52" alt="ChatGPT" title="ChatGPT" style="--i:7"><img src="img/apps/claude.webp" width="52" height="52" alt="Claude" title="Claude" style="--i:8"><img src="img/apps/cursor.webp" width="52" height="52" alt="Cursor" title="Cursor" style="--i:9"><img src="img/apps/vscode.webp" width="52" height="52" alt="VS Code" title="VS Code" style="--i:10"><img src="img/apps/terminal.webp" width="52" height="52" alt="Terminal" title="Terminal" style="--i:11"></div></div><div class="pill big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div><img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: today's dictations into Slack, Terminal, Mail and Notes" fetchpriority="high"></div>
+  <div class="right"><div class="apps"><p>Types into every app and agent you use</p><div class="row"><img src="img/apps/mail.webp" width="52" height="52" alt="Mail" title="Mail" style="--i:0"><img src="img/apps/messages.webp" width="52" height="52" alt="Messages" title="Messages" style="--i:1"><img src="img/apps/notes.webp" width="52" height="52" alt="Notes" title="Notes" style="--i:2"><img src="img/apps/slack.webp" width="52" height="52" alt="Slack" title="Slack" style="--i:3"><img src="img/apps/chrome.webp" width="52" height="52" alt="Chrome" title="Chrome" style="--i:4"><img src="img/apps/safari.webp" width="52" height="52" alt="Safari" title="Safari" style="--i:5"><img src="img/apps/notion.webp" width="52" height="52" alt="Notion" title="Notion" style="--i:6"><img src="img/apps/chatgpt.webp" width="52" height="52" alt="ChatGPT" title="ChatGPT" style="--i:7"><img src="img/apps/claude.webp" width="52" height="52" alt="Claude" title="Claude" style="--i:8"><img src="img/apps/cursor.webp" width="52" height="52" alt="Cursor" title="Cursor" style="--i:9"><img src="img/apps/vscode.webp" width="52" height="52" alt="VS Code" title="VS Code" style="--i:10"><img src="img/apps/terminal.webp" width="52" height="52" alt="Terminal" title="Terminal" style="--i:11"></div></div><div class="stage">
+    <figure class="slide mac on" data-k="mac"><img class="shot" src="img/app-ask.webp" width="1600" height="1189" alt="Jot's window: today's dictations into Slack, Terminal, Mail and Notes" fetchpriority="high"><div class="pill big" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><b id="t">0:00</b><span id="w">0 words</span></div></figure>
+    <figure class="slide phones" data-k="iphone" aria-hidden="true"><img class="phone" src="img/iphone-home.webp" width="506" height="1100" alt="Jot for iPhone: memos with their tags" loading="lazy"><img class="phone" src="img/iphone-rec.webp" width="506" height="1100" alt="Jot for iPhone recording, the words appearing as you talk" loading="lazy"></figure>
+    <figure class="slide phones" data-k="keyboard" aria-hidden="true"><img class="phone" src="img/iphone-kb.webp" width="506" height="1100" alt="The Jot keyboard in Messages, typing what you say" loading="lazy"><figcaption><b>Talk in any app</b>The Jot keyboard types what you say, and keeps every word as a memo.</figcaption></figure>
+  </div>
+  <div class="tabs" role="tablist" aria-label="Jot on each device"><button role="tab" aria-selected="true" data-k="mac">Mac</button><button role="tab" aria-selected="false" data-k="iphone">iPhone <small>soon</small></button><button role="tab" aria-selected="false" data-k="keyboard">Keyboard <small>soon</small></button></div></div>
 </main>
 
 <dialog id="features" aria-labelledby="feat-h">
@@ -341,6 +371,14 @@ async function dictate(){
   }
 }
 if(!matchMedia("(prefers-reduced-motion: reduce)").matches)dictate();else{tEl.textContent="0:02";wEl.textContent="2 words"}
+// The showcase: each device for six seconds, a tap picks one, hovering holds it.
+(()=>{const tabs=document.querySelector(".tabs");if(!tabs)return;const bs=[...tabs.querySelectorAll("button")],sl=[...document.querySelectorAll(".slide")];
+  let i=0,timer;const show=k=>{i=bs.findIndex(b=>b.dataset.k===k);bs.forEach(b=>b.setAttribute("aria-selected",b.dataset.k===k));sl.forEach(s=>{const on=s.dataset.k===k;s.classList.toggle("on",on);s.setAttribute("aria-hidden",!on)})};
+  const still=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const run=()=>{clearInterval(timer);if(!still)timer=setInterval(()=>show(bs[(i+1)%bs.length].dataset.k),6000)};
+  bs.forEach(b=>b.addEventListener("click",()=>{show(b.dataset.k);run();try{gtag("event","showcase",{device:b.dataset.k})}catch{}}));
+  const stage=document.querySelector(".right");stage.addEventListener("mouseenter",()=>{clearInterval(timer);tabs.classList.add("hold")});stage.addEventListener("mouseleave",()=>{tabs.classList.remove("hold");run()});
+  run()})();
 // The download count: shields.io (cached, so no network hits GitHub's hourly limit), GitHub's
 // release data if that's blocked,
 // never below the number saved in the page at the last deploy.
