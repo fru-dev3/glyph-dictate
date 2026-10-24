@@ -86,7 +86,7 @@ final class Dictation {
         copiedOnly = false
         state = .listening
         Prefs.shared.play("Tink")
-        Pill.shared.show()
+        Pill.shared.show(over: target)
         let mic = mic
         let relay = Relay()
         self.relay = relay

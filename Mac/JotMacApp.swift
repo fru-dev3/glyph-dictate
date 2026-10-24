@@ -53,6 +53,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 // "fail:N": the next N speech starts fail; "mute:N": the next N hear silence (a stall).
                 case "fail": Breakage.fail.withLock { $0 = Int(said.last ?? "") ?? 1 }
                 case "mute": Breakage.mute.withLock { $0 = Int(said.last ?? "") ?? 1 }
+                // "fullscreen:on|off": the front app's window in or out of full screen (the pill must show over it).
+                case "fullscreen":
+                    guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { break }
+                    var window: CFTypeRef?
+                    if AXUIElementCopyAttributeValue(AXUIElementCreateApplication(pid), kAXFocusedWindowAttribute as CFString, &window) == .success,
+                       let window { AXUIElementSetAttributeValue(window as! AXUIElement, "AXFullScreen" as CFString, (said.last == "on") as CFBoolean) }
                 default:
                     let mode: Mode = switch said.last {
                     case "thought": .thought

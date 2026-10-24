@@ -23,14 +23,34 @@ final class Pill {
         return panel
     }()
 
-    func show() {
-        // The screen the pointer is on, just above the Dock.
+    func show(over app: NSRunningApplication?) {
+        // The screen you're typing on (the front window's), else the pointer's, just above the Dock.
         let mouse = NSEvent.mouseLocation
-        let screen = NSScreen.screens.first { $0.frame.contains(mouse) } ?? NSScreen.main
+        let screen = Self.screen(of: app) ?? NSScreen.screens.first { $0.frame.contains(mouse) } ?? NSScreen.main
         guard let area = screen?.visibleFrame else { return }
         let size = panel.frame.size
         panel.setFrameOrigin(NSPoint(x: area.midX - size.width / 2, y: area.minY + 24))
         panel.orderFrontRegardless()
+        // So a pill that didn't appear says why next time (log show --predicate 'subsystem == "dev.fru.jot.mac"').
+        log.notice("pill: shown on \(screen?.localizedName ?? "?", privacy: .public) over \(app?.bundleIdentifier ?? "?", privacy: .public), visible \(self.panel.isVisible), active space \(self.panel.isOnActiveSpace), screens \(NSScreen.screens.count)")
+    }
+
+    /// The screen holding the app's focused window, through Accessibility (which Jot has).
+    private static func screen(of app: NSRunningApplication?) -> NSScreen? {
+        guard let pid = app?.processIdentifier else { return nil }
+        var window: CFTypeRef?, position: CFTypeRef?, size: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(AXUIElementCreateApplication(pid), kAXFocusedWindowAttribute as CFString, &window) == .success,
+              let window, CFGetTypeID(window) == AXUIElementGetTypeID() else { return nil }
+        let element = window as! AXUIElement
+        AXUIElementCopyAttributeValue(element, kAXPositionAttribute as CFString, &position)
+        AXUIElementCopyAttributeValue(element, kAXSizeAttribute as CFString, &size)
+        var origin = CGPoint.zero, extent = CGSize.zero
+        guard let position, let size, AXValueGetValue(position as! AXValue, .cgPoint, &origin),
+              AXValueGetValue(size as! AXValue, .cgSize, &extent) else { return nil }
+        // Accessibility measures from the top of the main screen; AppKit from the bottom.
+        let top = NSScreen.screens.first?.frame.maxY ?? 0
+        let centre = NSPoint(x: origin.x + extent.width / 2, y: top - (origin.y + extent.height / 2))
+        return NSScreen.screens.first { $0.frame.contains(centre) }
     }
 
     func hide() { panel.orderOut(nil) }
