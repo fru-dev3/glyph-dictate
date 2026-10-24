@@ -30,6 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if !CGPreflightPostEventAccess() { CGRequestPostEventAccess() } // to paste (Accessibility)
         _ = Words.shared // your dictionary joins the speech model's vocabulary
         Task { await Transcription.prewarm() } // download the speech model before the first dictation
+        SpeechWatch.start()
         AI.prewarm()
         HotKeys.register([
             (kVK_ANSI_V, { Dictation.shared.pasteLast() }),
@@ -55,6 +56,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 case "mute": Breakage.mute.withLock { $0 = Int(said.last ?? "") ?? 1 }
                 // "model:N": the next N speech starts find the model still downloading.
                 case "model": Breakage.model.withLock { $0 = Int(said.last ?? "") ?? 1 }
+                // "lost": the between-dictations check finds speech unreachable, now.
+                case "lost": Breakage.lost.withLock { $0 = 1 }; await SpeechWatch.check()
                 // "fullscreen:on|off": the front app's window in or out of full screen (the pill must show over it).
                 case "fullscreen":
                     guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { break }

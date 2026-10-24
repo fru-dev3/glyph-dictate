@@ -122,6 +122,11 @@ enum Transcription {
         _ = try? await make(live: true)
     }
 
+    /// Whether this process still reaches the speech service; false only when it has lost it.
+    static func reachable() async -> Bool {
+        do { _ = try await make(live: true); return true } catch { return error as? JotError != .serviceLost }
+    }
+
     /// One model download at a time, shared by every caller (a launch's prewarm, a dictation's retries).
     private static var install: (task: Task<Void, Never>, at: Date)?
 
@@ -143,13 +148,17 @@ enum Transcription {
             #if os(macOS)
             // Jot on the Mac keeps the sound in memory while you talk, so it can wait a little for it.
             let download = install!.task
-            await withTaskGroup(of: Void.self) { group in
-                group.addTask { await download.value }
-                group.addTask { try? await Task.sleep(for: .seconds(20)) }
-                await group.next()
-                group.cancelAll()
+            let finished = await withTaskGroup(of: Bool.self) { group in
+                group.addTask { await download.value; return true }
+                group.addTask { try? await Task.sleep(for: .seconds(20)); return false }
+                defer { group.cancelAll() }
+                return await group.next() ?? false
             }
             if await AssetInventory.status(forModules: [module]) == .installed { return }
+            // The download ended yet the model still isn't there: this process has lost the speech
+            // service (XPC 4099 in the log), which says "not installed" to everything. Only a
+            // relaunch reconnects.
+            if finished { install = nil; throw JotError.serviceLost }
             #endif
             throw JotError.notReady
         }
@@ -221,4 +230,5 @@ struct JotError: LocalizedError, Equatable {
     let errorDescription: String?
     init(_ message: String) { errorDescription = message }
     static let notReady = JotError("The speech model is still downloading.")
+    static let serviceLost = JotError("Speech stopped answering.")
 }

@@ -336,6 +336,7 @@ final class Dictation {
                 log.error("speech: attempt \(attempt) failed: \(error.localizedDescription, privacy: .public)")
                 // The model is downloading: speech isn't down, and a restart or relaunch won't help.
                 if error as? JotError == .notReady { throw error }
+                if error as? JotError == .serviceLost { throw SpeechDown() } // only a relaunch helps
             }
         }
         throw SpeechDown()
@@ -466,6 +467,7 @@ enum Breakage {
     static let fail = OSAllocatedUnfairLock(initialState: 0)
     static let mute = OSAllocatedUnfairLock(initialState: 0)
     static let model = OSAllocatedUnfairLock(initialState: 0)
+    static let lost = OSAllocatedUnfairLock(initialState: 0)
     static func take(_ counter: OSAllocatedUnfairLock<Int>) -> Bool {
         counter.withLock { n in defer { n = max(0, n - 1) }; return n > 0 }
     }
@@ -525,6 +527,7 @@ final class Relay: @unchecked Sendable {
 /// Opens a fresh Jot and quits this one: what brings Apple's speech service back when it stops
 /// answering a running app. At most once in 10 minutes, so it can never loop.
 enum Relaunch {
+    /// At most once in 10 minutes, so a speech service that stays down can't put Jot in a loop.
     @MainActor static func now() {
         let last = UserDefaults.standard.double(forKey: "relaunchedAt")
         guard Date.now.timeIntervalSince1970 - last > 600 else { return }
@@ -535,6 +538,32 @@ enum Relaunch {
         task.arguments = ["-c", "sleep 1; /usr/bin/open \"$0\"", Bundle.main.bundlePath]
         try? task.run()
         NSApp.terminate(nil)
+    }
+}
+
+/// Every two minutes and after the Mac wakes, while you aren't dictating: is speech still
+/// reachable? macOS's speech service now and then drops a running app, and the next dictation
+/// would fail; reconnecting (a relaunch) while idle means it never does.
+@MainActor
+enum SpeechWatch {
+    private static var timer: Timer?
+
+    static func start() {
+        timer = Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { _ in Task { await check() } }
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didWakeNotification, object: nil, queue: .main) { _ in
+            Task { try? await Task.sleep(for: .seconds(5)); await check() }
+        }
+    }
+
+    static func check() async {
+        var lost = false
+        #if DEBUG
+        lost = Breakage.take(Breakage.lost)
+        #endif
+        if !lost { lost = !(await Transcription.reachable()) }
+        guard lost, Dictation.shared.state == .idle else { return }
+        log.error("watch: speech unreachable between dictations, reconnecting")
+        Relaunch.now()
     }
 }
 

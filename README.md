@@ -99,6 +99,8 @@ from fixes), `Ask.swift`, `FormFill.swift`, `Pill.swift`, `Settings.swift`, `His
 
 - **0.7.1** (2026-10-21): forms fill from any browser page (also just opened, or with the address bar in focus), emails lowercase;
   "get commit" in a terminal is `git commit`; answers show their bold text.
+- **0.7.7** (2026-10-23): Jot checks it still reaches Apple's speech service every two minutes and after
+  the Mac wakes, and reconnects while you aren't talking, so a dropped connection never meets a dictation.
 - **0.7.6** (2026-10-23): no more restarting over and over when macOS drops its speech model; Jot fetches it
   once, waits for it, and says so on the pill if it isn't ready yet.
 - **0.7.5** (2026-10-23): the pill shows on the screen you're typing on, not wherever the pointer is.
