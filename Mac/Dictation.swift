@@ -110,7 +110,9 @@ final class Dictation {
             self.feed = nil
             let speech = failure is SpeechDown
             rescue(failure.localizedDescription)
-            problem = speech ? "Speech stopped. Restarting Jot" : "The mic didn't start"
+            problem = speech ? "Speech stopped. Restarting Jot"
+                : failure as? JotError == .notReady ? "Speech model downloading. Try soon"
+                : "The mic didn't start"
             pipeline.cancel()
             state = .done
             Task {
@@ -332,6 +334,8 @@ final class Dictation {
             } catch {
                 try Task.checkCancellation() // let go with Esc, or stopped: not a failure
                 log.error("speech: attempt \(attempt) failed: \(error.localizedDescription, privacy: .public)")
+                // The model is downloading: speech isn't down, and a restart or relaunch won't help.
+                if error as? JotError == .notReady { throw error }
             }
         }
         throw SpeechDown()
@@ -345,6 +349,7 @@ final class Dictation {
         log.info("speech: making model")
         #if DEBUG
         if Breakage.take(Breakage.fail) { throw JotError("Test: speech didn't start.") }
+        if Breakage.take(Breakage.model) { throw JotError.notReady }
         let mute = Breakage.take(Breakage.mute)
         #endif
         // Apple's speech service has now and then never answered here; don't wait forever.
@@ -460,6 +465,7 @@ final class Dictation {
 enum Breakage {
     static let fail = OSAllocatedUnfairLock(initialState: 0)
     static let mute = OSAllocatedUnfairLock(initialState: 0)
+    static let model = OSAllocatedUnfairLock(initialState: 0)
     static func take(_ counter: OSAllocatedUnfairLock<Int>) -> Bool {
         counter.withLock { n in defer { n = max(0, n - 1) }; return n > 0 }
     }

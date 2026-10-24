@@ -122,6 +122,9 @@ enum Transcription {
         _ = try? await make(live: true)
     }
 
+    /// One model download at a time, shared by every caller (a launch's prewarm, a dictation's retries).
+    private static var install: (task: Task<Void, Never>, at: Date)?
+
     private static func ensureInstalled(_ module: any SpeechModule) async throws {
         switch await AssetInventory.status(forModules: [module]) {
         case .installed:
@@ -129,11 +132,25 @@ enum Transcription {
         case .unsupported:
             throw JotError("Speech recognition isn't available on this iPhone.")
         default:
-            Task {
-                if let request = try? await AssetInventory.assetInstallationRequest(supporting: [module]) {
-                    try? await request.downloadAndInstall()
-                }
+            // macOS can drop or replace the model (a system update); fetch it again, once.
+            if install == nil || Date.now.timeIntervalSince(install!.at) > 60 {
+                install = (Task {
+                    if let request = try? await AssetInventory.assetInstallationRequest(supporting: [module]) {
+                        try? await request.downloadAndInstall()
+                    }
+                }, .now)
             }
+            #if os(macOS)
+            // Jot on the Mac keeps the sound in memory while you talk, so it can wait a little for it.
+            let download = install!.task
+            await withTaskGroup(of: Void.self) { group in
+                group.addTask { await download.value }
+                group.addTask { try? await Task.sleep(for: .seconds(20)) }
+                await group.next()
+                group.cancelAll()
+            }
+            if await AssetInventory.status(forModules: [module]) == .installed { return }
+            #endif
             throw JotError.notReady
         }
     }
