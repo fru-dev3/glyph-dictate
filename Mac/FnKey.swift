@@ -51,8 +51,8 @@ enum TalkKey: String, CaseIterable {
     case fn, rightOption, rightCommand, rightControl
 
     static var current: TalkKey {
-        get { UserDefaults.standard.string(forKey: "talkKey").flatMap(TalkKey.init) ?? .fn }
-        set { UserDefaults.standard.set(newValue.rawValue, forKey: "talkKey") }
+        get { jotDefaults.string(forKey: "talkKey").flatMap(TalkKey.init) ?? .fn }
+        set { jotDefaults.set(newValue.rawValue, forKey: "talkKey") }
     }
 
     var name: String {

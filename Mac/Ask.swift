@@ -17,7 +17,7 @@ final class Ask {
         answer = ""
         busy = true
         defer { busy = false }
-        MainWindow.show(.home)
+        MainWindow.show()
         sources = Self.find(question, in: HistoryView.load())
         guard !sources.isEmpty else { answer = "Nothing you've dictated matches that."; return }
         do {
@@ -56,19 +56,5 @@ final class Ask {
         }
         scored.sort { $0.score != $1.score ? $0.score > $1.score : $0.entry.at > $1.entry.at }
         return scored.prefix(limit).map(\.entry)
-    }
-}
-
-/// Opens the Jot window on a section, from anywhere (a dictation, the menu). If the window was
-/// closed, opening the app again brings it back, the same as a click on the Dock icon.
-enum MainWindow {
-    @MainActor static func show(_ section: MainView.Section) {
-        UserDefaults.standard.set(section.rawValue, forKey: "section")
-        if let window = NSApp.windows.first(where: { $0.identifier?.rawValue.hasPrefix("main") == true }) {
-            window.makeKeyAndOrderFront(nil)
-        } else {
-            NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: .init())
-        }
-        NSApp.activate()
     }
 }

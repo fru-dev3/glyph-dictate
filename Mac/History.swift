@@ -4,8 +4,9 @@ import SwiftUI
 /// Reads every Mac's file, so the history is the same on each. Filter by app, project or Starred;
 /// Insert Again types one into the app you were in before Jot.
 struct HistoryView: View {
+    /// The window's search field.
+    let search: String
     @State private var entries: [Entry] = []
-    @State private var search = ""
     @State private var copied: Entry.ID?
     @State private var stars: Set<String> = []
     /// "" for all, "starred", "app:<name>" or "project:<name>".
@@ -45,7 +46,36 @@ struct HistoryView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            if let error = Dictation.shared.error {
+            // The header with its two controls; the window's toolbar corner keeps only Record.
+            HStack(alignment: .center, spacing: 10) {
+                PaneHeader(title: "Dictations", symbol: "text.cursor", line: "What you said into other apps, newest first")
+            Picker(selection: $filter) {
+                    Text("All").tag("")
+                    Label("Starred", systemImage: "star").tag("starred")
+                    if !apps.isEmpty {
+                        Section("Apps") { ForEach(apps, id: \.self) { Text($0).tag("app:" + $0) } }
+                    }
+                    if !projects.isEmpty {
+                        Section("Projects") { ForEach(projects, id: \.self) { Text($0).tag("project:" + $0) } }
+                    }
+                } label: {
+                    Label("Filter", systemImage: filter.isEmpty ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .fixedSize()
+                .help("Show one app, one project, or the starred ones")
+                Button {
+                    Task { await ask.run(search) }
+                } label: {
+                    Label("Ask", systemImage: "sparkle.magnifyingglass")
+                }
+                .help("Ask your dictations what's in the search box")
+                .disabled(search.trimmingCharacters(in: .whitespaces).isEmpty || ask.busy)
+        
+                    .padding(.trailing, 20)
+            }
+            if let error = Engine.shared.problem {
                 Label(error, systemImage: "exclamationmark.circle").font(.callout).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal).padding(.top, 10)
             }
@@ -60,30 +90,6 @@ struct HistoryView: View {
                 }
             }
             .overlay { if shown.isEmpty { Text(entries.isEmpty ? "No dictations yet" : "Nothing matches").foregroundStyle(.secondary) } }
-        }
-        .searchable(text: $search)
-        .toolbar {
-            Picker(selection: $filter) {
-                Text("All").tag("")
-                Label("Starred", systemImage: "star").tag("starred")
-                if !apps.isEmpty {
-                    Section("Apps") { ForEach(apps, id: \.self) { Text($0).tag("app:" + $0) } }
-                }
-                if !projects.isEmpty {
-                    Section("Projects") { ForEach(projects, id: \.self) { Text($0).tag("project:" + $0) } }
-                }
-            } label: {
-                Label("Filter", systemImage: filter.isEmpty ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
-            }
-            .pickerStyle(.menu)
-            .help("Show one app, one project, or the starred ones")
-            Button {
-                Task { await ask.run(search) }
-            } label: {
-                Label("Ask", systemImage: "sparkle.magnifyingglass")
-            }
-            .help("Ask your dictations what's in the search box")
-            .disabled(search.trimmingCharacters(in: .whitespaces).isEmpty || ask.busy)
         }
         .onChange(of: ask.busy) { if !ask.busy { entries = Self.load() } }
         .task { entries = Self.load(); stars = Stars.load() }
@@ -103,8 +109,11 @@ struct HistoryView: View {
         }
     }
 
+    @State private var hovered: Entry.ID?
+
     private func row(_ entry: Entry) -> some View {
-        HStack(alignment: .top, spacing: 12) {
+        let showActions = hovered == entry.id || copied == entry.id || stars.contains(entry.id)
+        return HStack(alignment: .top, spacing: 12) {
             Text(entry.at.formatted(date: .omitted, time: .shortened))
                 .monospacedDigit().foregroundStyle(.secondary).frame(width: 64, alignment: .leading)
             VStack(alignment: .leading, spacing: 4) {
@@ -115,9 +124,11 @@ struct HistoryView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
-            Button { Task { await LastApp.insert(entry.text) } } label: { Image(systemName: "text.insert") }
+            // Actions show on hover (a starred one keeps its star), so the list stays quiet.
+            Group {
+            Button { Engine.shared.send(.init(.insert, text: entry.text)) } label: { Image(systemName: "text.insert") }
                 .buttonStyle(.borderless)
-                .help(LastApp.app?.localizedName.map { "Insert again in \($0)" } ?? "Insert again")
+                .help("Insert again in the app you were in")
                 .accessibilityLabel("Insert Again")
             Button { copy(entry.text, entry) } label: {
                 Image(systemName: copied == entry.id ? "checkmark" : "doc.on.doc")
@@ -134,13 +145,17 @@ struct HistoryView: View {
             }
             .buttonStyle(.borderless)
             .accessibilityLabel(stars.contains(entry.id) ? "Unstar" : "Star")
+            }
+            .opacity(showActions ? 1 : 0)
         }
         .padding(.vertical, 2)
+        .contentShape(Rectangle())
+        .onHover { inside in withAnimation(.easeOut(duration: 0.12)) { hovered = inside ? entry.id : (hovered == entry.id ? nil : hovered) } }
         .contextMenu {
-            Button("Insert Again") { Task { await LastApp.insert(entry.text) } }
+            Button("Insert Again") { Engine.shared.send(.init(.insert, text: entry.text)) }
             if let heard = entry.heard, heard != entry.text {
                 Button("Copy as Heard") { copy(heard, entry) }
-                Button("Insert as Heard") { Task { await LastApp.insert(heard) } }
+                Button("Insert as Heard") { Engine.shared.send(.init(.insert, text: heard)) }
             }
         }
     }
@@ -189,40 +204,6 @@ enum Stars {
         guard var line = try? JSONEncoder().encode(Mark(at: .now, id: id, on: on)) else { return }
         line.append(0x0A)
         DictationLog.add(line, to: folder.appending(path: "\(DictationLog.host).jsonl"))
-    }
-}
-
-/// The app you were in before Jot's window: where Insert Again types.
-@MainActor
-enum LastApp {
-    private(set) static var app: NSRunningApplication?
-
-    static func track() {
-        app = NSWorkspace.shared.frontmostApplication.flatMap { $0 == .current ? nil : $0 }
-        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification,
-                                                          object: nil, queue: .main) { note in
-            guard let active = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
-                  active != .current else { return }
-            MainActor.assumeIsolated { app = active }
-        }
-    }
-
-    /// Types it into that app's focused field the way a dictation does (checked it landed, else
-    /// it stays on the clipboard and Jot says so).
-    static func insert(_ text: String) async {
-        guard let app, !app.isTerminated else {
-            NSPasteboard.general.clearContents()
-            NSPasteboard.general.setString(text, forType: .string)
-            Dictation.shared.error = "No app to insert into. It's on the clipboard."
-            return
-        }
-        app.activate()
-        for _ in 0..<50 where NSWorkspace.shared.frontmostApplication != app { // up to a second
-            try? await Task.sleep(for: .milliseconds(20))
-        }
-        if await Paste.insert(text, into: app) == nil, Dictation.shared.error == nil {
-            Dictation.shared.error = "No text field in \(app.localizedName ?? "that app"). It's on the clipboard."
-        }
     }
 }
 

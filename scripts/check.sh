@@ -3,5 +3,5 @@
 # breaks, the AI guard, styles, spoken symbols, "press enter", forms, learning).
 set -euo pipefail
 cd "${0:A:h}/.."
-cat Mac/FnKey.swift Mac/FnKeyCheck.swift | swift -
+cat Mac/Link.swift Mac/FnKey.swift Mac/FnKeyCheck.swift | swift -
 cat Mac/Rules.swift Mac/RulesCheck.swift | swift -

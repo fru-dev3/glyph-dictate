@@ -3,17 +3,18 @@ import AVFoundation
 import Carbon.HIToolbox
 import SwiftUI
 
-/// Jot on the Mac: a window (Home, Dictionary, Snippets, Styles, Settings), a Dock icon and a menu bar icon. Hold the talk key
-/// (Fn) to dictate into any app; double-press it to talk hands-free until the next press.
-/// On-device, no cloud.
+/// The dictation engine of Glyph Jot: hold the talk key (Fn) to dictate into any app,
+/// double-press it to talk hands-free, Fn+Shift for a note. A helper app inside Glyph Jot's
+/// bundle with no Dock icon and no window: the main app starts it, shows its settings and
+/// history, and restarts it if it ever stops (Link.swift). On-device, no cloud.
 @main
-struct JotMacApp: App {
-    @NSApplicationDelegateAdaptor private var delegate: AppDelegate
-
-    var body: some Scene {
-        Window("Glyph Dictate", id: "main") { MainView() }
-            .defaultSize(width: 900, height: 640)
-        MenuBarExtra("Glyph Dictate", systemImage: "mic") { JotMenu() }
+enum EngineMain {
+    @MainActor static func main() {
+        let app = NSApplication.shared
+        let delegate = AppDelegate()
+        app.delegate = delegate
+        app.setActivationPolicy(.accessory)
+        withExtendedLifetime(delegate) { app.run() }
     }
 }
 
@@ -22,7 +23,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var key: FnKey?
     private var retry: Timer?
 
+    /// Asked to quit mid-dictation (the app is taking over): finish it first, then go.
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard Dictation.shared.state == .listening || Dictation.shared.state == .finishing else { return .terminateNow }
+        Task {
+            for _ in 0..<300 where Dictation.shared.state == .listening || Dictation.shared.state == .finishing {
+                try? await Task.sleep(for: .milliseconds(200))
+            }
+            NSApp.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
+        EngineLink.start()
+        if EngineLink.quiet { log.notice("engine: quiet, for a test"); return }
         AVCaptureDevice.requestAccess(for: .audio) { granted in
             Task { @MainActor in if granted { Dictation.shared.keepMicReady(Prefs.shared.keepMicReady) } }
         }
@@ -88,7 +103,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 /// Pressing Fn twice opens the emoji picker unless the Globe key is set to Do Nothing
-/// (System Settings > Keyboard > "Press 🌐 key to"). Jot owns Fn, so it sets that.
+/// (System Settings > Keyboard > "Press Globe key to"). Jot owns Fn, so it sets that.
 enum FnSetting {
     static func doNothing() {
         let domain = "com.apple.HIToolbox" as CFString
@@ -124,56 +139,3 @@ enum HotKeys {
     }
 }
 
-/// "0.7 (12)", from the app's Info.plist.
-enum Version {
-    static var text: String {
-        let info = Bundle.main.infoDictionary
-        return "\(info?["CFBundleShortVersionString"] as? String ?? "?") (\(info?["CFBundleVersion"] as? String ?? "?"))"
-    }
-}
-
-private struct JotMenu: View {
-    private let dictation = Dictation.shared
-    @Environment(\.openWindow) private var openWindow
-    @AppStorage("section") private var section: MainView.Section = .home
-
-    var body: some View {
-        Text("Glyph Dictate \(Version.text). Hold \(Prefs.shared.talkKey.name) to talk, double-press for hands-free")
-        if let error = dictation.error { Text(error) }
-        if !Permissions.allGranted {
-            Button("Finish Setup…") { open(.settings) }
-        }
-
-        Divider()
-        Button("Paste Last Dictation") { dictation.pasteLast() }
-            .keyboardShortcut("v", modifiers: [.control, .command])
-            .disabled(dictation.recent.isEmpty)
-        Button("Undo Last Dictation") { dictation.undoLast() }
-            .keyboardShortcut("z", modifiers: [.control, .command])
-            .disabled(dictation.recent.isEmpty)
-        Button("Use What I Said") { dictation.useWhatISaid() }
-            .keyboardShortcut("r", modifiers: [.control, .command])
-            .disabled(dictation.recent.isEmpty)
-        if !dictation.recent.isEmpty {
-            Menu("Recent") {
-                ForEach(dictation.recent, id: \.self) { text in
-                    Button(String(text.prefix(60))) {
-                        NSPasteboard.general.clearContents()
-                        NSPasteboard.general.setString(text, forType: .string)
-                    }
-                }
-            }
-        }
-        Button("Open Glyph Dictate") { open(.home) }
-        Button("History…") { open(.home) }
-        Button("Settings…") { open(.settings) }.keyboardShortcut(",")
-        Divider()
-        Button("Quit Glyph Dictate") { NSApp.terminate(nil) }.keyboardShortcut("q")
-    }
-
-    private func open(_ to: MainView.Section) {
-        section = to
-        openWindow(id: "main")
-        NSApp.activate()
-    }
-}

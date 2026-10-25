@@ -4,8 +4,6 @@ import Carbon.HIToolbox
 import os
 import Speech
 
-let log = Logger(subsystem: "dev.fru.jot.mac", category: "dictation")
-
 /// One dictation: the talk key down starts the mic, words stream through Apple's on-device
 /// model while you talk, the key up finishes. Then, by mode: type it where you are, save it
 /// to the vault as a thought, or run it as a command on the selected text. Nothing leaves the
@@ -35,7 +33,7 @@ final class Dictation {
     private(set) var reconnecting = false
     /// The dictation didn't work; the pill says so in place of the tick.
     private(set) var problem: String?
-    var error: String?
+    var error: String? { didSet { EngineLink.status() } }
 
     private let mic = Mic()
     private var feed: AsyncStream<AVAudioPCMBuffer>.Continuation?
@@ -87,6 +85,7 @@ final class Dictation {
         draftAt = .now
         copiedOnly = false
         state = .listening
+        EngineLink.jotStarted(mode)
         Prefs.shared.play("Tink")
         Pill.shared.show(over: target)
         project = nil
@@ -119,7 +118,7 @@ final class Dictation {
             self.feed = nil
             let speech = failure is SpeechDown
             rescue(failure.localizedDescription)
-            problem = speech ? "Speech stopped. Restarting Glyph Dictate"
+            problem = speech ? "Speech stopped. Restarting dictation"
                 : failure as? JotError == .notReady ? "Speech model downloading. Try soon"
                 : "The mic didn't start"
             pipeline.cancel()
@@ -213,7 +212,8 @@ final class Dictation {
                     }
                 case .thought:
                     text = await Polish.text(heard, app: nil, live: live)
-                    try Thoughts.save(text)
+                    let note = try Thoughts.save(text)
+                    EngineLink.send(.init(.thought, text: note, at: Date.now.timeIntervalSince1970))
                 case .command:
                     let saved = Clipboard.save()
                     let selection = await Paste.copySelection()
@@ -221,7 +221,7 @@ final class Dictation {
                     await Paste.insert(text, into: target, restoring: saved)
                 case .ask:
                     text = heard
-                    Task { await Ask.shared.run(heard) }
+                    EngineLink.send(.init(.ask, text: heard)) // the app answers it, in its window
                 }
                 log.info("finish: done")
                 Draft.clear()
@@ -272,6 +272,7 @@ final class Dictation {
         locked = false
         levels = levels.map { _ in 0 }
         Pill.shared.hide()
+        EngineLink.jotEnded()
     }
 
     private func fail(_ message: String) {
@@ -283,6 +284,7 @@ final class Dictation {
         recent.insert(text, at: 0)
         recent = Array(recent.prefix(5))
         lastHeard = heard
+        EngineLink.status()
     }
 
     private func push(_ db: Float) {
@@ -485,7 +487,7 @@ enum Breakage {
 
 /// Speech stopped answering, three times over. Relaunching Jot has always brought it back.
 struct SpeechDown: LocalizedError {
-    var errorDescription: String? { "Speech stopped answering, so Glyph Dictate is restarting. Talk again in a moment." }
+    var errorDescription: String? { "Speech stopped answering, so dictation is restarting. Talk again in a moment." }
 }
 
 /// The dictation's sound, kept in memory while you talk and dropped when it's done (never
@@ -538,10 +540,12 @@ final class Relay: @unchecked Sendable {
 enum Relaunch {
     /// At most once in 10 minutes, so a speech service that stays down can't put Jot in a loop.
     @MainActor static func now() {
-        let last = UserDefaults.standard.double(forKey: "relaunchedAt")
+        let last = jotDefaults.double(forKey: "relaunchedAt")
         guard Date.now.timeIntervalSince1970 - last > 600 else { return }
-        UserDefaults.standard.set(Date.now.timeIntervalSince1970, forKey: "relaunchedAt")
+        jotDefaults.set(Date.now.timeIntervalSince1970, forKey: "relaunchedAt")
         log.error("relaunch: speech stopped answering")
+        // Started by Glyph Jot: quit, and the app starts a fresh engine at once.
+        if EngineLink.linked { NSApp.terminate(nil); return }
         let task = Process()
         task.executableURL = URL(filePath: "/bin/sh")
         task.arguments = ["-c", "sleep 1; /usr/bin/open \"$0\"", Bundle.main.bundlePath]
@@ -814,117 +818,6 @@ enum Paste {
             let e = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(key), keyDown: down)
             e?.flags = flags
             e?.post(tap: .cghidEventTap)
-        }
-    }
-}
-
-/// A thought (talk key + Shift) is a Markdown note with the same frontmatter as Jot on the
-/// iPhone's memos. It goes in the notes folder chosen in Settings (any folder: an Obsidian
-/// vault works), or `<vault>/data/domains/notes/source/jot` when that folder is a Prevail
-/// vault, or `~/Documents/Jot/Thoughts` when none is chosen.
-enum Thoughts {
-    static var folder: URL {
-        DictationLog.vault?.appending(path: "data/domains/notes/source/jot")
-            ?? DictationLog.chosen
-            ?? URL.documentsDirectory.appending(path: "Jot/Thoughts")
-    }
-
-    static func save(_ text: String) throws {
-        let now = Date.now
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd HH-mm-ss" // the phone's memo names
-        let stem = f.string(from: now)
-        let date = stem.prefix(10) + "T" + stem.dropFirst(11).replacingOccurrences(of: "-", with: ":")
-        let device = Host.current().localizedName ?? "Mac"
-        let md = "---\ndate: \(date)\ntags: []\nkind: voice\ndevice: \(device)\nsource: jot\n---\n\n\(text)\n"
-        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-        try md.write(to: folder.appending(path: stem + ".md"), atomically: true, encoding: .utf8)
-    }
-}
-
-/// The words of a long dictation so far, saved every 10 seconds while you talk:
-/// `<vault>/data/apps/jot/drafts/unfinished.<host>.txt`. Cleared when the dictation lands.
-enum Draft {
-    static var url: URL {
-        DictationLog.folder.deletingLastPathComponent().appending(path: "drafts/unfinished.\(DictationLog.host).txt")
-    }
-
-    static func save(_ words: String) {
-        guard !words.isEmpty else { return }
-        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try? words.write(to: url, atomically: true, encoding: .utf8)
-    }
-
-    static func clear() { try? FileManager.default.removeItem(at: url) }
-
-    /// The draft left by a dictation that never finished, removed as it's read.
-    static func take() -> String? {
-        defer { clear() }
-        return (try? String(contentsOf: url, encoding: .utf8)).flatMap { $0.isEmpty ? nil : $0 }
-    }
-}
-
-/// Every dictation, one JSON line each: `<YYYY-MM>.<host>.jsonl`, one file per Mac so syncing
-/// the folder between Macs never conflicts. Beside it are the Dictionary and the draft. They live
-/// in `data/apps/jot/` in a Prevail vault, in a hidden `.jot/` in any other notes folder (so they
-/// sync with it but stay out of your notes), and in Application Support when none is chosen.
-enum DictationLog {
-    /// The notes folder: the one chosen in Settings, else this Mac's own (`LocalVault`).
-    static var chosen: URL? {
-        guard let path = UserDefaults.standard.string(forKey: "vaultPath") ?? LocalVault.path,
-              FileManager.default.fileExists(atPath: path) else { return nil }
-        return URL(filePath: path)
-    }
-
-    /// The notes folder when it is a Prevail vault (it has `data/domains`).
-    static var vault: URL? {
-        chosen.flatMap { FileManager.default.fileExists(atPath: $0.appending(path: "data/domains").path) ? $0 : nil }
-    }
-
-    static var folder: URL {
-        vault?.appending(path: "data/apps/jot/dictations")
-            ?? chosen?.appending(path: ".jot/dictations")
-            ?? URL.applicationSupportDirectory.appending(path: "Jot/dictations")
-    }
-
-    /// Same host naming as Prevail's prompt streams: "Mac-Name.local" -> "mac-name-local".
-    static var host: String {
-        ProcessInfo.processInfo.hostName.lowercased().replacingOccurrences(of: ".", with: "-")
-    }
-
-    /// `heard` is the transcript before polishing (or the spoken command), so a bad cleanup
-    /// can always be undone from the log.
-    /// `project` (the repo or folder of a terminal or editor) is left out when unknown; older lines have none.
-    static func append(text: String, heard: String, mode: String, app: NSRunningApplication?, project: String?,
-                       seconds: Double, finishMs: Int) {
-        let now = Date.now
-        var entry: [String: Any] = [
-            "at": now.ISO8601Format(),
-            "text": text,
-            "heard": heard,
-            "mode": mode,
-            "app": app?.localizedName ?? "",
-            "bundle": app?.bundleIdentifier ?? "",
-            "seconds": (seconds * 10).rounded() / 10,
-            "finish_ms": finishMs,
-        ]
-        if let project { entry["project"] = project }
-        guard var line = try? JSONSerialization.data(withJSONObject: entry, options: [.sortedKeys]) else { return }
-        line.append(0x0A)
-        let month = now.formatted(.iso8601.year().month())
-        add(line, to: folder.appending(path: "\(month).\(host).jsonl"))
-    }
-
-    /// Appends a line to a file, making the file and its folder if need be.
-    static func add(_ line: Data, to file: URL) {
-        try? FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
-        if let handle = try? FileHandle(forWritingTo: file) {
-            defer { try? handle.close() }
-            _ = try? handle.seekToEnd()
-            try? handle.write(contentsOf: line)
-        } else {
-            try? line.write(to: file)
         }
     }
 }

@@ -155,12 +155,13 @@ enum AI {
     <transcript>I mean, can you remove the old branch?</transcript> -> I mean, can you remove the old branch?
     """
 
+    #if !JOT_ENGINE // the app answers questions (Ask.swift); the engine only hears them
     /// Answers a question from your own past dictations, and only from them.
     static func ask(_ question: String, from entries: [HistoryView.Entry]) async throws -> String {
         guard available else { throw JotError("Asking needs Apple Intelligence (System Settings > Apple Intelligence & Siri).") }
         var budget = 7000 // characters; the model's window is 4,096 tokens
         let notes = entries.compactMap { entry -> String? in
-            let line = "[\(entry.at.formatted(date: .abbreviated, time: .shortened)), \(entry.app.isEmpty ? "Glyph Dictate" : entry.app)] \(entry.text.prefix(700))"
+            let line = "[\(entry.at.formatted(date: .abbreviated, time: .shortened)), \(entry.app.isEmpty ? "Glyph Jot" : entry.app)] \(entry.text.prefix(700))"
             guard budget > 0 else { return nil }
             budget -= line.count
             return line
@@ -173,6 +174,7 @@ enum AI {
         return try await session.respond(to: "Dictations:\n\(notes)\n\nQuestion: \(question)",
                                          options: GenerationOptions(temperature: 0)).content
     }
+    #endif
 
     @Generable struct FormPlan {
         @Guide(description: "One entry per field the speaker gave a value for, and only those") var fields: [FormValue]
@@ -238,20 +240,50 @@ enum AI {
 @Observable @MainActor
 final class Prefs {
     static let shared = Prefs()
-    private let defaults = UserDefaults.standard
+    private let defaults = jotDefaults
 
-    var aiCleanup: Bool { didSet { defaults.set(aiCleanup, forKey: "aiCleanup") } }
-    var sounds: Bool { didSet { defaults.set(sounds, forKey: "sounds") } }
-    var talkKey: TalkKey { didSet { TalkKey.current = talkKey; if talkKey == .fn { FnSetting.doNothing() } } }
+    var aiCleanup: Bool { didSet { defaults.set(aiCleanup, forKey: "aiCleanup"); changed() } }
+    var sounds: Bool { didSet { defaults.set(sounds, forKey: "sounds"); changed() } }
+    var talkKey: TalkKey {
+        didSet {
+            TalkKey.current = talkKey
+            changed()
+            #if JOT_ENGINE
+            if talkKey == .fn { FnSetting.doNothing() }
+            #endif
+        }
+    }
     /// The mic runs between dictations, so the key starts at once and no first word is lost.
     var keepMicReady: Bool {
-        didSet { defaults.set(keepMicReady, forKey: "keepMicReady"); Dictation.shared.keepMicReady(keepMicReady) }
+        didSet {
+            defaults.set(keepMicReady, forKey: "keepMicReady")
+            changed()
+            #if JOT_ENGINE
+            Dictation.shared.keepMicReady(keepMicReady)
+            #endif
+        }
     }
-    private var styles: [String: String] { didSet { defaults.set(styles, forKey: "styles") } }
+    private var styles: [String: String] { didSet { defaults.set(styles, forKey: "styles"); changed() } }
+
+    /// In the app, a change is passed to the engine (the other process) so it reads it again.
+    private func changed() {
+        #if !JOT_ENGINE
+        Engine.shared.send(.init(.prefs))
+        #endif
+    }
 
     private init() {
         defaults.register(defaults: ["aiCleanup": true, "sounds": true, "keepMicReady": true])
         keepMicReady = defaults.bool(forKey: "keepMicReady")
+        aiCleanup = defaults.bool(forKey: "aiCleanup")
+        sounds = defaults.bool(forKey: "sounds")
+        talkKey = TalkKey.current
+        styles = defaults.dictionary(forKey: "styles") as? [String: String] ?? [:]
+    }
+
+    /// Reads them again: the settings window (the other process) changed them.
+    func reload() {
+        if keepMicReady != defaults.bool(forKey: "keepMicReady") { keepMicReady = defaults.bool(forKey: "keepMicReady") }
         aiCleanup = defaults.bool(forKey: "aiCleanup")
         sounds = defaults.bool(forKey: "sounds")
         talkKey = TalkKey.current
@@ -323,6 +355,9 @@ final class Words {
         guard let data = try? encoder.encode(File(dictionary: dictionary, snippets: snippets)) else { return }
         try? FileManager.default.createDirectory(at: Self.url.deletingLastPathComponent(), withIntermediateDirectories: true)
         try? data.write(to: Self.url, options: .atomic)
+        #if !JOT_ENGINE
+        Engine.shared.send(.init(.words))
+        #endif
     }
 
     /// Your words join Jot's built-in names: the model is told to expect them, and what it

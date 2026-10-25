@@ -2,8 +2,9 @@ import AVFoundation
 import ServiceManagement
 import SwiftUI
 
-/// What macOS has to allow before Jot can hear the key, the mic, and paste.
-enum Permissions {
+/// What macOS has to allow before Glyph Jot can hear the key, the mic, and paste. The engine
+/// asks through the app (its parent), so the app's own answers are the ones that count.
+enum JotPermissions {
     static var keys: Bool { CGPreflightListenEventAccess() }
     static var paste: Bool { CGPreflightPostEventAccess() }
     static var mic: Bool { AVCaptureDevice.authorizationStatus(for: .audio) == .authorized }
@@ -14,47 +15,7 @@ enum Permissions {
     }
 }
 
-/// The Jot window: a sidebar of sections, Home first.
-struct MainView: View {
-    enum Section: String, CaseIterable {
-        case home = "Home", dictionary = "Dictionary", snippets = "Snippets", styles = "Styles", settings = "Settings"
-        var icon: String {
-            switch self {
-            case .home: "house"
-            case .dictionary: "character.book.closed"
-            case .snippets: "text.badge.plus"
-            case .styles: "textformat"
-            case .settings: "gearshape"
-            }
-        }
-    }
-
-    @AppStorage("section") private var section: Section = .home
-
-    var body: some View {
-        NavigationSplitView {
-            List(Section.allCases, id: \.self, selection: Binding($section)) { item in
-                Label(item.rawValue, systemImage: item.icon)
-            }
-            .safeAreaInset(edge: .bottom) {
-                Text("Glyph Dictate \(Version.text)").font(.caption).foregroundStyle(.tertiary).padding(.bottom, 10)
-            }
-            .navigationSplitViewColumnWidth(180)
-        } detail: {
-            switch section {
-            case .home: HistoryView()
-            case .dictionary: DictionaryTab()
-            case .snippets: SnippetsTab()
-            case .styles: StylesTab()
-            case .settings: GeneralTab()
-            }
-        }
-        .navigationTitle(section.rawValue)
-        .frame(minWidth: 760, minHeight: 540)
-    }
-}
-
-private struct GeneralTab: View {
+struct GeneralTab: View {
     @Bindable private var prefs = Prefs.shared
     @State private var atLogin = SMAppService.mainApp.status == .enabled
     // Re-read when the window comes back, after a trip to System Settings.
@@ -80,7 +41,7 @@ private struct GeneralTab: View {
                 Shortcut(keys: "Control-Command-R", does: "Swap it for exactly what you said")
                 Shortcut(keys: "Esc", does: "Cancel")
                 if prefs.talkKey == .fn {
-                    Text("Glyph Dictate sets System Settings > Keyboard > \"Press 🌐 key to\" to Do Nothing, so a double-press doesn't open emoji. Give Fn to Glyph Dictate alone, not to another dictation app too.")
+                    Text("Glyph Jot sets System Settings > Keyboard > \"Press Globe key to\" to Do Nothing, so a double-press doesn't open the emoji picker. Give Fn to Glyph Jot alone, not to another dictation app too.")
                         .font(.callout).foregroundStyle(.secondary)
                 }
             }
@@ -101,9 +62,9 @@ private struct GeneralTab: View {
                     }
             }
             Section("Permissions") {
-                Grant(name: "Input Monitoring", why: "to hear the talk key", ok: Permissions.keys, pane: "Privacy_ListenEvent")
-                Grant(name: "Accessibility", why: "to paste where you are", ok: Permissions.paste, pane: "Privacy_Accessibility")
-                Grant(name: "Microphone", why: "to hear you", ok: Permissions.mic, pane: "Privacy_Microphone")
+                Grant(name: "Input Monitoring", why: "to hear the talk key", ok: JotPermissions.keys, pane: "Privacy_ListenEvent")
+                Grant(name: "Accessibility", why: "to paste where you are", ok: JotPermissions.paste, pane: "Privacy_Accessibility")
+                Grant(name: "Microphone", why: "to hear you", ok: JotPermissions.mic, pane: "Privacy_Microphone")
             }
             .id(refresh)
             Section("Where your words go") {
@@ -114,7 +75,7 @@ private struct GeneralTab: View {
                     }
                 } label: {
                     Text("Notes folder")
-                    Text("Optional. Any folder, an Obsidian vault too: thoughts are saved in it as Markdown notes, and Glyph Dictate keeps its own files in a hidden .jot folder there, so they sync with it.")
+                    Text("Optional. Any folder, an Obsidian vault too: thoughts are saved in it as Markdown notes, and Glyph Jot keeps its own files in a hidden .jot folder there, so they sync with it.")
                 }
                 LabeledContent("Every dictation", value: DictationLog.folder.path(percentEncoded: false))
                 LabeledContent("Thoughts", value: Thoughts.folder.path(percentEncoded: false))
@@ -137,7 +98,7 @@ private struct GeneralTab: View {
         guard panel.runModal() == .OK, let url = panel.url else { return }
         // Your Dictionary comes along to the new folder.
         let words = Words.url
-        UserDefaults.standard.set(url.path(percentEncoded: false), forKey: "vaultPath")
+        jotDefaults.set(url.path(percentEncoded: false), forKey: "vaultPath")
         if !FileManager.default.fileExists(atPath: Words.url.path) {
             try? FileManager.default.createDirectory(at: Words.url.deletingLastPathComponent(), withIntermediateDirectories: true)
             try? FileManager.default.copyItem(at: words, to: Words.url)
@@ -164,7 +125,7 @@ private struct Grant: View {
             if ok {
                 Image(systemName: "checkmark.circle.fill").foregroundStyle(.green).accessibilityLabel("Allowed")
             } else {
-                Button("Allow…") { Permissions.open(pane) }
+                Button("Allow…") { JotPermissions.open(pane) }
             }
         } label: {
             Text(name)
@@ -173,7 +134,7 @@ private struct Grant: View {
     }
 }
 
-private struct StylesTab: View {
+struct StylesTab: View {
     private let prefs = Prefs.shared
 
     var body: some View {
@@ -195,14 +156,14 @@ private struct StylesTab: View {
     }
 }
 
-private struct DictionaryTab: View {
+struct DictionaryTab: View {
     @Bindable private var words = Words.shared
     @State private var write = ""
     @State private var heard = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Names and words Glyph Dictate should spell your way. Add what it hears instead, if it keeps getting one wrong. When you fix a word it typed, it learns it here by itself.")
+            Text("Names and words Glyph Jot should spell your way. Add what it hears instead, if it keeps getting one wrong. When you fix a word it typed, it learns it here by itself.")
                 .foregroundStyle(.secondary)
             HStack {
                 TextField("Spelled", text: $write, prompt: Text("Harbr"))
@@ -237,7 +198,7 @@ private struct DictionaryTab: View {
     }
 }
 
-private struct SnippetsTab: View {
+struct SnippetsTab: View {
     @Bindable private var words = Words.shared
     @State private var say = ""
     @State private var write = ""

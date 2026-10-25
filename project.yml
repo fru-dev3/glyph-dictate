@@ -1,4 +1,5 @@
-# Glyph Dictate (formerly Jot) for Mac. The target, Jot.app and bundle id keep the Jot name so installs keep their permissions. Generate the Xcode project with `xcodegen generate` (scripts/install.sh does).
+# Glyph Jot for Mac (formerly Glyph Dictate and Glyph Record). Jot.app and its bundle id keep the
+# Jot name so installs keep their permissions. Generate the Xcode project with `xcodegen generate`.
 name: Jot
 options:
   bundleIdPrefix: dev.fru
@@ -7,33 +8,112 @@ options:
 settings:
   base:
     CODE_SIGN_STYLE: Automatic
-    SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.7.8"
-    CURRENT_PROJECT_VERSION: "15"
+packages:
+  GlyphCore:
+    path: Packages/GlyphCore
 targets:
-  Jot:
+  JotMac: # Glyph Jot on the Mac: one app. Library (notes, dictations, recordings, People/Accounts/tags), Record, settings, menu bar.
+    # The dictation engine is its own process inside the bundle (JotEngine), so meeting code can never stop typing.
+    # Outside the App Store (it pastes into other apps). PRODUCT_NAME stays Jot and the id dev.fru.jot.mac, so
+    # Jot.app, scripts, settings and every permission carry over.
     type: application
     platform: macOS
     sources:
-      - path: Mac
-        excludes: [FnKeyCheck.swift, RulesCheck.swift]
+      - path: Record
+        excludes: [Assets.xcassets, Info.plist, GlyphRecord.entitlements]
+      - Mac/Link.swift
+      - Mac/Storage.swift
+      - Mac/LocalVault.swift
+      - Mac/Polish.swift
+      - Mac/Rules.swift
+      - Mac/FnKey.swift
+      - Mac/Settings.swift
+      - Mac/History.swift
+      - Mac/Ask.swift
+      - Mac/Transcription.swift
+      - path: Mac/Assets.xcassets
+    dependencies:
+      - package: GlyphCore
+        product: GlyphCore
+      - target: JotEngine
+        embed: true
+        codeSign: true
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
     entitlements:
       path: Mac/JotMac.entitlements
       properties:
         com.apple.security.device.audio-input: true
+    scheme:
+      testTargets: [GlyphJotTests]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: dev.fru.jot.mac
         PRODUCT_NAME: Jot
-        PRODUCT_MODULE_NAME: JotMac
+        PRODUCT_MODULE_NAME: GlyphJot
+        MARKETING_VERSION: "0.7.9" # Glyph Jot's own version (was Glyph Dictate 0.7.8; patch bumps only); see the README's Versions
+        CURRENT_PROJECT_VERSION: "16"
+        SWIFT_VERSION: "5.0" # the Jot sources predate Swift 6's strict checks; the engine builds in 5 too
+        SWIFT_UPCOMING_FEATURE_INFER_ISOLATED_CONFORMANCES: YES
+        ENABLE_APP_SANDBOX: NO
         ENABLE_HARDENED_RUNTIME: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
     info:
       path: Mac/Info.plist
       properties:
-        CFBundleDisplayName: Glyph Dictate
-        CFBundleName: Glyph Dictate
+        CFBundleDisplayName: Glyph Jot
+        CFBundleName: Glyph Jot # the app menu and About; PRODUCT_NAME stays Jot so Jot.app, scripts and permissions hold
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.productivity
-        NSMicrophoneUsageDescription: Glyph Dictate listens while you hold the talk key and types what you say. Nothing leaves this Mac.
+        NSMicrophoneUsageDescription: Glyph Jot hears you while you hold the talk key, and your side of a conversation while you record. Nothing leaves this Mac.
+        NSScreenCaptureUsageDescription: Glyph Jot records the Mac's own sound, so the other side of a call is in the recording too. Nothing is shared.
+        NSAudioCaptureUsageDescription: Glyph Jot records the Mac's own sound, so the other side of a call is in the recording too. Nothing is shared.
+  JotEngine: # Glyph Jot's dictation engine: talk key, pill, typing into any app. A helper app in Jot.app/Contents/Helpers,
+    # started and watched by JotMac over a private pipe (Mac/Link.swift). Its permissions are the app's: macOS asks on
+    # behalf of the app that started it.
+    type: application
+    platform: macOS
+    sources:
+      - path: Mac
+        excludes: [FnKeyCheck.swift, RulesCheck.swift, Settings.swift, History.swift, Ask.swift, Assets.xcassets, Info.plist, Engine.plist, JotMac.entitlements]
+    entitlements:
+      path: Mac/JotEngine.entitlements
+      properties:
+        com.apple.security.device.audio-input: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.fru.jot.mac.engine
+        PRODUCT_NAME: Glyph Jot Dictation
+        PRODUCT_MODULE_NAME: JotEngine
+        MARKETING_VERSION: "0.7.9"
+        CURRENT_PROJECT_VERSION: "16"
+        ENABLE_HARDENED_RUNTIME: YES
+        SKIP_INSTALL: YES
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) JOT_ENGINE
+    info:
+      path: Mac/Engine.plist
+      properties:
+        CFBundleDisplayName: Glyph Jot Dictation
+        CFBundleName: Glyph Jot Dictation
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSUIElement: true
+        NSMicrophoneUsageDescription: Glyph Jot listens while you hold the talk key and types what you say. Nothing leaves this Mac.
+  GlyphJotTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: RecordTests
+        excludes: ["*.py", "*.sh"]
+    dependencies:
+      - target: JotMac
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.fru.jot.mac.tests
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Jot.app/Contents/MacOS/Jot
+        BUNDLE_LOADER: $(TEST_HOST)
