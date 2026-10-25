@@ -390,7 +390,7 @@ struct JotMarker: View {
                     model.openNote = note
                 } label: {
                     let title = NoteStore.shared.notes.first { $0.file == note }?.title
-                    (Text("Note at \(Format.clock(jot.start))").underline() + Text(title.map { ": \($0)" } ?? ""))
+                    Text("\(Text("Note at \(Format.clock(jot.start))").underline())\(title.map { ": \($0)" } ?? "")")
                         .lineLimit(1)
                 }
                 .buttonStyle(.plain)

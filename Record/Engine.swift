@@ -70,7 +70,8 @@ final class Engine {
         let toEngine = Pipe(), fromEngine = Pipe()
         p.standardInput = toEngine
         p.standardOutput = fromEngine
-        var buffer = LineBuffer()
+        // ponytail: the handler runs on one serial queue, so the buffer needs no lock.
+        nonisolated(unsafe) var buffer = LineBuffer()
         fromEngine.fileHandleForReading.readabilityHandler = { handle in
             let data = handle.availableData
             guard !data.isEmpty else { handle.readabilityHandler = nil; return }

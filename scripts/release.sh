@@ -20,7 +20,8 @@ xcodebuild -project Jot.xcodeproj -scheme JotMac -configuration Release -derived
   CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO build # no get-task-allow: notarization refuses it
 app=build/Build/Products/Release/Jot.app
 codesign --verify --strict --deep "$app"
-codesign -dvv "$app/Contents/Helpers/Glyph Jot Dictation.app" 2>&1 | grep -q "Developer ID Application" || { echo "the engine is not Developer ID signed"; exit 1; }
+engine_sig=$(codesign -dvv "$app/Contents/Helpers/Glyph Jot Dictation.app" 2>&1)
+[[ $engine_sig == *"Developer ID Application"* ]] || { echo "the engine is not Developer ID signed"; exit 1; }
 
 echo "making the disk image"
 rm -rf dist && mkdir -p dist/stage

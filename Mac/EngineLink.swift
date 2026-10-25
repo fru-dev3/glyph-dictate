@@ -94,6 +94,7 @@ enum EngineLink {
         config.activates = false
         config.createsNewApplicationInstance = true // this copy, never another Jot.app on the Mac
         if quiet { config.arguments = ["-quietEngine"]; config.hides = true }
+        let quiet = quiet
         NSWorkspace.shared.openApplication(at: app, configuration: config) { _, error in
             guard let error else { return }
             log.error("link: reopening the app failed (\(error.localizedDescription, privacy: .public)), trying open")
