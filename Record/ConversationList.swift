@@ -35,6 +35,25 @@ struct ConversationList: View {
                                 .draggable(c.id)
                                 .contextMenu { ConversationMenu(id: c.id) }
                         }
+                        // A person's or an account's page also lists the notes that name them.
+                        let mentions = mentionNotes(item)
+                        if !mentions.isEmpty {
+                            Section {
+                                ForEach(mentions) { note in
+                                    Button {
+                                        model.openNote = note.file
+                                        model.sidebar = .notes
+                                    } label: {
+                                        NoteRow(note: note, linked: false).contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            } header: {
+                                Text(mentions.count == 1 ? "1 note" : "\(mentions.count) notes")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                     }
                     .listStyle(.inset)
                     .scrollContentBackground(.hidden)
@@ -47,6 +66,15 @@ struct ConversationList: View {
             }
         }
         .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
+    }
+
+    private func mentionNotes(_ item: SidebarItem) -> [JotNote] {
+        switch item {
+        // A person by full name, alias or first name ("Sam" for Sam Lee).
+        case .person(let n): notesMentioning([n, String(n.split(separator: " ").first ?? "")] + (model.entity(.person, n)?.aliases ?? []))
+        case .account(let n): notesMentioning([n] + (model.entity(.account, n)?.aliases ?? []))
+        default: []
+        }
     }
 
     @ViewBuilder private func emptyState(_ item: SidebarItem) -> some View {

@@ -93,6 +93,9 @@ summarizes and reads the library. Tests: the `JotMac` scheme and `swift test` in
 
 ## Versions
 
+- **0.7.10** (2026-10-25): design pass. A person's or an account's page lists the notes that name
+  them; a note links to the recording it was said in; Dictations keeps its filter and Ask in its
+  header and shows a row's actions on hover; the library opens with the app (not at login).
 - **0.7.9** (2026-10-25): Glyph Dictate and Glyph Record are one app, Glyph Jot. Click Record
   for a meeting, hold Fn to jot even while recording (kept out of the meeting's transcript),
   and find notes, dictations and recordings in one library with People, Accounts and tags.

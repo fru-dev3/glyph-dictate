@@ -214,7 +214,15 @@ struct NoteDetail: View {
                             model.selectedID = id
                             model.tab = .transcript
                         } label: {
-                            MetaChip(symbol: "waveform", text: "\(meta.title) at \(Format.clock(at))")
+                            HStack(spacing: 5) {
+                                Image(systemName: "waveform").font(.system(size: 11, weight: .semibold)).foregroundStyle(.tint)
+                                Text("\(meta.title) at \(Format.clock(at))").font(.system(size: 13, weight: .medium)).lineLimit(1)
+                                Image(systemName: "arrow.up.right").font(.system(size: 9, weight: .bold)).foregroundStyle(.secondary)
+                            }
+                            .padding(.horizontal, 10)
+                            .frame(height: 26)
+                            .background(Color.accentColor.opacity(0.12), in: Capsule())
+                            .contentShape(Capsule())
                         }
                         .buttonStyle(.plain)
                         .help("Open the recording this note was said in")
@@ -266,5 +274,15 @@ struct DictationsPane: View {
             HistoryView(search: model.searchText)
         }
         .background(Color(nsColor: .textBackgroundColor))
+    }
+}
+
+/// Notes that name a person or an account (or one of its aliases), for its page.
+@MainActor
+func notesMentioning(_ names: [String]) -> [JotNote] {
+    let words = names.map { $0.trimmingCharacters(in: .whitespaces) }.filter { $0.count >= 3 }
+    guard !words.isEmpty else { return [] }
+    return NoteStore.shared.notes.filter { note in
+        words.contains { w in note.text.range(of: "\\b\(NSRegularExpression.escapedPattern(for: w))\\b", options: [.regularExpression, .caseInsensitive]) != nil }
     }
 }

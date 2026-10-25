@@ -35,14 +35,14 @@ conv=Work/Acme/$(ls $demo/rec/Work/Acme | grep -v '^_' | grep kickoff | head -1)
 linked=$(python3 -c "import json,glob; print([json.load(open(f))['id'] for f in glob.glob('$demo/rec/**/meta.json', recursive=True) if 'jots' in json.load(open(f))][0])")
 for look in light dark; do
   hook "look:$look"
-  for size in 1280x800 1728x1080 1000x660; do
+  for size in 1280x800 1728x1080 900x600; do
     hook "size:$size"
     hook "side:all"; hook "conv:$conv"; hook "tab:summary" 1.2; shot "$look-$size-recording-summary"
     hook "side:notes" 1.2; shot "$look-$size-notes"
-    [[ $size == 1280x800 ]] || continue
-    hook "side:all"; hook "conv:$linked"; hook "tab:transcript" 1.2; shot "$look-$size-transcript-with-jots"
     hook "side:dictations" 1.5; shot "$look-$size-dictations"
     hook "side:person:Sam Lee" 1.2; shot "$look-$size-person"
+    [[ $size == 1280x800 ]] || continue
+    hook "side:all"; hook "conv:$linked"; hook "tab:transcript" 1.2; shot "$look-$size-transcript-with-jots"
     hook "side:tasks" 1.2; shot "$look-$size-open-tasks"
     # Settings and the recorder panel come to the front: only when nobody is at the Mac.
     idle=$(ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print int($NF/1000000000); exit}')

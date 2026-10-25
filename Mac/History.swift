@@ -89,6 +89,8 @@ struct HistoryView: View {
                     }
                 }
             }
+            .listStyle(.inset)
+            .scrollContentBackground(.hidden)
             .overlay { if shown.isEmpty { Text(entries.isEmpty ? "No dictations yet" : "Nothing matches").foregroundStyle(.secondary) } }
         }
         .onChange(of: ask.busy) { if !ask.busy { entries = Self.load() } }
@@ -112,20 +114,24 @@ struct HistoryView: View {
     @State private var hovered: Entry.ID?
 
     private func row(_ entry: Entry) -> some View {
-        let showActions = hovered == entry.id || copied == entry.id || stars.contains(entry.id)
+        let showActions = hovered == entry.id || copied == entry.id
         return HStack(alignment: .top, spacing: 12) {
             Text(entry.at.formatted(date: .omitted, time: .shortened))
                 .monospacedDigit().foregroundStyle(.secondary).frame(width: 64, alignment: .leading)
             VStack(alignment: .leading, spacing: 4) {
                 Text(entry.text).textSelection(.enabled)
-                Text([entry.app, entry.project, entry.mode == "thought" ? "Thought" : entry.mode == "command" ? "Command"
-                      : entry.mode == "ask" ? "Question" : entry.mode == "recovered" ? "Recovered" : nil]
-                    .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
-                    .font(.caption).foregroundStyle(.secondary)
+                HStack(spacing: 5) {
+                    if stars.contains(entry.id) { Image(systemName: "star.fill").foregroundStyle(.tint).accessibilityLabel("Starred") }
+                    Text([entry.app, entry.project, entry.mode == "thought" ? "Thought" : entry.mode == "command" ? "Command"
+                          : entry.mode == "ask" ? "Question" : entry.mode == "recovered" ? "Recovered" : nil]
+                        .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
+                }
+                .font(.caption).foregroundStyle(.secondary)
             }
-            Spacer()
-            // Actions show on hover (a starred one keeps its star), so the list stays quiet.
-            Group {
+            Spacer(minLength: 0)
+        }
+        .overlay(alignment: .topTrailing) {
+            HStack(spacing: 10) {
             Button { Engine.shared.send(.init(.insert, text: entry.text)) } label: { Image(systemName: "text.insert") }
                 .buttonStyle(.borderless)
                 .help("Insert again in the app you were in")
@@ -146,6 +152,9 @@ struct HistoryView: View {
             .buttonStyle(.borderless)
             .accessibilityLabel(stars.contains(entry.id) ? "Unstar" : "Star")
             }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(.background, in: Capsule())
             .opacity(showActions ? 1 : 0)
         }
         .padding(.vertical, 2)

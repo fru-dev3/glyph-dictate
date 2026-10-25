@@ -38,6 +38,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         EngineLink.start()
         if EngineLink.quiet { log.notice("engine: quiet, for a test"); return }
+        // What macOS allows this engine (asked through the app): the install script reads this line.
+        let mic = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
+        log.notice("engine: permissions keys=\(CGPreflightListenEventAccess(), privacy: .public) paste=\(CGPreflightPostEventAccess(), privacy: .public) mic=\(mic, privacy: .public)")
         AVCaptureDevice.requestAccess(for: .audio) { granted in
             Task { @MainActor in if granted { Dictation.shared.keepMicReady(Prefs.shared.keepMicReady) } }
         }
