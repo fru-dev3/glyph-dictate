@@ -14,7 +14,7 @@ with AI. This file is what an agent needs before touching it.
   - `Polish.swift`, `Rules.swift`: clean-up, corrections, styles, the Dictionary.
   - `FnKey.swift`, `Pill.swift`, `Settings.swift`, `History.swift`, `Ask.swift`, `FormFill.swift`.
   - `RulesCheck.swift`: checks for the pure rules: `cat Mac/Rules.swift Mac/RulesCheck.swift | swift -`.
-- `site/`: jot.fru.dev, one static page.
+- `site/`: jot.fru.dev, retired 2026-10-25: every page 301s to https://glyph.fru.dev/dictate (vercel.json); only `/download` and `/privacy.html` still answer here.
 - `scripts/`: `install.sh` (build and install), `check.sh`, `release.sh`, `ship.sh`.
 
 ## Rules

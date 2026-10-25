@@ -4,16 +4,40 @@
   "buildCommand": "",
   "installCommand": "",
   "outputDirectory": "site",
-  "rewrites": [
-    { "source": "/agents", "destination": "/agents.html" }
-  ],
   "redirects": [
-    { "source": "/download", "destination": "https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg", "permanent": false }
+    {
+      "source": "/download",
+      "destination": "https://github.com/fru-dev3/glyph-dictate/releases/latest/download/Jot.dmg",
+      "permanent": false
+    },
+    {
+      "source": "/((?!privacy\\.html$).*)",
+      "destination": "https://glyph.fru.dev/dictate",
+      "statusCode": 301
+    }
   ],
   "headers": [
-    { "source": "/(.*)", "headers": [
-      { "key": "X-Content-Type-Options", "value": "nosniff" },
-      { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" } ] },
-    { "source": "/(.*)\\.png", "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }] }
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)\\.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    }
   ]
 }

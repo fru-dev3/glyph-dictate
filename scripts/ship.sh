@@ -1,21 +1,13 @@
 #!/usr/bin/env bash
 #
 # Deploy the jot.fru.dev site (the static files in site/) to Vercel,
-# team fru-dev3, project jot-fru. No build step, no functions, no secrets. First it refreshes
-# the download count saved in the page (scripts/fetch-downloads.mjs).
+# team fru-dev3, project jot-fru. No build step, no functions, no secrets. Since 2026-10-25 the
+# site is only redirects to https://glyph.fru.dev/dictate (see vercel.json).
 #
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 [ -f .vercel/project.json ] || vercel link --yes --project jot-fru
-
-# The download count's floor, written into the page; committed and pushed so a deploy stays
-# the pushed code.
-node scripts/fetch-downloads.mjs
-if ! git diff --quiet -- site/index.html; then
-  git commit -qm "jot.fru.dev: download count $(grep -o 'data-baked="[0-9]*"' site/index.html | grep -o '[0-9]*')" -- site/index.html
-  git push -q
-fi
 
 echo "building"
 vercel build --prod --yes
@@ -35,9 +27,10 @@ vdeploy() {
 echo "deploying"
 vdeploy --prebuilt --prod
 
-CODE=$(curl -s -o /dev/null -w '%{http_code}' https://jot.fru.dev/)
-if [ "$CODE" != "200" ]; then
-  echo "jot.fru.dev answered $CODE, expected 200"
-  exit 1
-fi
-echo "live at https://jot.fru.dev"
+# jot.fru.dev is retired (Jot is now Glyph Dictate): every page 301s to glyph.fru.dev/dictate,
+# /download still serves the DMG and /privacy.html (the app's policy link) is still served.
+r=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' https://jot.fru.dev/)
+[ "$r" = "301 https://glyph.fru.dev/dictate" ] || { echo "jot.fru.dev/ answered $r"; exit 1; }
+[ "$(curl -s -o /dev/null -w '%{http_code}' -L https://jot.fru.dev/download)" = 200 ] || { echo "/download does not reach the DMG"; exit 1; }
+[ "$(curl -s -o /dev/null -w '%{http_code}' https://jot.fru.dev/privacy.html)" = 200 ] || { echo "/privacy.html is not served"; exit 1; }
+echo "live: jot.fru.dev redirects to https://glyph.fru.dev/dictate"
