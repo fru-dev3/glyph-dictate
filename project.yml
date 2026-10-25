@@ -1,4 +1,4 @@
-# Jot for Mac. Generate the Xcode project with `xcodegen generate` (scripts/install.sh does).
+# Glyph Dictate (formerly Jot) for Mac. The target, Jot.app and bundle id keep the Jot name so installs keep their permissions. Generate the Xcode project with `xcodegen generate` (scripts/install.sh does).
 name: Jot
 options:
   bundleIdPrefix: dev.fru
@@ -8,8 +8,8 @@ settings:
   base:
     CODE_SIGN_STYLE: Automatic
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.7.7"
-    CURRENT_PROJECT_VERSION: "14"
+    MARKETING_VERSION: "0.7.8"
+    CURRENT_PROJECT_VERSION: "15"
 targets:
   Jot:
     type: application
@@ -31,8 +31,9 @@ targets:
     info:
       path: Mac/Info.plist
       properties:
-        CFBundleDisplayName: Jot
+        CFBundleDisplayName: Glyph Dictate
+        CFBundleName: Glyph Dictate
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSApplicationCategoryType: public.app-category.productivity
-        NSMicrophoneUsageDescription: Jot listens while you hold the talk key and types what you say. Nothing leaves this Mac.
+        NSMicrophoneUsageDescription: Glyph Dictate listens while you hold the talk key and types what you say. Nothing leaves this Mac.

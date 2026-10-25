@@ -37,7 +37,7 @@ struct MainView: View {
                 Label(item.rawValue, systemImage: item.icon)
             }
             .safeAreaInset(edge: .bottom) {
-                Text("Jot \(Version.text)").font(.caption).foregroundStyle(.tertiary).padding(.bottom, 10)
+                Text("Glyph Dictate \(Version.text)").font(.caption).foregroundStyle(.tertiary).padding(.bottom, 10)
             }
             .navigationSplitViewColumnWidth(180)
         } detail: {
@@ -68,7 +68,7 @@ private struct GeneralTab: View {
                 }
                 Shortcut(keys: "Hold \(prefs.talkKey.name)", does: "Dictate into any app")
                 Shortcut(keys: "Double-press \(prefs.talkKey.name)", does: "Hands-free until you press it again")
-                Shortcut(keys: "\(prefs.talkKey.name) + Shift", does: "Save a thought to the vault, like Jot on the phone")
+                Shortcut(keys: "\(prefs.talkKey.name) + Shift", does: "Save a thought to the vault, like Glyph on the phone")
                 Shortcut(keys: "\(prefs.talkKey.name) + \(prefs.talkKey.commandName)",
                          does: "Command Mode: say what to do with the selected text")
                 Shortcut(keys: "\(prefs.talkKey.name) + \(prefs.talkKey.askName)",
@@ -80,7 +80,7 @@ private struct GeneralTab: View {
                 Shortcut(keys: "Control-Command-R", does: "Swap it for exactly what you said")
                 Shortcut(keys: "Esc", does: "Cancel")
                 if prefs.talkKey == .fn {
-                    Text("Jot sets System Settings > Keyboard > \"Press 🌐 key to\" to Do Nothing, so a double-press doesn't open emoji. Give Fn to Jot alone, not to another dictation app too.")
+                    Text("Glyph Dictate sets System Settings > Keyboard > \"Press 🌐 key to\" to Do Nothing, so a double-press doesn't open emoji. Give Fn to Glyph Dictate alone, not to another dictation app too.")
                         .font(.callout).foregroundStyle(.secondary)
                 }
             }
@@ -114,7 +114,7 @@ private struct GeneralTab: View {
                     }
                 } label: {
                     Text("Notes folder")
-                    Text("Optional. Any folder, an Obsidian vault too: thoughts are saved in it as Markdown notes, and Jot keeps its own files in a hidden .jot folder there, so they sync with it.")
+                    Text("Optional. Any folder, an Obsidian vault too: thoughts are saved in it as Markdown notes, and Glyph Dictate keeps its own files in a hidden .jot folder there, so they sync with it.")
                 }
                 LabeledContent("Every dictation", value: DictationLog.folder.path(percentEncoded: false))
                 LabeledContent("Thoughts", value: Thoughts.folder.path(percentEncoded: false))
@@ -202,7 +202,7 @@ private struct DictionaryTab: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Names and words Jot should spell your way. Add what it hears instead, if it keeps getting one wrong. When you fix a word Jot typed, it learns it here by itself.")
+            Text("Names and words Glyph Dictate should spell your way. Add what it hears instead, if it keeps getting one wrong. When you fix a word it typed, it learns it here by itself.")
                 .foregroundStyle(.secondary)
             HStack {
                 TextField("Spelled", text: $write, prompt: Text("Harbr"))

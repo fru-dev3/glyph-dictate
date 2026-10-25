@@ -11,9 +11,9 @@ struct JotMacApp: App {
     @NSApplicationDelegateAdaptor private var delegate: AppDelegate
 
     var body: some Scene {
-        Window("Jot", id: "main") { MainView() }
+        Window("Glyph Dictate", id: "main") { MainView() }
             .defaultSize(width: 900, height: 640)
-        MenuBarExtra("Jot", systemImage: "mic") { JotMenu() }
+        MenuBarExtra("Glyph Dictate", systemImage: "mic") { JotMenu() }
     }
 }
 
@@ -27,6 +27,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Task { @MainActor in if granted { Dictation.shared.keepMicReady(Prefs.shared.keepMicReady) } }
         }
         Dictation.shared.recoverDraft()
+        LastApp.track()
         if !CGPreflightPostEventAccess() { CGRequestPostEventAccess() } // to paste (Accessibility)
         _ = Words.shared // your dictionary joins the speech model's vocabulary
         Task { await Transcription.prewarm() } // download the speech model before the first dictation
@@ -137,7 +138,7 @@ private struct JotMenu: View {
     @AppStorage("section") private var section: MainView.Section = .home
 
     var body: some View {
-        Text("Jot \(Version.text). Hold \(Prefs.shared.talkKey.name) to talk, double-press for hands-free")
+        Text("Glyph Dictate \(Version.text). Hold \(Prefs.shared.talkKey.name) to talk, double-press for hands-free")
         if let error = dictation.error { Text(error) }
         if !Permissions.allGranted {
             Button("Finish Setup…") { open(.settings) }
@@ -163,11 +164,11 @@ private struct JotMenu: View {
                 }
             }
         }
-        Button("Open Jot") { open(.home) }
+        Button("Open Glyph Dictate") { open(.home) }
         Button("History…") { open(.home) }
         Button("Settings…") { open(.settings) }.keyboardShortcut(",")
         Divider()
-        Button("Quit Jot") { NSApp.terminate(nil) }.keyboardShortcut("q")
+        Button("Quit Glyph Dictate") { NSApp.terminate(nil) }.keyboardShortcut("q")
     }
 
     private func open(_ to: MainView.Section) {

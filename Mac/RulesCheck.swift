@@ -53,4 +53,23 @@ assert(Rules.correction(pasted: "I use harbor every day.", field: "I use harbor 
 assert(Rules.correction(pasted: "Meet me at the cafe today.", field: "Meet me at the office tomorrow.") == nil)
 assert(Rules.correction(pasted: "Ship it on Friday.", field: "Ship it on Monday.") == nil) // a different word, not a respelling
 assert(Rules.distance("kitten", "sitting") == 3)
+// Which project a window is on (History).
+let em = " \u{2014} "
+check(Rules.project(title: "Rules.swift" + em + "acme-api", bundle: "com.microsoft.VSCode", app: "Code") ?? "-", "acme-api")
+check(Rules.project(title: "\u{25CF} Rules.swift" + em + "acme-api [SSH: box]" + em + "Cursor", bundle: "com.todesktop.230313mzl4w4u92", app: "Cursor") ?? "-", "acme-api")
+check(Rules.project(title: "Rules.swift - northwind - Visual Studio Code", bundle: "com.microsoft.VSCode", app: "Code") ?? "-", "northwind")
+check(Rules.project(title: "northwind (Workspace)", bundle: "com.microsoft.VSCode", app: "Code") ?? "-", "northwind")
+assert(Rules.project(title: "Rules.swift", bundle: "com.microsoft.VSCode", app: "Code") == nil)
+check(Rules.project(title: "acme-api" + em + "Rules.swift", bundle: "com.apple.dt.Xcode", app: "Xcode") ?? "-", "acme-api")
+check(Rules.project(title: "x", document: "file:///srv/code/Acme.xcodeproj/", bundle: "com.apple.dt.Xcode", app: "Xcode") ?? "-", "Acme")
+check(Rules.project(title: "acme-api" + em + "-zsh" + em + "80\u{D7}24", bundle: "com.apple.Terminal", app: "Terminal") ?? "-", "acme-api")
+check(Rules.project(title: "-zsh", document: "file:///srv/code/acme%20api/", bundle: "com.apple.Terminal", app: "Terminal") ?? "-", "acme api")
+assert(Rules.project(title: "sam" + em + "-zsh" + em + "80\u{D7}24", bundle: "com.apple.Terminal", app: "Terminal", user: "sam") == nil)
+check(Rules.project(title: "sam@laptop:~/code/acme-api", bundle: "com.googlecode.iterm2", app: "iTerm2") ?? "-", "acme-api")
+check(Rules.project(title: "~/code/northwind/", bundle: "com.mitchellh.ghostty", app: "Ghostty") ?? "-", "northwind")
+assert(Rules.project(title: "~", bundle: "com.mitchellh.ghostty", app: "Ghostty") == nil)
+assert(Rules.project(title: "claude", bundle: "com.mitchellh.ghostty", app: "Ghostty") == nil)
+check(Rules.project(title: "acme-api" + em + "Codex", bundle: "com.openai.codex", app: "Codex") ?? "-", "acme-api")
+assert(Rules.project(title: "Claude", bundle: "com.anthropic.claudefordesktop", app: "Claude") == nil)
+assert(Rules.project(title: "Rules.swift" + em + "acme-api", bundle: "com.apple.Safari", app: "Safari") == nil)
 print("Rules: all checks passed")

@@ -46,6 +46,8 @@ final class Dictation {
     private var wordsAt = Date()
     private var lastLevel = Date()
     private var target: NSRunningApplication?
+    /// The project or repo the target's window is on, for History (`Rules.project`).
+    private var project: String?
     private var live: LiveCleaner?
     /// The words heard so far in this dictation, kept for the safety net.
     private var soFar = ""
@@ -87,6 +89,13 @@ final class Dictation {
         state = .listening
         Prefs.shared.play("Tink")
         Pill.shared.show(over: target)
+        project = nil
+        let started = startedAt, pid = target?.processIdentifier ?? 0
+        let bundle = target?.bundleIdentifier ?? "", name = target?.localizedName ?? ""
+        Task.detached { // off the main thread: the mic starts first
+            let found = Paste.project(pid: pid, bundle: bundle, app: name)
+            await MainActor.run { if Dictation.shared.startedAt == started { Dictation.shared.project = found } }
+        }
         let mic = mic
         let relay = Relay()
         self.relay = relay
@@ -110,7 +119,7 @@ final class Dictation {
             self.feed = nil
             let speech = failure is SpeechDown
             rescue(failure.localizedDescription)
-            problem = speech ? "Speech stopped. Restarting Jot"
+            problem = speech ? "Speech stopped. Restarting Glyph Dictate"
                 : failure as? JotError == .notReady ? "Speech model downloading. Try soon"
                 : "The mic didn't start"
             pipeline.cancel()
@@ -217,7 +226,7 @@ final class Dictation {
                 log.info("finish: done")
                 Draft.clear()
                 if mode != .ask { remember(text, heard: heard) }
-                DictationLog.append(text: text, heard: heard, mode: "\(mode)", app: target, seconds: seconds,
+                DictationLog.append(text: text, heard: heard, mode: "\(mode)", app: target, project: project, seconds: seconds,
                                     finishMs: Int(Date.now.timeIntervalSince(released) * 1000))
                 Prefs.shared.play(mode == .thought ? "Glass" : "Pop")
                 done()
@@ -238,7 +247,7 @@ final class Dictation {
         } else {
             NSPasteboard.general.clearContents()
             NSPasteboard.general.setString(words, forType: .string)
-            DictationLog.append(text: words, heard: words, mode: "recovered", app: target, seconds: 0, finishMs: 0)
+            DictationLog.append(text: words, heard: words, mode: "recovered", app: target, project: project, seconds: 0, finishMs: 0)
             fail(message + " What you said is on the clipboard.")
         }
         Draft.clear()
@@ -313,7 +322,7 @@ final class Dictation {
         guard let words = Draft.take() else { return }
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(words, forType: .string)
-        DictationLog.append(text: words, heard: words, mode: "recovered", app: nil, seconds: 0, finishMs: 0)
+        DictationLog.append(text: words, heard: words, mode: "recovered", app: nil, project: nil, seconds: 0, finishMs: 0)
         error = "Recovered a dictation cut off last time. It's in History and on the clipboard."
     }
 
@@ -476,7 +485,7 @@ enum Breakage {
 
 /// Speech stopped answering, three times over. Relaunching Jot has always brought it back.
 struct SpeechDown: LocalizedError {
-    var errorDescription: String? { "Speech stopped answering, so Jot is restarting. Talk again in a moment." }
+    var errorDescription: String? { "Speech stopped answering, so Glyph Dictate is restarting. Talk again in a moment." }
 }
 
 /// The dictation's sound, kept in memory while you talk and dropped when it's done (never
@@ -769,6 +778,22 @@ enum Paste {
         return (focused as! AXUIElement)
     }
 
+    /// The project or repo the app's front window is on (`Rules.project`), from the window's title
+    /// and the folder it shows. Nothing else of the window is read.
+    nonisolated static func project(pid: pid_t, bundle: String, app: String) -> String? {
+        guard pid != 0, Rules.projectApps.contains(bundle) else { return nil }
+        let appElement = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(appElement, 0.3) // a busy app gives no answer rather than a slow one
+        var window: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(appElement, kAXFocusedWindowAttribute as CFString, &window) == .success,
+              let window, CFGetTypeID(window) == AXUIElementGetTypeID() else { return nil }
+        let w = window as! AXUIElement
+        var document: CFTypeRef?
+        AXUIElementCopyAttributeValue(w, kAXDocumentAttribute as CFString, &document)
+        return Rules.project(title: string(w, kAXTitleAttribute) ?? "", document: document as? String, bundle: bundle,
+                             app: app, user: URL.homeDirectory.lastPathComponent)
+    }
+
     /// The selected text in the front app, by Cmd-C (works where reading it directly doesn't:
     /// browsers, Electron, terminals). Nil when nothing is selected.
     @MainActor
@@ -870,9 +895,11 @@ enum DictationLog {
 
     /// `heard` is the transcript before polishing (or the spoken command), so a bad cleanup
     /// can always be undone from the log.
-    static func append(text: String, heard: String, mode: String, app: NSRunningApplication?, seconds: Double, finishMs: Int) {
+    /// `project` (the repo or folder of a terminal or editor) is left out when unknown; older lines have none.
+    static func append(text: String, heard: String, mode: String, app: NSRunningApplication?, project: String?,
+                       seconds: Double, finishMs: Int) {
         let now = Date.now
-        let entry: [String: Any] = [
+        var entry: [String: Any] = [
             "at": now.ISO8601Format(),
             "text": text,
             "heard": heard,
@@ -882,11 +909,16 @@ enum DictationLog {
             "seconds": (seconds * 10).rounded() / 10,
             "finish_ms": finishMs,
         ]
+        if let project { entry["project"] = project }
         guard var line = try? JSONSerialization.data(withJSONObject: entry, options: [.sortedKeys]) else { return }
         line.append(0x0A)
         let month = now.formatted(.iso8601.year().month())
-        let file = folder.appending(path: "\(month).\(host).jsonl")
-        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        add(line, to: folder.appending(path: "\(month).\(host).jsonl"))
+    }
+
+    /// Appends a line to a file, making the file and its folder if need be.
+    static func add(_ line: Data, to file: URL) {
+        try? FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
         if let handle = try? FileHandle(forWritingTo: file) {
             defer { try? handle.close() }
             _ = try? handle.seekToEnd()

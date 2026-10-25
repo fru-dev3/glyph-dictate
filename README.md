@@ -1,18 +1,20 @@
-<p align="center"><img src="site/icon-512.png" width="128" alt="Jot icon: a white lowercase j giving off sound, on office green"></p>
+<p align="center"><img src="Mac/Assets.xcassets/AppIcon.appiconset/icon_256@2x.png" width="128" alt="Glyph Dictate icon: a petroglyph figure with sound arcs leaving its head, on office green"></p>
 
-<h1 align="center">Jot</h1>
+<h1 align="center">Glyph Dictate</h1>
+
+<p align="center"><i>Formerly Jot.</i></p>
 
 <p align="center"><b>Talk. It types. Free dictation for your Mac that never leaves it.</b></p>
 
 <p align="center">
-  <a href="https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg">Download for Mac</a> ·
-  <a href="https://jot.fru.dev">jot.fru.dev</a> ·
+  <a href="https://github.com/fru-dev3/glyph-dictate/releases/latest/download/Glyph-Dictate.dmg">Download for Mac</a> ·
+  <a href="https://glyph.fru.dev/dictate">glyph.fru.dev/dictate</a> ·
   <a href="#build-from-source">Build from source</a>
 </p>
 
-<p align="center"><img src="site/img/app-ask.webp" width="760" alt="Jot's window: an answer from your history above a day of dictations into Slack, Terminal, Mail and Notes"></p>
+<p align="center"><img src="site/img/app-ask.webp" width="760" alt="Glyph Dictate's window: an answer from your history above a day of dictations into Slack, Terminal, Mail and Notes"></p>
 
-Jot is voice dictation for the Mac that runs entirely on your Mac. Hold the Fn key, talk, let
+Glyph Dictate is voice dictation for the Mac that runs entirely on your Mac. Hold the Fn key, talk, let
 go, and the words are typed where your cursor is: any app, any form, the terminal, an AI
 coding agent's prompt. Speech recognition is Apple's on-device model; clean-up, Command Mode
 and answers use Apple Intelligence on the Mac. No account, no subscription, no cloud, no audio
@@ -20,7 +22,7 @@ saved anywhere.
 
 ## What it does
 
-| You do | Jot does |
+| You do | Glyph Dictate does |
 |---|---|
 | **Hold Fn**, talk, let go | Types it where your cursor is |
 | **Double-press Fn** | Hands-free until you press Fn again (Esc cancels) |
@@ -37,7 +39,7 @@ saved anywhere.
 - **Cleans up while you talk.** Fillers go, "Tuesday, no wait, Wednesday" becomes Wednesday,
   spoken lists become lists, "new line" and "new paragraph" work. A long dictation is cleaned
   in the background as you go, so it lands about a second after you let go.
-- **Learns your words.** Fix a word Jot typed and it remembers the spelling. Add names to the
+- **Learns your words.** Fix a word Glyph Dictate typed and it remembers the spelling. Add names to the
   Dictionary; a name misheard by a letter or two is matched to it.
 - **Knows terminals.** "dash dash no dash verify" is `--no-verify`, "scripts slash ship dot
   sh" is `scripts/ship.sh`.
@@ -50,13 +52,13 @@ saved anywhere.
 
 ## Install
 
-1. [Download Jot.dmg](https://github.com/fru-dev3/jot/releases/latest/download/Jot.dmg),
-   open it and drag Jot to Applications. It's signed and notarized by Apple.
+1. [Download Glyph-Dictate.dmg](https://github.com/fru-dev3/glyph-dictate/releases/latest/download/Glyph-Dictate.dmg),
+   open it and drag Glyph Dictate to Applications. It's signed and notarized by Apple.
 2. Open Jot. In **Settings > Permissions**, allow **Input Monitoring** (to hear the Fn key),
    **Accessibility** (to type where you are) and **Microphone**.
 3. Hold Fn and talk.
 
-Jot sets **System Settings > Keyboard > "Press 🌐 key to"** to Do Nothing, so a double-press
+Glyph Dictate sets **System Settings > Keyboard > "Press 🌐 key to"** to Do Nothing, so a double-press
 doesn't open the emoji picker. Give Fn to one dictation app only. Prefer another key? Settings
 offers Right Option, Right Command or Right Control.
 
@@ -65,15 +67,15 @@ your history and filling forms need Apple Intelligence turned on; plain dictatio
 
 ## Your words stay yours
 
-- Speech and clean-up run on your Mac. Jot makes no network requests.
+- Speech and clean-up run on your Mac. Glyph Dictate makes no network requests.
 - No audio is ever written to disk. The ready mic holds under a second of sound in memory.
 - Every dictation is kept as a line of JSON in
   `~/Library/Application Support/Jot/dictations/`, with what was heard before clean-up, so you
   can always get your exact words back. Thoughts are Markdown files in `~/Documents/Jot/Thoughts`.
-- Jot never types into a password field, and puts your clipboard back after each paste.
+- Glyph Dictate never types into a password field, and puts your clipboard back after each paste.
   With no text field to type into, what you said stays on the clipboard to paste yourself.
 - Keep them with your notes: choose any folder in **Settings > Where your words go** (an
-  Obsidian vault works). Thoughts are saved in it as Markdown notes, and Jot keeps its own
+  Obsidian vault works). Thoughts are saved in it as Markdown notes, and Glyph Dictate keeps its own
   files (dictations, Dictionary) in a hidden `.jot/` folder there, so they sync with it.
   A [Prevail](https://prevail.sh) vault gets its own layout.
 
@@ -82,12 +84,12 @@ your history and filling forms need Apple Intelligence turned on; plain dictatio
 Needs Xcode 26 and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
 
 ```sh
-git clone https://github.com/fru-dev3/jot.git && cd jot
+git clone https://github.com/fru-dev3/glyph-dictate.git && cd glyph-dictate
 ./scripts/install.sh        # builds, installs to /Applications, opens it
 ./scripts/check.sh          # the key timing and text-rule checks, no mic needed
 ```
 
-Set `DEVELOPMENT_TEAM` to your Apple team ID to sign with it, so macOS keeps Jot's
+Set `DEVELOPMENT_TEAM` to your Apple team ID to sign with it, so macOS keeps Glyph Dictate's
 permissions across rebuilds. `scripts/release.sh` is how releases are built: Developer ID
 signing, notarization and a GitHub release.
 
@@ -99,6 +101,8 @@ from fixes), `Ask.swift`, `FormFill.swift`, `Pill.swift`, `Settings.swift`, `His
 
 - **0.7.1** (2026-10-21): forms fill from any browser page (also just opened, or with the address bar in focus), emails lowercase;
   "get commit" in a terminal is `git commit`; answers show their bold text.
+- **0.7.8** (2026-10-25): Jot is now Glyph Dictate, with the Glyph family icon. The app is still
+  Jot.app with the same bundle id, so your settings, words and permissions carry over.
 - **0.7.7** (2026-10-23): Jot checks it still reaches Apple's speech service every two minutes and after
   the Mac wakes, and reconnects while you aren't talking, so a dropped connection never meets a dictation.
 - **0.7.6** (2026-10-23): no more restarting over and over when macOS drops its speech model; Jot fetches it
@@ -122,4 +126,4 @@ from fixes), `Ask.swift`, `FormFill.swift`, `Pill.swift`, `Settings.swift`, `His
 
 ## License
 
-MIT. Made by [fru.dev](https://fru.dev). If Jot saves you typing, a star helps others find it.
+MIT. Made by [fru.dev](https://fru.dev). If Glyph Dictate saves you typing, a star helps others find it.

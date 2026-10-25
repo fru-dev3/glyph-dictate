@@ -160,7 +160,7 @@ enum AI {
         guard available else { throw JotError("Asking needs Apple Intelligence (System Settings > Apple Intelligence & Siri).") }
         var budget = 7000 // characters; the model's window is 4,096 tokens
         let notes = entries.compactMap { entry -> String? in
-            let line = "[\(entry.at.formatted(date: .abbreviated, time: .shortened)), \(entry.app.isEmpty ? "Jot" : entry.app)] \(entry.text.prefix(700))"
+            let line = "[\(entry.at.formatted(date: .abbreviated, time: .shortened)), \(entry.app.isEmpty ? "Glyph Dictate" : entry.app)] \(entry.text.prefix(700))"
             guard budget > 0 else { return nil }
             budget -= line.count
             return line
