@@ -6,6 +6,7 @@
 # for notarization (ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH), and the GitHub CLI signed in.
 set -euo pipefail
 cd "${0:A:h}/.."
+export DEVELOPER_DIR=${DEVELOPER_DIR:-/Applications/Xcode.app/Contents/Developer} # xcodebuild needs Xcode, not the command line tools
 : ${ASC_KEY_ID:?set ASC_KEY_ID} ${ASC_ISSUER_ID:?set ASC_ISSUER_ID} ${ASC_KEY_PATH:?set ASC_KEY_PATH}
 identity=$(security find-identity -v -p codesigning | awk -F'"' '/Developer ID Application/{print $2; exit}')
 [[ -n $identity ]] || { echo "no Developer ID Application certificate in the keychain"; exit 1; }
