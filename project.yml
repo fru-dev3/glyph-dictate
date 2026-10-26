@@ -67,6 +67,7 @@ targets:
         CFBundleName: Glyph Jot # the app menu and About; PRODUCT_NAME stays Jot so Jot.app, scripts and permissions hold
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSHumanReadableCopyright: "© 2026 Inspired Nation, LLC"
         LSApplicationCategoryType: public.app-category.productivity
         NSMicrophoneUsageDescription: Glyph Jot hears you while you hold the talk key, and your side of a conversation while you record. Nothing leaves this Mac.
         NSScreenCaptureUsageDescription: Glyph Jot records the Mac's own sound, so the other side of a call is in the recording too. Nothing is shared.
@@ -100,6 +101,7 @@ targets:
         CFBundleName: Glyph Jot Dictation
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSHumanReadableCopyright: "© 2026 Inspired Nation, LLC"
         LSUIElement: true
         NSMicrophoneUsageDescription: Glyph Jot listens while you hold the talk key and types what you say. Nothing leaves this Mac.
   GlyphJotTests:
