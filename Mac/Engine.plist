@@ -22,6 +22,8 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>© 2026 Inspired Nation, LLC</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Glyph Jot listens while you hold the talk key and types what you say. Nothing leaves this Mac.</string>
 </dict>
