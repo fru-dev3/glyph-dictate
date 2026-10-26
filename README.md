@@ -93,6 +93,8 @@ summarizes and reads the library. Tests: the `JotMac` scheme and `swift test` in
 
 ## Versions
 
+- **0.7.11** (2026-10-25): meeting notes keep only the action items the conversation states:
+  no "None" or "No other action items mentioned" rows, no tasks the on-device model made up.
 - **0.7.10** (2026-10-25): design pass. A person's or an account's page lists the notes that name
   them; a note links to the recording it was said in; Dictations keeps its filter and Ask in its
   header and shows a row's actions on hover; the library opens with the app (not at login).

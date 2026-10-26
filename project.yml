@@ -52,8 +52,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: dev.fru.jot.mac
         PRODUCT_NAME: Jot
         PRODUCT_MODULE_NAME: GlyphJot
-        MARKETING_VERSION: "0.7.10" # Glyph Jot's own version (was Glyph Dictate 0.7.8; patch bumps only); see the README's Versions
-        CURRENT_PROJECT_VERSION: "18"
+        MARKETING_VERSION: "0.7.11" # Glyph Jot's own version (was Glyph Dictate 0.7.8; patch bumps only); see the README's Versions
+        CURRENT_PROJECT_VERSION: "19"
         SWIFT_VERSION: "5.0" # the Jot sources predate Swift 6's strict checks; the engine builds in 5 too
         SWIFT_UPCOMING_FEATURE_INFER_ISOLATED_CONFORMANCES: YES
         ENABLE_APP_SANDBOX: NO
@@ -88,8 +88,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: dev.fru.jot.mac.engine
         PRODUCT_NAME: Glyph Jot Dictation
         PRODUCT_MODULE_NAME: JotEngine
-        MARKETING_VERSION: "0.7.10"
-        CURRENT_PROJECT_VERSION: "18"
+        MARKETING_VERSION: "0.7.11"
+        CURRENT_PROJECT_VERSION: "19"
         ENABLE_HARDENED_RUNTIME: YES
         SKIP_INSTALL: YES
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) JOT_ENGINE

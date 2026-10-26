@@ -4,6 +4,12 @@ GlyphCore follows semantic versioning (the number is in `VERSION`). A change tha
 the on-disk format or breaks the public API is a major version, a new API a minor one, a
 fix a patch. Every change gets a line here, so an app can see what moved before it updates.
 
+## 0.1.1 (2026-10-25)
+
+- GlyphAI: notes keep only action items the conversation states. Placeholders the model
+  writes into an empty list ("None", "N/A", "No other action items mentioned") are dropped
+  from decisions and actions.
+
 ## 0.1.0 (2026-10-25)
 
 First version, from JotCore (the vault reader Jot Studio started from).

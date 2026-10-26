@@ -37,13 +37,18 @@ import GlyphVault
 }
 
 @Test func modelAnswersAreCleaned() {
-    let g = GeneratedNotes(summary: "  Acme renews. ", decisions: ["Hold the price", " "], actions: [
+    let g = GeneratedNotes(summary: "  Acme renews. ", decisions: ["Hold the price", " ", "None."], actions: [
         GeneratedAction(text: "Send the order form", owner: "Sam Lee", due: "2026-10-24"),
         GeneratedAction(text: "Share the sheet", owner: "null", due: "Friday"),
         GeneratedAction(text: " ", owner: nil, due: nil),
         GeneratedAction(text: "Call back", owner: " ", due: "N/A"),
         GeneratedAction(text: "Invented", owner: "Pat Doe", due: "2026-10-21"),
         GeneratedAction(text: "send the order form", owner: nil, due: nil),
+        GeneratedAction(text: "None", owner: nil, due: nil),
+        GeneratedAction(text: "N/A.", owner: nil, due: nil),
+        GeneratedAction(text: "No other action items mentioned.", owner: nil, due: nil),
+        GeneratedAction(text: "No other decisions mentioned", owner: nil, due: nil),
+        GeneratedAction(text: "Note the price", owner: nil, due: nil),
     ])
     let n = Summarizer.notes(from: g, heard: "Sam Lee will send it by October 24.")
     #expect(n.summary == "Acme renews.")
@@ -53,6 +58,7 @@ import GlyphVault
         ActionItem(text: "Share the sheet"),
         ActionItem(text: "Call back"),
         ActionItem(text: "Invented"),
+        ActionItem(text: "Note the price"),
     ], "an owner or a date the call never says is dropped, and so is a repeat")
     #expect(Summarizer.notes(from: g, heard: "Sam Lee will send it.").actions.allSatisfy { $0.due == nil })
 

@@ -48,7 +48,7 @@ struct GeneratedNotes {
     var summary: String
     @Guide(description: "Each concrete decision that was made, as a short sentence. Empty when none.", .maximumCount(10))
     var decisions: [String]
-    @Guide(description: "Each commitment, follow-up or to-do. Empty when none.", .maximumCount(15))
+    @Guide(description: "Each task a speaker said they or someone else will do, as a short instruction. Only tasks the transcript states, never ones it only suggests. Empty when none.", .maximumCount(15))
     var actions: [GeneratedAction]
 }
 
@@ -136,7 +136,8 @@ public struct Summarizer: Sendable {
 
     static let instructions = """
         You write meeting notes for the person who recorded this conversation. Use only what \
-        the transcript says. Never invent people, owners or dates.
+        the transcript says. Never invent people, owners, dates or tasks: an action item is only \
+        something someone in the conversation said will be done. Leave a list empty rather than guess.
         """
 
     static func prompt(title: String, date: String, transcript: String) -> String {
@@ -184,8 +185,16 @@ public struct Summarizer: Sendable {
     /// other short form) becomes that person's full name.
     static func notes(from g: GeneratedNotes, heard transcript: String, people: [String] = []) -> Notes {
         let clean = { (s: String) in s.trimmingCharacters(in: .whitespacesAndNewlines) }
+        // The model fills an empty list with a placeholder now and then: "None.", "N/A",
+        // "No other action items mentioned".
+        let placeholder = { (t: String) in
+            let l = t.lowercased().trimmingCharacters(in: CharacterSet.punctuationCharacters.union(.whitespaces))
+            return ["", "null", "none", "n/a", "na", "tbd", "unknown", "nothing"].contains(l)
+                || (l.hasPrefix("no ") && l.split(separator: " ").count <= 6
+                    && ["action", "task", "decision", "follow", "item", "mention"].contains { l.contains($0) })
+        }
         let optional = { (s: String?) -> String? in
-            guard let t = s.map(clean), !t.isEmpty, !["null", "none", "n/a", "tbd", "unknown"].contains(t.lowercased()) else { return nil }
+            guard let t = s.map(clean), !placeholder(t) else { return nil }
             return t
         }
         let said = { (owner: String) in
@@ -195,10 +204,10 @@ public struct Summarizer: Sendable {
         let fresh = { (s: String) in seen.insert(s.lowercased()).inserted }
         return Notes(
             summary: clean(g.summary),
-            decisions: g.decisions.map(clean).filter { !$0.isEmpty && fresh($0) },
+            decisions: g.decisions.map(clean).filter { !placeholder($0) && fresh($0) },
             actions: g.actions.compactMap { a in
                 let text = clean(a.text)
-                guard !text.isEmpty, fresh("action|" + text) else { return nil }
+                guard !placeholder(text), fresh("action|" + text) else { return nil }
                 let due = optional(a.due).flatMap { saysDay($0, in: transcript) ? $0 : nil }
                 return ActionItem(text: text, owner: optional(a.owner).flatMap { said($0) ? Entity.fullName($0, among: people) : nil }, due: due)
             })
