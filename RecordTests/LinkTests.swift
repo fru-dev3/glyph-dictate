@@ -21,8 +21,10 @@ struct LinkTests {
     /// transcript loses what was said in it (must-pass, decision d-mvo8wkr4).
     @MainActor @Test func jotsDuringARecordingAreRecordedAndKeptPrivate() async throws {
         let model = AppModel.shared
+        let setting = savedRecordingsPath()
+        defer { #expect(savedRecordingsPath() == setting, "a test changed the installed app's recordings folder") }
         let root = FileManager.default.temporaryDirectory.appending(path: "glyph-jot-tests-\(UUID().uuidString)")
-        model.switchVault(to: root)
+        model.switchVault(to: root, remember: false)
         model.debugFeed = nil
         // A recording fed silence through the test path, so no microphone is needed.
         let meta = try model.vault.createConversation(in: "Recordings", title: "Sync")
@@ -40,4 +42,19 @@ struct LinkTests {
         #expect(model.recordingFor(note: "2026-10-25 10-00-02.md")?.0 == meta.id)
         try? FileManager.default.removeItem(at: root)
     }
+
+    /// The test host is Jot.app with the installed app's settings (one bundle id): pointing it
+    /// at a test folder must never reach them. Once it did, and Fru's recordings went to /tmp.
+    @MainActor @Test func switchingVaultsInATestNeverSavesTheFolder() {
+        let saved = savedRecordingsPath()
+        let root = FileManager.default.temporaryDirectory.appending(path: "glyph-jot-tests-\(UUID().uuidString)")
+        AppModel.shared.switchVault(to: root) // even asked to remember
+        #expect(AppModel.testHost)
+        #expect(savedRecordingsPath() == saved)
+    }
+}
+
+/// The saved setting itself (not the -recordingsPath argument a test may pass).
+func savedRecordingsPath() -> String? {
+    UserDefaults.standard.persistentDomain(forName: "dev.fru.jot.mac")?["recordingsPath"] as? String
 }

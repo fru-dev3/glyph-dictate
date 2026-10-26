@@ -4,6 +4,12 @@ GlyphCore follows semantic versioning (the number is in `VERSION`). A change tha
 the on-disk format or breaks the public API is a major version, a new API a minor one, a
 fix a patch. Every change gets a line here, so an app can see what moved before it updates.
 
+## 0.1.2 (2026-10-25)
+
+- GlyphVault: `meta.json` gains `device`, the machine a recording was made on (the
+  computer's name, `ThisDevice.name`). Optional: older files read as before, and
+  `createConversation(device:)` takes another name (tests use a made-up one).
+
 ## 0.1.1 (2026-10-25)
 
 - GlyphAI: notes keep only action items the conversation states. Placeholders the model

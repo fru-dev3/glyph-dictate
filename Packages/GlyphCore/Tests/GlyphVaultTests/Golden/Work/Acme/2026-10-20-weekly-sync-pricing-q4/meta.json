@@ -24,6 +24,7 @@
     ]
   },
   "source": "recording",
+  "device": "laptop",
   "audio": "audio.m4a",
   "updated": "2026-10-14T17:46:40Z"
 }

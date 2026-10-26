@@ -135,6 +135,8 @@ public struct Vault: Sendable {
             return all.filter { index.links($0, kind, name) }
         case .tag(let tag):
             return all.filter { $0.tags.contains { $0.caseInsensitiveCompare(tag) == .orderedSame } }
+        case .object(let id):
+            return all.filter { $0.links.contains(id) }
         }
     }
 

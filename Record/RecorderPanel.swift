@@ -112,19 +112,19 @@ struct RecorderPanelView: View {
             }
 
             if let meta = model.recording {
-                let links: [Link] = meta.people.map { .person($0) } + meta.accounts.map { .account($0) } + meta.tags.map { .tag($0) }
+                let links: [Link] = meta.links.map { .object($0) } + meta.tags.map { .tag($0) }
                 VStack(alignment: .leading, spacing: 8) {
                     if !links.isEmpty {
                         FlowLayout(spacing: 5, lineSpacing: 5) {
                             ForEach(links, id: \.self) { link in
-                                LinkChip(link: link, size: .small, onRemove: { animate { model.removeLink(link, from: meta.id) } })
+                                LinkChip(link: link, size: .small, onRemove: { animate { model.removeLink(link, from: .recording(meta.id)) } })
                                     .transition(.scale(scale: 0.8).combined(with: .opacity))
                             }
                         }
                     }
-                    LinkAddField(style: .inline, placeholder: "Who is this with? Add people, accounts, #tags",
+                    LinkAddField(style: .inline, placeholder: "Who and what is this? People, products, a domain, #tags",
                                  excluding: Set(links), alwaysOpen: true) { link in
-                        model.addLink(link, to: meta.id)
+                        model.addLink(link, to: .recording(meta.id))
                     }
                 }
                 .animation(.glyph(reduceMotion), value: links)

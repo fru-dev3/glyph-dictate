@@ -1,4 +1,7 @@
 import Foundation
+#if os(macOS)
+import SystemConfiguration
+#endif
 
 /// `meta.json`: one conversation. Its id is its path in the vault, like
 /// `Work/Acme/2026-10-20-weekly-sync`.
@@ -12,9 +15,16 @@ public struct Conversation: Codable, Equatable, Sendable {
     public var people: [String] = []
     public var accounts: [String] = []
     public var tags: [String] = []
+    /// Glyph Studio objects this capture is filed under, by id: `person/<slug>`, `org/<slug>`
+    /// (a Product), `mission/<slug>` (a Project) or `domain/<slug>`. Left out of meta.json when
+    /// empty. `people` and `accounts` are the names older vaults used; they move here.
+    public var links: [String] = []
     /// Guesses waiting for a yes; they count for nothing until confirmed.
     public var suggested = Suggested()
     public var source = "recording"
+    /// The machine it was captured on ("Studio Laptop", "Office Desktop"): where a capture came
+    /// from is part of its context. Missing in files written before 2026-10-25.
+    public var device: String?
     public var calendarEventId: String?
     public var audio = "audio.m4a"
     public var updated: String?
@@ -23,7 +33,7 @@ public struct Conversation: Codable, Equatable, Sendable {
     public var jots: [Jot] = []
 
     enum CodingKeys: String, CodingKey {
-        case schema, id, title, created, people, accounts, tags, suggested, source, audio, updated, jots
+        case schema, id, title, created, people, accounts, tags, links, suggested, source, device, audio, updated, jots
         case durationSec = "duration_sec"
         case calendarEventId = "calendar_event_id"
     }
@@ -45,8 +55,10 @@ public struct Conversation: Codable, Equatable, Sendable {
         people = try c.decodeIfPresent([String].self, forKey: .people) ?? []
         accounts = try c.decodeIfPresent([String].self, forKey: .accounts) ?? []
         tags = try c.decodeIfPresent([String].self, forKey: .tags) ?? []
+        links = try c.decodeIfPresent([String].self, forKey: .links) ?? []
         suggested = try c.decodeIfPresent(Suggested.self, forKey: .suggested) ?? Suggested()
         source = try c.decodeIfPresent(String.self, forKey: .source) ?? "recording"
+        device = try c.decodeIfPresent(String.self, forKey: .device)
         calendarEventId = try c.decodeIfPresent(String.self, forKey: .calendarEventId)
         audio = try c.decodeIfPresent(String.self, forKey: .audio) ?? "audio.m4a"
         updated = try c.decodeIfPresent(String.self, forKey: .updated)
@@ -63,8 +75,10 @@ public struct Conversation: Codable, Equatable, Sendable {
         try c.encode(people, forKey: .people)
         try c.encode(accounts, forKey: .accounts)
         try c.encode(tags, forKey: .tags)
+        if !links.isEmpty { try c.encode(links, forKey: .links) }
         if !suggested.isEmpty { try c.encode(suggested, forKey: .suggested) }
         try c.encode(source, forKey: .source)
+        try c.encodeIfPresent(device, forKey: .device)
         try c.encodeIfPresent(calendarEventId, forKey: .calendarEventId)
         try c.encode(audio, forKey: .audio)
         try c.encodeIfPresent(updated, forKey: .updated)
@@ -90,6 +104,9 @@ public struct Jot: Codable, Equatable, Sendable {
 }
 
 public struct Suggested: Codable, Equatable, Sendable {
+    /// Glyph Studio objects the call names, by id.
+    public var links: [String] = []
+    /// Names said in the call with no Studio page yet (a yes makes one).
     public var people: [String] = []
     public var accounts: [String] = []
     public var tags: [String] = []
@@ -100,13 +117,14 @@ public struct Suggested: Codable, Equatable, Sendable {
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
+        links = try c.decodeIfPresent([String].self, forKey: .links) ?? []
         people = try c.decodeIfPresent([String].self, forKey: .people) ?? []
         accounts = try c.decodeIfPresent([String].self, forKey: .accounts) ?? []
         tags = try c.decodeIfPresent([String].self, forKey: .tags) ?? []
         dismissed = try c.decodeIfPresent([String].self, forKey: .dismissed) ?? []
     }
 
-    public var isEmpty: Bool { people.isEmpty && accounts.isEmpty && tags.isEmpty && dismissed.isEmpty }
+    public var isEmpty: Bool { links.isEmpty && people.isEmpty && accounts.isEmpty && tags.isEmpty && dismissed.isEmpty }
 }
 
 /// `transcript.json`.
@@ -302,12 +320,13 @@ public struct Notes: Equatable, Sendable {
     }
 }
 
-/// What a conversation links to: a person, an account or a topic tag.
+/// What a capture links to: a Glyph Studio object by id (`object`), a topic tag, or a name
+/// with no Studio page yet (`person`, a suggestion). `account` is the older vault's name list.
 public enum Link: Hashable, Sendable {
-    case person(String), account(String), tag(String)
+    case person(String), account(String), tag(String), object(String)
 
     public var name: String {
-        switch self { case .person(let n), .account(let n), .tag(let n): n }
+        switch self { case .person(let n), .account(let n), .tag(let n), .object(let n): n }
     }
 }
 
@@ -318,4 +337,17 @@ public struct VaultTask: Equatable, Sendable {
     /// The conversation's title.
     public var title: String
     public var item: ActionItem
+}
+
+/// This machine's name as its owner set it (System Settings > General > Sharing), e.g.
+/// "Studio Laptop": stamped on every capture so its source is never lost.
+public enum ThisDevice {
+    public static var name: String {
+        #if os(macOS)
+        // Not Host.current(): it can wait on the network for seconds.
+        (SCDynamicStoreCopyComputerName(nil, nil) as String?) ?? ProcessInfo.processInfo.hostName
+        #else
+        ProcessInfo.processInfo.hostName
+        #endif
+    }
 }

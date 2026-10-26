@@ -5,7 +5,7 @@ import SwiftUI
 
 /// Debug builds only: drive the app from a script without touching the screen, so it
 /// can be tested while nobody uses the Mac. Post the distributed notification
-/// `dev.fru.jot.mac.app.check` with a command as the object, like `side:person:Sam Lee`,
+/// `dev.fru.jot.mac.app.check` with a command as the object, like `side:object:person/sam-lee`,
 /// `tab:transcript`, `size:900x600`, `look:dark`, `windows:/tmp/w.json`.
 @MainActor
 enum DebugHook {
@@ -26,7 +26,7 @@ enum DebugHook {
         func link(_ s: String) -> Link? {
             let kv = s.split(separator: ":", maxSplits: 1).map(String.init)
             guard kv.count == 2 else { return nil }
-            return switch kv[0] { case "person": .person(kv[1]); case "account": .account(kv[1]); case "tag": .tag(kv[1]); default: nil }
+            return switch kv[0] { case "object": .object(kv[1]); case "person": .person(kv[1]); case "product": .account(kv[1]); case "tag": .tag(kv[1]); default: nil }
         }
 
         switch verb {
@@ -34,11 +34,10 @@ enum DebugHook {
             let kv = arg.split(separator: ":", maxSplits: 1).map(String.init)
             switch kv.first ?? "" {
             case "all": model.sidebar = .all
-            case "tasks": model.sidebar = .openTasks
             case "notes": model.sidebar = .notes
             case "dictations": model.sidebar = .dictations
-            case "folder": model.sidebar = .folder(kv[1])
-            default: if let l = link(arg) { model.sidebar = l.sidebarItem }
+            case "recordings": model.sidebar = .recordings
+            default: if let item = link(arg)?.sidebarItem { model.sidebar = item }
             }
         case "conv": model.selectedID = arg.isEmpty ? nil : arg
         case "tab": animate { model.tab = DetailTab(rawValue: arg) ?? .summary }
@@ -80,22 +79,24 @@ enum DebugHook {
         case "pause": arg == "off" ? model.recorder.resume() : model.recorder.pause()
         case "systemaudio": model.includeSystemAudio = arg == "on"
         case "rename": if let id = model.selectedID { model.rename(id, to: arg) }
-        case "move": if let id = model.selectedID { model.move(id, to: arg) }
         case "trash": if let id = model.selectedID { model.trash(id) }
         case "copymd": if let id = model.selectedID { model.copyMarkdown(id) }
-        case "add": if let id = model.recordingID ?? model.selectedID, let l = link(arg) { model.addLink(l, to: id) }
-        case "remove": if let id = model.selectedID, let l = link(arg) { model.removeLink(l, from: id) }
+        case "add": if let id = model.recordingID ?? model.selectedID, let l = link(arg) { model.addLink(l, to: .recording(id)) }
+        case "remove": if let id = model.selectedID, let l = link(arg) { model.removeLink(l, from: .recording(id)) }
+        // "notelink:<file>|object:<id>" files a note; "noteunlink:..." takes it off.
+        case "notelink", "noteunlink":
+            let kv = arg.split(separator: "|", maxSplits: 1).map(String.init)
+            if kv.count == 2, let l = link(kv[1]) {
+                verb == "notelink" ? model.addLink(l, to: .note(kv[0])) : model.removeLink(l, from: .note(kv[0]))
+            }
+        // "open:<n>" opens the n-th row of All's Recent list, as a click does.
+        case "open":
+            let all = AllPane.captures(model, notes: NoteStore.shared.notes, dictations: HistoryView.load())
+            if let n = Int(arg), all.indices.contains(n) { model.open(all[n]) }
+        case "ask": Task { await Ask.shared.run(arg, over: AllPane.askSources(model), show: false) }
         case "accept", "dismiss": if let id = model.selectedID, let l = link(arg) { model.answer(l, for: id, accept: verb == "accept") }
-        case "task":
-            let kv = arg.split(separator: ":", maxSplits: 1).map(String.init)
-            if let id = model.selectedID, kv.count == 2 { model.setTask(id, ActionItem(text: kv[1]), done: kv[0] == "done") }
         case "process": if let id = model.selectedID { Task { await model.process(id) } }
         case "import": model.importAudio([URL(filePath: arg)])
-        case "folder": model.createFolder(arg)
-        case "newperson": model.createEntity(.person, arg)
-        case "notes":
-            if case .person(let n) = model.sidebar, var e = model.entity(.person, n) { e.body = arg; model.saveEntity(e) }
-            if case .account(let n) = model.sidebar, var e = model.entity(.account, n) { e.body = arg; model.saveEntity(e) }
         case "banner": model.show(arg.isEmpty ? AIError.unavailable(.appleIntelligenceOff).localizedDescription : arg,
                                   fix: .settings("AppleIntelligence"), for: model.selectedID)
         // A plain text window for the engine to type into (the jot-while-recording test).
@@ -114,6 +115,10 @@ enum DebugHook {
             let state: [String: Any] = [
                 "sidebar": String(describing: model.sidebar), "selected": model.selectedID ?? "",
                 "listed": model.listed.map(\.id), "recording": model.recordingID ?? "",
+                "studio": model.studio.objects.count, "counts": model.linkCounts.objects, "tags": model.linkCounts.tags,
+                "links": model.selected?.links ?? [], "suggested": model.selected.map { $0.suggested.links + $0.suggested.people } ?? [],
+                "notes": NoteStore.shared.notes.map { ["file": $0.file, "links": $0.links, "tags": $0.tags] as [String: Any] },
+                "ask": Ask.shared.answer,
                 "elapsed": model.recorder.elapsed, "stages": model.stages.mapValues(\.help),
                 "banners": model.banners.map(\.message), "pasteboard": NSPasteboard.general.string(forType: .string) ?? "",
             ]

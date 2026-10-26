@@ -12,7 +12,7 @@ packages:
   GlyphCore:
     path: Packages/GlyphCore
 targets:
-  JotMac: # Glyph Jot on the Mac: one app. Library (notes, dictations, recordings, People/Accounts/tags), Record, settings, menu bar.
+  JotMac: # Glyph Jot on the Mac: one app. Library (All, notes, dictations, recordings, filed under Glyph Studio's domains, people, products, projects), Record, settings, menu bar.
     # The dictation engine is its own process inside the bundle (JotEngine), so meeting code can never stop typing.
     # Outside the App Store (it pastes into other apps). PRODUCT_NAME stays Jot and the id dev.fru.jot.mac, so
     # Jot.app, scripts, settings and every permission carry over.
@@ -52,8 +52,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: dev.fru.jot.mac
         PRODUCT_NAME: Jot
         PRODUCT_MODULE_NAME: GlyphJot
-        MARKETING_VERSION: "0.7.11" # Glyph Jot's own version (was Glyph Dictate 0.7.8; patch bumps only); see the README's Versions
-        CURRENT_PROJECT_VERSION: "19"
+        MARKETING_VERSION: "0.7.13" # Glyph Jot's own version (was Glyph Dictate 0.7.8; patch bumps only); see the README's Versions
+        CURRENT_PROJECT_VERSION: "20"
         SWIFT_VERSION: "5.0" # the Jot sources predate Swift 6's strict checks; the engine builds in 5 too
         SWIFT_UPCOMING_FEATURE_INFER_ISOLATED_CONFORMANCES: YES
         ENABLE_APP_SANDBOX: NO
@@ -88,8 +88,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: dev.fru.jot.mac.engine
         PRODUCT_NAME: Glyph Jot Dictation
         PRODUCT_MODULE_NAME: JotEngine
-        MARKETING_VERSION: "0.7.11"
-        CURRENT_PROJECT_VERSION: "19"
+        MARKETING_VERSION: "0.7.13"
+        CURRENT_PROJECT_VERSION: "20"
         ENABLE_HARDENED_RUNTIME: YES
         SKIP_INSTALL: YES
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: $(inherited) JOT_ENGINE

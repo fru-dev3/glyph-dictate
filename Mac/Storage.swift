@@ -94,6 +94,7 @@ enum DictationLog {
             "mode": mode,
             "app": app?.localizedName ?? "",
             "bundle": app?.bundleIdentifier ?? "",
+            "device": SCDynamicStoreCopyComputerName(nil, nil) as String? ?? "Mac", // the machine it came from
             "seconds": (seconds * 10).rounded() / 10,
             "finish_ms": finishMs,
         ]

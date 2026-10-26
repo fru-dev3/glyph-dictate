@@ -36,20 +36,14 @@ struct RecordCommands: Commands {
                     .keyboardShortcut(KeyEquivalent(Character("\(i + 1)")))
             }
         }
-        CommandMenu("Conversation") {
+        CommandMenu("Recording") {
             let id = model.selectedID
             Button("Rename") { model.renameRequest += 1 }
                 .keyboardShortcut(.return, modifiers: [.command])
                 .disabled(id == nil)
-            Button("Add Person, Account or Tag") { model.addLinkRequest = (model.addLinkRequest.id + 1, "") }
+            Button("File Under\u{2026}") { model.addLinkRequest = (model.addLinkRequest.id + 1, "") }
                 .keyboardShortcut("t", modifiers: [.command, .shift])
                 .disabled(id == nil)
-            Menu("Move to") {
-                ForEach(model.folders, id: \.self) { f in
-                    Button(f) { if let id { model.move(id, to: f) } }
-                }
-            }
-            .disabled(id == nil)
             Divider()
             Button("Copy as Markdown") { if let id { model.copyMarkdown(id) } }
                 .keyboardShortcut("c", modifiers: [.command, .shift])

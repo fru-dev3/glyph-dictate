@@ -5,58 +5,64 @@ import Testing
 
 @MainActor
 struct LogicTests {
-    let directory: Vault.Directory
+    let studio = StudioDirectory(objects: [
+        StudioObject(id: "person/sam-lee", name: "Sam Lee", aliases: ["Sammy"], kind: .person),
+        StudioObject(id: "person/kim-park", name: "Kim Park", kind: .person),
+        StudioObject(id: "org/acme", name: "Acme", kind: .product),
+        StudioObject(id: "org/globex", name: "Globex", kind: .product),
+        StudioObject(id: "domain/career", name: "Career", kind: .domain),
+    ])
+    let counts = (objects: ["person/sam-lee": 3, "org/acme": 1], tags: ["pricing": 2, "q4-planning": 1])
 
-    /// A throwaway vault with made-up names, read back through the public API.
-    init() throws {
-        let root = FileManager.default.temporaryDirectory.appending(path: "glyph-record-tests-\(UUID().uuidString)")
-        let vault = Vault(root: root)
-        try vault.ensure()
-        var sam = Entity(kind: .person, name: "Sam Lee")
-        sam.aliases = ["Sammy"]
-        try vault.saveEntity(sam)
-        try vault.saveEntity(Entity(kind: .person, name: "Kim Park"))
-        try vault.saveEntity(Entity(kind: .account, name: "Acme"))
-        let a = try vault.createConversation(in: "Work", title: "One")
-        _ = try vault.setLinks(a.id, people: ["Sam Lee"], accounts: ["Acme"], tags: ["pricing", "q4-planning"])
-        let b = try vault.createConversation(in: "Work", title: "Two")
-        _ = try vault.setLinks(b.id, people: [], accounts: [], tags: ["pricing"])
-        directory = vault.directory()
-    }
-
-    @Test func findsByNameAliasAndWord() {
-        #expect(LinkMatcher.candidates("sam", directory: directory).first?.link == .person("Sam Lee"))
-        #expect(LinkMatcher.candidates("sammy", directory: directory).first?.link == .person("Sam Lee"))
-        #expect(LinkMatcher.candidates("park", directory: directory).first?.link == .person("Kim Park"))
-        #expect(LinkMatcher.candidates("ac", directory: directory).first?.link == .account("Acme"))
+    @Test func findsStudioObjectsByNameAliasAndWord() {
+        #expect(LinkMatcher.candidates("sam", studio: studio, counts: counts).first?.link == .object("person/sam-lee"))
+        #expect(LinkMatcher.candidates("sammy", studio: studio, counts: counts).first?.link == .object("person/sam-lee"))
+        #expect(LinkMatcher.candidates("park", studio: studio, counts: counts).first?.link == .object("person/kim-park"))
+        #expect(LinkMatcher.candidates("glob", studio: studio, counts: counts).first?.link == .object("org/globex"))
+        #expect(LinkMatcher.candidates("care", studio: studio, counts: counts).first?.link == .object("domain/career"))
+        #expect(LinkMatcher.candidates("sam", studio: studio, counts: counts).first?.count == 3)
     }
 
     @Test func hashMeansTag() {
-        let c = LinkMatcher.candidates("#pri", directory: directory)
+        let c = LinkMatcher.candidates("#pri", studio: studio, counts: counts)
         #expect(c.first?.link == .tag("pricing"))
         #expect(c.allSatisfy { if case .tag = $0.link { true } else { false } })
-        #expect(LinkMatcher.candidates("#Q4 Budget", directory: directory).last == Candidate(link: .tag("q4-budget"), isNew: true))
+        #expect(LinkMatcher.candidates("#Q4 Budget", studio: studio, counts: counts).last == Candidate(link: .tag("q4-budget"), isNew: true))
     }
 
-    @Test func offersNewOnlyWhenNotExact() {
-        #expect(!LinkMatcher.candidates("Acme", directory: directory).contains { $0.isNew })
-        let new = LinkMatcher.candidates("Pat Doe", directory: directory).filter(\.isNew).map(\.link)
+    @Test func offersNewPersonOrProductOnlyWhenNotExact() {
+        #expect(!LinkMatcher.candidates("Acme", studio: studio, counts: counts).contains { $0.isNew })
+        #expect(!LinkMatcher.candidates("sammy", studio: studio, counts: counts).contains { $0.isNew }, "an alias is exact too")
+        let new = LinkMatcher.candidates("Pat Doe", studio: studio, counts: counts).filter(\.isNew).map(\.link)
         #expect(new == [.person("Pat Doe"), .account("Pat Doe"), .tag("pat-doe")])
+        #expect(new.map(\.kindName) == ["person", "product", "tag"], "Studio's words, never account")
     }
 
     @Test func excludesLinked() {
-        #expect(!LinkMatcher.candidates("sam", directory: directory, excluding: [.person("Sam Lee")]).contains { $0.link == .person("Sam Lee") })
+        #expect(!LinkMatcher.candidates("sam", studio: studio, counts: counts, excluding: [.object("person/sam-lee")]).contains { $0.link == .object("person/sam-lee") })
+    }
+
+    @Test func notesKeepTheirFrontMatterWhenFiled() {
+        let raw = "---\ndate: 2026-10-25T12:08:24\ntags: []\nkind: voice\ndevice: iPhone\n---\n\nCall Sam about Acme.\n"
+        let filed = JotNote.withFields(raw, ["links": ["person/sam-lee", "org/acme"], "tags": ["pricing"]])
+        #expect(filed == "---\ndate: 2026-10-25T12:08:24\ntags: [pricing]\nkind: voice\ndevice: iPhone\nlinks: [person/sam-lee, org/acme]\n---\n\nCall Sam about Acme.\n")
+        #expect(JotNote.withFields(filed, ["links": [], "tags": []]) == raw, "taking every link off leaves the note as it was")
+        #expect(JotNote.withFields("Just text", ["links": ["domain/career"], "tags": []]) == "---\nlinks: [domain/career]\ntags: []\n---\n\nJust text")
+        let url = FileManager.default.temporaryDirectory.appending(path: "jot-note-\(UUID().uuidString).md")
+        try? filed.write(to: url, atomically: true, encoding: .utf8)
+        let note = JotNote.read(url)
+        #expect(note?.links == ["person/sam-lee", "org/acme"] && note?.tags == ["pricing"] && note?.text == "Call Sam about Acme.")
     }
 
     @Test func markdownExport() {
         var meta = Conversation(id: "Work/2026-10-20-sync", title: "Sync", created: "2026-10-20T15:00:00Z")
         meta.durationSec = 1_500
-        meta.people = ["Sam Lee"]
+        meta.links = ["person/sam-lee"]
         meta.tags = ["pricing"]
         let notes = Notes(summary: "We held the price.", decisions: ["Hold it"], actions: [ActionItem(text: "Send the form", owner: "Sam Lee", due: "2026-10-24")])
-        let md = Markdown.export(meta, notes: notes, transcript: Transcript())
+        let md = Markdown.export(meta, notes: notes, transcript: Transcript(), studio: studio)
         #expect(md.hasPrefix("# Sync\n\n"))
-        #expect(md.contains("With Sam Lee\n#pricing\n"))
+        #expect(md.contains("Filed under Sam Lee\n#pricing\n"))
         #expect(md.contains("## Decisions\n\n- Hold it\n"))
         #expect(md.contains("- [ ] Send the form (Sam Lee, due 2026-10-24)\n"))
         #expect(!md.contains("\u{2014}"))

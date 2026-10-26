@@ -95,7 +95,7 @@ extension Recorder {
     /// folder, so the recordings folder is "recordingsPath". Copied once from Glyph Record.
     @MainActor static func migrateSettings() {
         let d = UserDefaults.standard
-        guard d.string(forKey: "recordingsPath") == nil,
+        guard !AppModel.testHost, d.string(forKey: "recordingsPath") == nil,
               let old = UserDefaults(suiteName: "dev.fru.glyph.record") else { return }
         if let path = old.string(forKey: "vaultPath") { d.set(path, forKey: "recordingsPath") }
         if d.object(forKey: "includeSystemAudio") == nil, old.object(forKey: "includeSystemAudio") != nil {

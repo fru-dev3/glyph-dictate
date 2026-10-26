@@ -44,6 +44,7 @@ The on-disk truth. Every other module reads/writes these exact shapes. No DB.
   "tags": ["insurance", "home"],
   "suggested": { "people": [], "accounts": [], "tags": ["renewal"], "dismissed": [] },
   "source": "recording",                 // recording | import | calendar
+  "device": "laptop",                    // the machine it was captured on (since GlyphCore 0.1.2; missing in older files)
   "calendar_event_id": null,
   "audio": "audio.m4a",
   "updated": "2026-06-17T11:46:00Z"
@@ -147,3 +148,35 @@ byte, and Memosa's `vault_report` reads them exactly as `glyphcore-report` does.
 - Trash, never delete: a conversation moves to `.memosa/trash/<id with / as __>` (`-2`, `-3`
   when taken). Nothing in GlyphCore removes a conversation, a note or audio, and there is no
   retention policy.
+
+## Studio links (v3, Glyph Jot 0.7.12)
+Glyph Jot captures context and files it into Glyph Studio. It keeps no people or companies
+of its own: a capture links to Studio's objects by Studio's ids, and Studio owns them.
+
+```
+<studio vault>/data/
+├─ entities/people/<slug>/entity.md    # People     id person/<slug>
+├─ entities/orgs/<slug>/entity.md      # Products   id org/<slug>   (a company)
+├─ apps/<id>/manifest.json             # Products   an app: shown on its company's row when its
+│                                      #            `company`, id or `title`/`name` slugs to an
+│                                      #            org; else its own row, id org/<slug of title>
+├─ missions/<slug>/mission.md          # Projects   id mission/<slug>
+└─ domains/<slug>/manifest.json        # Domains    id domain/<slug> (name: identity.label)
+```
+- Entity pages carry front matter `name:` and `aliases: [a, b]`; an older vault's flat
+  `<slug>.md` still reads. Folders starting with `_` or `.` are not objects.
+- Slug: lower case, anything but a-z and 0-9 becomes `-`, no `-` at the ends.
+- Glyph Jot only reads these. A new person or product is made with Studio's own
+  `prevail entities create --kind person|org` (stdin `{"draft": {"name": ..., "notes": ...}}`);
+  links between Studio objects are Studio's (`prevail entities link`), never Jot's.
+- meta.json gains `"links": ["person/sam-lee", "org/acme", "mission/launch", "domain/career"]`
+  after `tags`, and `suggested` gains `"links"` first (Studio objects the call names; its
+  `people` are now only names with no Studio page yet). Both are left out when empty, so a
+  file without links is byte for byte the v2 file.
+- A note (`<studio vault>/data/domains/notes/source/jot/*.md`) gains `links: [...]` in its
+  front matter; its `tags` stay.
+- `#tags` stay plain: Studio has no tags.
+- Moving a v2 vault: each name in `people` and `accounts` (through its note's aliases) becomes
+  the Studio id with that name or alias, or one Studio makes; the People and Accounts notes
+  move to `.memosa/migrated-to-studio/` (never deleted), with a line per run in its `log.jsonl`.
+  Names Studio can't take stay where they were. Older `suggested.accounts` are dropped.

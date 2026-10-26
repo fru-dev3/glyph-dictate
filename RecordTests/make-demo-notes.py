@@ -1,13 +1,25 @@
 #!/usr/bin/env python3
-"""Made-up notes and dictations for trying Glyph Jot and taking its screenshots.
+"""A made-up Glyph Studio vault with notes and dictations, for trying Glyph Jot and taking
+its screenshots.
 
-    python3 RecordTests/make-demo-notes.py <notes folder> [<recordings vault>]
+    python3 RecordTests/make-demo-notes.py <studio vault folder> [<recordings vault>]
 
-Every word here is invented. With a recordings vault (from make-demo-vault.py), the first
-note is linked to the newest recording as a jot said during it.
+Every word here is invented. The Studio part is the documented layout Glyph Jot reads
+(docs/vault-format.md, "Studio links"): people, companies and an app (Products), projects
+and domains. With a recordings vault (from make-demo-vault.py), the first note is linked to
+the newest recording as a jot said during it.
 """
 import json, os, sys
 from datetime import datetime, timedelta, timezone
+
+PEOPLE = {"sam-lee": ("Sam Lee", ["Sammy"]), "kim-park": ("Kim Park", []), "pat-doe": ("Pat Doe", ["Patricia"])}
+ORGS = {"acme": ("Acme", ["Acme Corp"]), "globex": ("Globex", []), "northwind": ("Northwind", [])}
+APPS = {"acme-portal": {"id": "acme-portal", "name": "Acme Portal", "company": "Acme"}, "initech": {"id": "initech", "name": "Initech"}}
+MISSIONS = {"acme-renewal": "Acme renewal", "kitchen-remodel": "Kitchen remodel"}
+DOMAINS = {"career": "Career", "home": "Home", "health": "Health", "money": "Money", "learning": "Learning"}
+# Which notes are filed where (by NOTES index).
+NOTE_LINKS = {0: ["person/sam-lee", "org/acme", "domain/career"], 1: ["domain/learning"], 2: ["domain/home", "mission/kitchen-remodel"],
+              4: ["domain/health"], 5: ["person/kim-park", "org/globex"]}
 
 NOTES = [
     (0, 9, 41, "Mac", None, "Send Sam the order form today, and ask finance about the forty new seats before Friday."),
@@ -28,8 +40,25 @@ DICTATIONS = [
     (3, 9, 5, "Calendar", None, "Northwind pilot check-in, Thursday at ten"),
 ]
 
+def put(path, text):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    open(path, "w").write(text)
+
+
 def main():
-    notes, rec = sys.argv[1], (sys.argv[2] if len(sys.argv) > 2 else None)
+    vault, rec = sys.argv[1], (sys.argv[2] if len(sys.argv) > 2 else None)
+    data = os.path.join(vault, "data")
+    for slug, (name, aliases) in PEOPLE.items():
+        put(os.path.join(data, "entities/people", slug, "entity.md"), f"---\nname: {name}\nkind: person\naliases: [{', '.join(aliases)}]\nsaved: true\n---\n")
+    for slug, (name, aliases) in ORGS.items():
+        put(os.path.join(data, "entities/orgs", slug, "entity.md"), f"---\nname: {name}\nkind: org\naliases: [{', '.join(aliases)}]\nsaved: true\n---\n")
+    for slug, m in APPS.items():
+        put(os.path.join(data, "apps", slug, "manifest.json"), json.dumps(m, indent=2))
+    for slug, name in MISSIONS.items():
+        put(os.path.join(data, "missions", slug, "mission.md"), f'---\nname: "{name}"\nstatus: active\n---\n')
+    for slug, label in DOMAINS.items():
+        put(os.path.join(data, "domains", slug, "manifest.json"), json.dumps({"schema": 1, "identity": {"name": slug, "label": label}}))
+    notes = os.path.join(data, "domains/notes/source/jot")  # where Glyph Jot keeps notes in a Studio vault
     os.makedirs(notes, exist_ok=True)
     now = datetime.now().replace(second=0, microsecond=0)
     files = []
@@ -37,11 +66,12 @@ def main():
         t = (now - timedelta(days=days)).replace(hour=h, minute=m)
         stem = t.strftime("%Y-%m-%d %H-%M-%S")
         fm = f"---\ndate: {t.strftime('%Y-%m-%dT%H:%M:%S')}\ntags: []\nkind: voice\ndevice: {device}\n"
+        if len(files) in NOTE_LINKS: fm += f"links: [{', '.join(NOTE_LINKS[len(files)])}]\n"
         if place: fm += f'place: "{place}"\n'
         fm += "source: jot\n---\n\n"
         open(os.path.join(notes, stem + ".md"), "w").write(fm + text + "\n")
         files.append(stem + ".md")
-    log = os.path.join(notes, ".jot", "dictations")
+    log = os.path.join(data, "apps", "jot", "dictations")
     os.makedirs(log, exist_ok=True)
     lines = []
     for days, h, m, app, project, text in DICTATIONS:
@@ -63,7 +93,7 @@ def main():
                          {"start": 498.0, "end": 505.6, "kind": "thought", "note": files[0]}]
             open(os.path.join(d, "meta.json"), "w").write(json.dumps(m, indent=2) + "\n")
             print("linked", files[0], "to", m["id"])
-    print("notes in", notes)
+    print("studio vault, notes and dictations in", vault)
 
 if __name__ == "__main__":
     main()

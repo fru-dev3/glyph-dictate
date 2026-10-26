@@ -13,6 +13,8 @@ struct JotNote: Identifiable, Hashable {
     let device: String?
     let place: String?
     let tags: [String]
+    /// Glyph Studio objects it is filed under, by id (front matter `links: [person/sam-lee]`).
+    var links: [String] = []
 
     /// Front matter between `---` lines, then the text. Missing fields stay nil.
     static func read(_ url: URL) -> JotNote? {
@@ -30,10 +32,10 @@ struct JotNote: Identifiable, Hashable {
         guard !text.isEmpty else { return nil }
         let date = fields["date"].flatMap(parseDate) ?? stemDate(url.deletingPathExtension().lastPathComponent)
             ?? ((try? url.resourceValues(forKeys: [.creationDateKey]))?.creationDate ?? .distantPast)
-        let tags = (fields["tags"] ?? "").trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
-            .split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        let list = { (key: String) in (fields[key] ?? "").trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
+            .split(separator: ",").map { $0.trimmingCharacters(in: CharacterSet(charactersIn: " \"'")) }.filter { !$0.isEmpty } }
         return JotNote(file: url.lastPathComponent, url: url, date: date, text: text,
-                       device: fields["device"], place: fields["place"], tags: tags)
+                       device: fields["device"], place: fields["place"], tags: list("tags"), links: list("links"))
     }
 
     /// "2026-10-25T12:08:24", local time, as the phone and the Mac write it.
@@ -51,6 +53,28 @@ struct JotNote: Identifiable, Hashable {
         return f.date(from: stem)
     }
 
+    /// `raw` with these front matter lists set (added before the closing `---`, or in a new
+    /// front matter); `links` is left out when empty.
+    static func withFields(_ raw: String, _ fields: [String: [String]]) -> String {
+        var head: [String] = [], body = raw
+        if raw.hasPrefix("---\n"), let end = raw.range(of: "\n---", range: raw.index(raw.startIndex, offsetBy: 4)..<raw.endIndex) {
+            head = raw[raw.index(raw.startIndex, offsetBy: 4)..<end.lowerBound].split(separator: "\n", omittingEmptySubsequences: false).map(String.init)
+            body = String(raw[end.upperBound...])
+        } else {
+            body = "\n\n" + raw
+        }
+        for key in fields.keys.sorted() {
+            let values = fields[key] ?? []
+            let line = "\(key): [\(values.joined(separator: ", "))]"
+            if let i = head.firstIndex(where: { $0.hasPrefix(key + ":") }) {
+                if values.isEmpty, key == "links" { head.remove(at: i) } else { head[i] = line }
+            } else if !(values.isEmpty && key == "links") {
+                head.append(line)
+            }
+        }
+        return "---\n" + head.joined(separator: "\n") + "\n---" + body
+    }
+
     var title: String {
         let first = text.split(separator: "\n").first.map(String.init) ?? text
         return first.count > 90 ? String(first.prefix(88)) + "\u{2026}" : first
@@ -64,8 +88,42 @@ final class NoteStore {
     private(set) var notes: [JotNote] = []
     private(set) var dictationCount = 0
 
+    /// Writes a note's `links` and `tags` into its front matter; every other line stays.
+    func setLinks(_ file: String, links: [String], tags: [String]) throws {
+        guard let note = notes.first(where: { $0.file == file }) else { return }
+        let raw = try String(contentsOf: note.url, encoding: .utf8)
+        let unique = { (xs: [String]) in xs.reduce(into: [String]()) { out, x in if !out.contains(x) { out.append(x) } } }
+        let text = JotNote.withFields(raw, ["links": unique(links), "tags": unique(tags.map(LinkMatcher.tidyTag).filter { !$0.isEmpty })])
+        try text.write(to: note.url, atomically: true, encoding: .utf8)
+        reload()
+    }
+
+    private var watcher: DispatchSourceFileSystemObject?
+    private var settle: DispatchWorkItem?
+
+    /// Reads the notes again whenever the folder changes: a note the phone sends, or fixes after
+    /// it was sent, shows up without waiting for the window to come forward. The folder's own
+    /// write event fires when a file in it is added, replaced or removed (the inbox and vault
+    /// sync both replace files whole).
+    private func watch(_ folder: URL) {
+        guard watcher == nil else { return }
+        let fd = open(folder.path, O_EVTONLY)
+        guard fd >= 0 else { return }
+        let source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: fd, eventMask: [.write, .rename, .delete], queue: .main)
+        source.setEventHandler { [weak self] in
+            self?.settle?.cancel()
+            let work = DispatchWorkItem { MainActor.assumeIsolated { self?.reload() } }
+            self?.settle = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
+        }
+        source.setCancelHandler { close(fd) }
+        source.resume()
+        watcher = source
+    }
+
     func reload() {
         let folder = Thoughts.folder
+        watch(folder)
         let files = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.creationDateKey])) ?? []
         notes = files.filter { $0.pathExtension == "md" }.compactMap(JotNote.read).sorted { $0.date > $1.date }
         dictationCount = HistoryView.load().count
@@ -207,10 +265,9 @@ struct NoteDetail: View {
                 FlowLayout(spacing: 6) {
                     if let device = note.device { MetaChip(symbol: note.device?.contains("iPhone") == true ? "iphone" : "laptopcomputer", text: device) }
                     if let place = note.place { MetaChip(symbol: "mappin.and.ellipse", text: place) }
-                    ForEach(note.tags, id: \.self) { MetaChip(symbol: "number", text: $0) }
                     if let (id, at) = model.recordingFor(note: note.file), let meta = model.meta(id) {
                         Button {
-                            model.sidebar = .all
+                            model.sidebar = .recordings
                             model.selectedID = id
                             model.tab = .transcript
                         } label: {
@@ -228,6 +285,7 @@ struct NoteDetail: View {
                         .help("Open the recording this note was said in")
                     }
                 }
+                LinkEditor(target: .note(note.file), links: note.links.map { .object($0) } + note.tags.map { .tag($0) })
                 Text(note.text)
                     .font(.system(size: 17))
                     .lineSpacing(5)

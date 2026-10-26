@@ -27,7 +27,7 @@ import Testing
 
 /// The files the golden vault holds, vault-relative.
 func buildGoldenVault(_ v: Vault) throws -> [String] {
-    let id = try v.createConversation(in: "Work/Acme", title: "Weekly sync: pricing \"Q4\"", created: try Date("2026-10-20T15:00:00Z", strategy: .iso8601)).id
+    let id = try v.createConversation(in: "Work/Acme", title: "Weekly sync: pricing \"Q4\"", created: try Date("2026-10-20T15:00:00Z", strategy: .iso8601), device: "laptop").id
     var sam = Entity(kind: .person, name: "Sam Lee")
     sam.account = "Acme Corp"
     sam.aliases = ["Sammy", "Sam"]

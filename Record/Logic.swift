@@ -9,15 +9,16 @@ typealias Link = GlyphVault.Link
 struct Candidate: Hashable {
     var link: Link
     var isNew = false
-    /// Calls it already has, for known people, accounts and tags.
+    /// Captures it already has.
     var count = 0
 }
 
 enum LinkMatcher {
-    /// Matches for `text` among the notes and tags, best first, then the ways to make it
-    /// new. `#word` means a tag; anything else may be a person, an account or a tag.
+    /// Matches for `text` among Studio's objects and the tags in use, best first, then the
+    /// ways to make it new (a person or a product in Studio, or a tag). `#word` means a tag.
     /// Links in `excluding` are left out.
-    static func candidates(_ text: String, directory: Vault.Directory, excluding: Set<Link> = []) -> [Candidate] {
+    static func candidates(_ text: String, studio: StudioDirectory, counts: (objects: [String: Int], tags: [String: Int]),
+                           excluding: Set<Link> = []) -> [Candidate] {
         let raw = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let isTag = raw.hasPrefix("#")
         let query = (isTag ? String(raw.dropFirst()) : raw).trimmingCharacters(in: .whitespaces)
@@ -35,21 +36,25 @@ enum LinkMatcher {
 
         var found: [(Int, Candidate)] = []
         if !isTag {
-            for row in directory.entities {
-                guard let s = score([row.entity.name] + row.entity.aliases) else { continue }
-                let link: Link = row.entity.kind == .person ? .person(row.entity.name) : .account(row.entity.name)
-                found.append((s, Candidate(link: link, count: row.count)))
+            for o in studio.objects {
+                guard let s = score([o.name] + o.aliases) else { continue }
+                found.append((s, Candidate(link: .object(o.id), count: counts.objects[o.id] ?? 0)))
             }
         }
-        for tag in directory.tags {
-            guard let s = score([tag.name]) else { continue }
-            found.append((s, Candidate(link: .tag(tag.name), count: tag.count)))
+        for (tag, n) in counts.tags {
+            guard let s = score([tag]) else { continue }
+            found.append((s, Candidate(link: .tag(tag), count: n)))
         }
-        var out = found.sorted { $0.0 != $1.0 ? $0.0 < $1.0 : $0.1.count > $1.1.count }.map(\.1)
-            .filter { !excluding.contains($0.link) }
+        // Best match first; among equals, the one with more captures, then by name.
+        var out = found.sorted { a, b in
+            a.0 != b.0 ? a.0 < b.0 : a.1.count != b.1.count ? a.1.count > b.1.count : a.1.link.name < b.1.link.name
+        }.map(\.1).filter { !excluding.contains($0.link) }
 
         // Making something new, unless that exact name is already offered.
-        let exact = out.contains { $0.link.name.lowercased() == q || $0.link.name == tidyTag(query) }
+        let exact = out.contains { c in
+            if case .object(let id) = c.link, let o = studio.object(id) { return ([o.name] + o.aliases).contains { $0.lowercased() == q } }
+            return c.link.name == tidyTag(query)
+        }
         if !exact {
             if isTag {
                 out.append(Candidate(link: .tag(tidyTag(query)), isNew: true))
@@ -59,7 +64,7 @@ enum LinkMatcher {
                 out.append(Candidate(link: .tag(tidyTag(query)), isNew: true))
             }
         }
-        return Array(out.prefix(7))
+        return Array(out.prefix(8))
     }
 
     /// How the vault stores a tag: lower case, words joined with `-`, no `#`.
@@ -72,13 +77,13 @@ enum LinkMatcher {
 
 enum Markdown {
     /// A conversation as Markdown to paste anywhere: title, when and who, the notes.
-    static func export(_ meta: Conversation, notes: Notes, transcript: Transcript) -> String {
+    static func export(_ meta: Conversation, notes: Notes, transcript: Transcript, studio: StudioDirectory = StudioDirectory()) -> String {
         var out = "# \(meta.title)\n\n"
         var facts = [Format.longDate(meta.created)]
         if meta.durationSec > 0 { facts.append(Format.duration(meta.durationSec)) }
         out += facts.joined(separator: ", ") + "\n"
-        let who = meta.people + meta.accounts
-        if !who.isEmpty { out += "With " + who.joined(separator: ", ") + "\n" }
+        let who = meta.links.map(studio.name)
+        if !who.isEmpty { out += "Filed under " + who.joined(separator: ", ") + "\n" }
         if !meta.tags.isEmpty { out += meta.tags.map { "#" + $0 }.joined(separator: " ") + "\n" }
         if !notes.summary.isEmpty { out += "\n## Summary\n\n\(notes.summary)\n" }
         if !notes.decisions.isEmpty { out += "\n## Decisions\n\n" + notes.decisions.map { "- \($0)\n" }.joined() }

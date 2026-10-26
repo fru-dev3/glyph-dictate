@@ -55,13 +55,12 @@ struct ConversationDetail: View {
                 ForEach(model.banners.filter { $0.conversation == meta.id }) { b in
                     BannerView(banner: b).padding(.bottom, 16)
                 }
-                TabBar(selection: $model.tab, counts: [.actions: notes.actions.filter { !$0.done }.count])
+                TabBar(selection: $model.tab)
                     .padding(.bottom, 20)
                 Group {
                     switch model.tab {
                     case .summary: SummaryTab(meta: meta, notes: notes, hasTranscript: !transcript.segments.isEmpty)
                     case .transcript: TranscriptTab(meta: meta, transcript: transcript, player: player, hasAudio: hasAudio)
-                    case .actions: ActionsTab(meta: meta, notes: notes)
                     }
                 }
                 .transition(.opacity)
@@ -117,7 +116,7 @@ struct ConversationDetail: View {
             FlowLayout(spacing: 16, lineSpacing: 6) {
                 MetaChip(symbol: "calendar", text: Format.longDate(meta.created))
                 if meta.durationSec > 0 { MetaChip(symbol: "clock", text: Format.duration(meta.durationSec)) }
-                FolderChip(id: meta.id)
+                if let device = meta.device { MetaChip(symbol: "laptopcomputer", text: device) }
                 if let stage = model.stage(meta.id) {
                     HStack(spacing: 5) {
                         StageIcon(stage: stage)
@@ -131,56 +130,48 @@ struct ConversationDetail: View {
     }
 }
 
-/// People, accounts and #tags on a conversation, the add field, then the AI's guesses.
+/// What a recording is filed under (Studio objects and #tags), the add field, then the AI's guesses.
 struct LinkRow: View {
     let meta: Conversation
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        let links: [Link] = meta.people.map { .person($0) } + meta.accounts.map { .account($0) } + meta.tags.map { .tag($0) }
-        let suggestions: [Link] = meta.suggested.people.map { .person($0) } + meta.suggested.accounts.map { .account($0) } + meta.suggested.tags.map { .tag($0) }
+        LinkEditor(target: .recording(meta.id),
+                   links: meta.links.map { .object($0) } + meta.tags.map { .tag($0) },
+                   suggestions: meta.suggested.links.map { .object($0) } + meta.suggested.people.map { .person($0) } + meta.suggested.tags.map { .tag($0) },
+                   onAnswer: { link, yes in model.answer(link, for: meta.id, accept: yes) })
+    }
+}
+
+/// Links on a recording or a note: chips that open their page, the + field, and guesses.
+struct LinkEditor: View {
+    let target: LinkTarget
+    let links: [Link]
+    var suggestions: [Link] = []
+    var onAnswer: ((Link, Bool) -> Void)?
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
         FlowLayout(spacing: 6, lineSpacing: 8) {
             ForEach(links, id: \.self) { link in
-                LinkChip(link: link, onOpen: { model.sidebar = link.sidebarItem }, onRemove: {
-                    animate { model.removeLink(link, from: meta.id) }
+                LinkChip(link: link, onOpen: { if let item = link.sidebarItem { model.sidebar = item } }, onRemove: {
+                    animate { model.removeLink(link, from: target) }
                 })
                 .transition(.scale(scale: 0.8).combined(with: .opacity))
             }
             LinkAddField(excluding: Set(links), request: model.addLinkRequest) { link in
-                model.addLink(link, to: meta.id)
+                model.addLink(link, to: target)
             }
             ForEach(suggestions, id: \.self) { link in
                 SuggestionChip(link: link,
-                               onAccept: { animate { model.answer(link, for: meta.id, accept: true) } },
-                               onDismiss: { animate { model.answer(link, for: meta.id, accept: false) } })
+                               onAccept: { animate { onAnswer?(link, true) } },
+                               onDismiss: { animate { onAnswer?(link, false) } })
                 .transition(.scale(scale: 0.8).combined(with: .opacity))
             }
         }
         .animation(.glyph(false), value: links)
         .animation(.glyph(false), value: suggestions)
         .zIndex(5)
-    }
-}
-
-/// The folder a conversation is in; click to move it.
-struct FolderChip: View {
-    let id: String
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        let folder = AppModel.parent(id)
-        Menu {
-            ForEach(model.folders, id: \.self) { f in
-                Button(f) { model.move(id, to: f) }.disabled(f == folder)
-            }
-        } label: {
-            MetaChip(symbol: "folder", text: folder.isEmpty ? "Vault" : folder)
-        }
-        .menuStyle(.button)
-        .buttonStyle(.plain)
-        .menuIndicator(.hidden)
-        .fixedSize()
-        .help("Move to another folder")
     }
 }
 
@@ -206,10 +197,9 @@ struct MoreMenu: View {
     }
 }
 
-/// Summary / Transcript / Action items with an indicator that slides between them.
+/// Summary / Transcript with an indicator that slides between them.
 struct TabBar: View {
     @Binding var selection: DetailTab
-    var counts: [DetailTab: Int] = [:]
     @Namespace private var ns
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -219,17 +209,7 @@ struct TabBar: View {
                 Button {
                     withAnimation(.glyph(reduceMotion)) { selection = tab }
                 } label: {
-                    HStack(spacing: 6) {
-                        Text(tab.title)
-                        if let n = counts[tab], n > 0 {
-                            Text("\(n)")
-                                .font(.system(size: 11, weight: .semibold))
-                                .monospacedDigit()
-                                .padding(.horizontal, 6)
-                                .frame(height: 17)
-                                .background(selection == tab ? Color.accentColor.opacity(0.18) : Color.secondary.opacity(0.14), in: Capsule())
-                        }
-                    }
+                    Text(tab.title)
                     .font(.system(size: 13, weight: selection == tab ? .semibold : .medium))
                     .fixedSize()
                     .foregroundStyle(selection == tab ? .primary : .secondary)
@@ -262,7 +242,7 @@ struct SummaryTab: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        if !notes.summary.isEmpty || !notes.decisions.isEmpty {
+        if !notes.summary.isEmpty || !notes.decisions.isEmpty || !notes.actions.isEmpty {
             VStack(alignment: .leading, spacing: 26) {
                 if !notes.summary.isEmpty {
                     Text(notes.summary)
@@ -280,6 +260,28 @@ struct SummaryTab: View {
                             HStack(alignment: .firstTextBaseline, spacing: 10) {
                                 Circle().fill(.tint).frame(width: 6, height: 6).alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + 5 }
                                 Text(d).font(.system(size: 15)).lineSpacing(3).textSelection(.enabled)
+                            }
+                        }
+                    }
+                }
+                // Read here only: tasks live in Glyph Studio, not in Glyph Jot.
+                if !notes.actions.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Label("Action items", systemImage: "arrow.right.circle.fill")
+                            .font(.system(size: 17, weight: .semibold))
+                            .labelStyle(TintedIconLabel())
+                        ForEach(Array(notes.actions.enumerated()), id: \.offset) { _, item in
+                            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                                Circle().fill(.tint).frame(width: 6, height: 6).alignmentGuide(.firstTextBaseline) { $0[VerticalAlignment.center] + 5 }
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(item.text).font(.system(size: 15)).lineSpacing(3).textSelection(.enabled)
+                                    if item.owner != nil || item.due != nil {
+                                        HStack(spacing: 14) {
+                                            if let o = item.owner { MetaChip(symbol: "person", text: o) }
+                                            if let d = item.due { MetaChip(symbol: "calendar", text: Format.due(d)) }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -452,47 +454,5 @@ enum SpeakerColor {
     static let palette: [Color] = [.accentColor, .blue, .purple, .teal, .pink, .indigo]
     static func `for`(_ name: String) -> Color {
         palette[abs(name.unicodeScalars.reduce(0) { $0 &* 31 &+ Int($1.value) }) % palette.count]
-    }
-}
-
-struct ActionsTab: View {
-    let meta: Conversation
-    let notes: Notes
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        if notes.actions.isEmpty {
-            if let stage = model.stage(meta.id) {
-                Working(stage: stage)
-            } else {
-                EmptyState(symbol: "checklist", title: "No action items", message: "Things to do that come up in the call land here.")
-                    .frame(minHeight: 260)
-            }
-        } else {
-            VStack(alignment: .leading, spacing: 4) {
-                ForEach(Array(notes.actions.enumerated()), id: \.offset) { _, item in
-                    HStack(alignment: .firstTextBaseline, spacing: 12) {
-                        CheckBox(done: item.done) { model.setTask(meta.id, item, done: $0) }
-                        VStack(alignment: .leading, spacing: 5) {
-                            Text(item.text)
-                                .font(.system(size: 15))
-                                .strikethrough(item.done, color: .secondary)
-                                .foregroundStyle(item.done ? .secondary : .primary)
-                                .fixedSize(horizontal: false, vertical: true)
-                            if item.owner != nil || item.due != nil {
-                                HStack(spacing: 14) {
-                                    if let o = item.owner { MetaChip(symbol: "person", text: o) }
-                                    if let d = item.due { MetaChip(symbol: "calendar", text: Format.due(d)) }
-                                }
-                            }
-                        }
-                        Spacer(minLength: 0)
-                    }
-                    .padding(.vertical, 9)
-                    .padding(.horizontal, 12)
-                    .background(Color.secondary.opacity(0.05), in: RoundedRectangle(cornerRadius: 10))
-                }
-            }
-        }
     }
 }

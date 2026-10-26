@@ -3,31 +3,33 @@ import AVFoundation
 import GlyphCore
 import SwiftUI
 
+/// What the sidebar shows: the three kinds of capture (and All of them), then the Glyph
+/// Studio objects they are filed under (by Studio id), then plain #tags.
 enum SidebarItem: Hashable {
-    case all, openTasks
-    /// Glyph Jot's own: notes (Fn+Shift, the phone's memos) and every dictation.
-    case notes, dictations
-    case folder(String)
-    case person(String), account(String), tag(String)
+    case all, notes, dictations, recordings
+    case object(String), tag(String)
 
     var link: Link? {
         switch self {
-        case .person(let n): .person(n)
-        case .account(let n): .account(n)
-        case .tag(let n): .tag(n)
+        case .object(let id): .object(id)
+        case .tag(let t): .tag(t)
         default: nil
         }
     }
 }
 
+/// A recording or a note: what a link is added to.
+enum LinkTarget: Hashable {
+    case recording(String), note(String)
+}
+
 enum DetailTab: String, CaseIterable, Identifiable {
-    case summary, transcript, actions
+    case summary, transcript
     var id: Self { self }
     var title: String {
         switch self {
         case .summary: "Summary"
         case .transcript: "Transcript"
-        case .actions: "Action items"
         }
     }
 }
@@ -72,6 +74,8 @@ final class AppModel {
 
     private(set) var library: Library
     var vault: Vault { library.vault }
+    /// Glyph Studio's people, products, projects and domains, from the notes vault.
+    private(set) var studio = StudioDirectory()
 
     // Selection and layout
     var sidebar: SidebarItem? = .all { didSet { if oldValue != sidebar { syncSelection() } } }
@@ -112,6 +116,42 @@ final class AppModel {
         try? vault.ensure()
         library = Library(vault: vault)
         library.start()
+        Task { await reloadStudio(); await migrateToStudio() }
+    }
+
+    /// The Studio vault: the notes folder when it is one (`data/domains`).
+    var studioRoot: URL? { DictationLog.vault }
+
+    func reloadStudio() async {
+        guard let root = studioRoot else { studio = StudioDirectory(); return }
+        let read = await Task.detached(priority: .utility) { StudioDirectory(root: root) }.value
+        if read != studio { studio = read }
+    }
+
+    /// An older library's People and Accounts become Studio ids, once (see Vault.migrateToStudio).
+    /// Not when the Studio vault reads empty: a locked folder must not make every name again.
+    func migrateToStudio() async {
+        guard !AppModel.testHost, let root = studioRoot, !studio.objects(.domain).isEmpty else { return }
+        let vault = vault, studio = studio
+        let report = await Task.detached(priority: .utility) {
+            try? vault.migrateToStudio(studio) { kind, name, notes in StudioCommand.create(kind, name, notes: notes, vault: root) }
+        }.value
+        guard let report, !report.isEmpty else { return }
+        for r in report.rows { jotLog.notice("studio: \(r.name, privacy: .public) is \(r.id, privacy: .public)\(r.created ? " (new)" : "", privacy: .public)") }
+        if !report.unresolved.isEmpty { jotLog.notice("studio: not moved yet: \(report.unresolved.joined(separator: ", "), privacy: .public)") }
+        // A record to read later, beside the moved notes.
+        let record: [String: Any] = [
+            "at": Date.now.ISO8601Format(), "conversations": report.conversations, "notes_moved": report.notesMoved, "unresolved": report.unresolved,
+            "rows": report.rows.map { ["name": $0.name, "id": $0.id, "created": $0.created] as [String: Any] },
+        ]
+        if let data = try? JSONSerialization.data(withJSONObject: record) {
+            let log = vault.root.appending(path: ".memosa/migrated-to-studio/log.jsonl")
+            try? FileManager.default.createDirectory(at: log.deletingLastPathComponent(), withIntermediateDirectories: true)
+            if !FileManager.default.fileExists(atPath: log.path) { FileManager.default.createFile(atPath: log.path, contents: nil) }
+            if let h = try? FileHandle(forWritingTo: log) { h.seekToEndOfFile(); h.write(data + Data("\n".utf8)); try? h.close() }
+        }
+        await reloadStudio()
+        library.reload()
     }
 
     // MARK: vault
@@ -127,14 +167,16 @@ final class AppModel {
         return FileManager.default.fileExists(atPath: memosa.path) ? memosa : docs.appending(path: "Glyph Vault", directoryHint: .isDirectory)
     }
 
-    func switchVault(to url: URL) {
-        UserDefaults.standard.set(url.path, forKey: "recordingsPath")
+    /// `remember: false` (tests) leaves the saved choice alone: a test host shares the
+    /// installed app's defaults, and once pointed Fru's recordings at a temp folder.
+    func switchVault(to url: URL, remember: Bool = true) {
+        if remember, !AppModel.testHost { UserDefaults.standard.set(url.path, forKey: "recordingsPath") }
         library.stop()
         let vault = Vault(root: url)
         try? vault.ensure()
         library = Library(vault: vault)
         library.start()
-        sidebar = .all
+        sidebar = .recordings
         selectedID = nil
     }
 
@@ -145,12 +187,6 @@ final class AppModel {
 
     var selected: Conversation? { meta(selectedID) }
 
-    var entities: [Entity] { library.directory.entities.map(\.entity) }
-
-    func entity(_ kind: Entity.Kind, _ name: String) -> Entity? {
-        library.directory.entities.first { $0.entity.kind == kind && $0.entity.name == name }?.entity
-    }
-
     // MARK: the list
 
     /// The conversations the list shows for the sidebar choice and the search.
@@ -158,48 +194,46 @@ final class AppModel {
         let all = library.conversations
         var shown: [Conversation]
         switch sidebar ?? .all {
-        case .all: shown = all
+        case .all, .recordings: shown = all
         case .notes, .dictations: shown = []
-        case .openTasks:
-            let ids = Set(library.tasks.filter { !$0.item.done }.map(\.conversation))
-            shown = all.filter { ids.contains($0.id) }
-        case .folder(let path): shown = all.filter { $0.id.hasPrefix(path + "/") }
-        case .person(let n): shown = linked(all, .person, n)
-        case .account(let n): shown = linked(all, .account, n)
+        case .object(let id): shown = all.filter { $0.links.contains(id) }
         case .tag(let t): shown = all.filter { $0.tags.contains { $0.caseInsensitiveCompare(t) == .orderedSame } }
         }
         if let hits = searchHits { shown = shown.filter { hits.contains($0.id) } }
         return shown
     }
 
-    private func linked(_ all: [Conversation], _ kind: Entity.Kind, _ name: String) -> [Conversation] {
-        let index = EntityIndex(entities)
-        return all.filter { index.links($0, kind, name) }
+    /// The notes filed under a Studio object or carrying a tag.
+    func notes(for item: SidebarItem) -> [JotNote] {
+        switch item {
+        case .object(let id): NoteStore.shared.notes.filter { $0.links.contains(id) }
+        case .tag(let t): NoteStore.shared.notes.filter { $0.tags.contains { $0.caseInsensitiveCompare(t) == .orderedSame } }
+        default: []
+        }
     }
 
-    /// Open action items, newest conversation first, filtered by the search.
-    var openTasks: [VaultTask] {
-        library.tasks.filter { t in !t.item.done && (searchHits?.contains(t.conversation) ?? true) }
+    /// How many recordings and notes each Studio object and tag has.
+    var linkCounts: (objects: [String: Int], tags: [String: Int]) {
+        var objects: [String: Int] = [:], tags: [String: Int] = [:]
+        for c in library.conversations {
+            for l in Set(c.links) { objects[l, default: 0] += 1 }
+            for t in Set(c.tags) { tags[t, default: 0] += 1 }
+        }
+        for n in NoteStore.shared.notes {
+            for l in Set(n.links) { objects[l, default: 0] += 1 }
+            for t in Set(n.tags) { tags[t, default: 0] += 1 }
+        }
+        return (objects, tags)
     }
 
-    /// The folder new recordings and imports go into.
-    var targetFolder: String {
-        if case .folder(let path) = sidebar { return path }
-        if let id = selectedID, case .folder = sidebar { return Self.parent(id) }
-        return "Recordings"
-    }
-
-    /// Every folder path, for Move to.
-    var folders: [String] {
-        func walk(_ n: Vault.Node) -> [String] { n.kind == .conversation ? [] : [n.path] + n.children.flatMap(walk) }
-        return library.tree.flatMap(walk)
-    }
+    /// Recordings and imports go into one folder; where they belong is a Studio link, not a folder.
+    let targetFolder = "Recordings"
 
     private func syncSelection() {
         searchText = ""
         // Keep the open conversation when it is in the new list; else open the first.
         if let id = selectedID, listed.contains(where: { $0.id == id }) { return }
-        selectedID = sidebar == .openTasks ? openTasks.first?.conversation : listed.first?.id
+        selectedID = listed.first?.id
     }
 
     private func scheduleSearch() {
@@ -211,7 +245,7 @@ final class AppModel {
             guard !Task.isCancelled else { return }
             let needle = phrase.lowercased()
             var hits = Set(library.conversations.filter { c in
-                ([c.title] + c.people + c.accounts + c.tags).contains { $0.lowercased().contains(needle) }
+                ([c.title] + c.links.map(studio.name) + c.tags).contains { $0.lowercased().contains(needle) }
             }.map(\.id))
             hits.formUnion(await library.search(phrase))
             guard !Task.isCancelled else { return }
@@ -244,13 +278,6 @@ final class AppModel {
         }
     }
 
-    func move(_ id: String, to folder: String) {
-        perform {
-            let newID = try vault.move(id, to: folder)
-            if selectedID == id { selectedID = newID }
-        }
-    }
-
     func trash(_ id: String) {
         let list = listed
         let next = list.firstIndex { $0.id == id }.flatMap { i in i + 1 < list.count ? list[i + 1].id : (i > 0 ? list[i - 1].id : nil) }
@@ -267,56 +294,88 @@ final class AppModel {
     func copyMarkdown(_ id: String) {
         guard let meta = meta(id) else { return }
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(Markdown.export(meta, notes: vault.notes(id), transcript: vault.transcript(id)), forType: .string)
+        NSPasteboard.general.setString(Markdown.export(meta, notes: vault.notes(id), transcript: vault.transcript(id), studio: studio), forType: .string)
     }
 
-    func setTask(_ id: String, _ item: ActionItem, done: Bool) {
-        perform { try vault.setTask(id, text: item.text, done: done) }
-    }
-
-    func createFolder(_ path: String) {
-        perform { try vault.createFolder(path) }
-    }
-
-    func createEntity(_ kind: Entity.Kind, _ name: String) {
-        let name = Entity.cleanName(name)
-        guard !name.isEmpty else { return }
-        perform { try vault.saveEntity(Entity(kind: kind, name: name)) }
-        sidebar = kind == .person ? .person(name) : .account(name)
-    }
-
-    func saveEntity(_ entity: Entity, renamingFrom old: String? = nil) {
-        perform { try vault.saveEntity(entity, renamingFrom: old) }
-        if let old, old != entity.name {
-            sidebar = entity.kind == .person ? .person(entity.name) : .account(entity.name)
+    /// Opens a capture from All in its own section.
+    func open(_ capture: Capture) {
+        switch capture.kind {
+        case .recording:
+            sidebar = .recordings
+            selectedID = capture.id
+        case .note:
+            openNote = capture.id
+            sidebar = .notes
+        case .dictation:
+            sidebar = .dictations
         }
     }
 
-    // MARK: links
+    // MARK: links (Studio objects and #tags, on a recording or a note)
 
-    func addLink(_ link: Link, to id: String) {
-        guard let m = meta(id) else { return }
-        var people = m.people, accounts = m.accounts, tags = m.tags
+    /// Files a recording or a note under a Studio object or a tag. A new name (`.person`,
+    /// `.account` for a product) is made in Studio first.
+    func addLink(_ link: Link, to target: LinkTarget) {
+        Task {
+            guard let link = await resolve(link) else { return }
+            let (links, tags) = current(target)
+            switch link {
+            case .tag(let t): save(target, links: links, tags: tags + [t])
+            default: save(target, links: links + [link.name], tags: tags)
+            }
+        }
+    }
+
+    func removeLink(_ link: Link, from target: LinkTarget) {
+        let (links, tags) = current(target)
         switch link {
-        case .person(let n): people.append(n)
-        case .account(let n): accounts.append(n)
-        case .tag(let t): tags.append(t)
-        }
-        perform { _ = try vault.setLinks(id, people: people, accounts: accounts, tags: tags) }
-    }
-
-    func removeLink(_ link: Link, from id: String) {
-        guard let m = meta(id) else { return }
-        perform {
-            _ = try vault.setLinks(id,
-                                   people: m.people.filter { link != .person($0) },
-                                   accounts: m.accounts.filter { link != .account($0) },
-                                   tags: m.tags.filter { link != .tag($0) })
+        case .tag(let t): save(target, links: links, tags: tags.filter { $0.caseInsensitiveCompare(t) != .orderedSame })
+        default: save(target, links: links.filter { $0 != link.name }, tags: tags)
         }
     }
 
+    /// A yes or no to a guess on a recording; a yes to a new name makes it in Studio.
     func answer(_ link: Link, for id: String, accept: Bool) {
-        perform { _ = try vault.answerSuggestion(id, link, accept: accept) }
+        Task {
+            var resolved: String?
+            if accept, case .person = link {
+                guard let made = await resolve(link) else { return }
+                resolved = made.name
+            }
+            perform { _ = try vault.answer(id, link, accept: accept, resolved: resolved) }
+        }
+    }
+
+    /// A Studio id for a link: as it is, or made in Studio for a new name.
+    private func resolve(_ link: Link) async -> Link? {
+        guard let kind = link.studioKind, !link.isObject else { return link }
+        if let found = studio.match(link.name, kind) { return .object(found.id) }
+        guard let root = studioRoot, StudioCommand.url != nil else {
+            show("New \(kind.label.lowercased()) are made in Glyph Studio, which isn't on this Mac. Pick one it already has.")
+            return nil
+        }
+        let name = link.name
+        guard let id = await Task.detached(operation: { StudioCommand.create(kind, name, vault: root) }).value else {
+            show("Glyph Studio couldn't add \(name). Try again, or add it in Glyph Studio.")
+            return nil
+        }
+        await reloadStudio()
+        return .object(id)
+    }
+
+    private func current(_ target: LinkTarget) -> ([String], [String]) {
+        switch target {
+        case .recording(let id): meta(id).map { ($0.links, $0.tags) } ?? ([], [])
+        case .note(let file): NoteStore.shared.notes.first { $0.file == file }.map { ($0.links, $0.tags) } ?? ([], [])
+        }
+    }
+
+    private func save(_ target: LinkTarget, links: [String], tags: [String]) {
+        switch target {
+        case .recording(let id): perform { _ = try vault.setStudioLinks(id, links: links, tags: tags) }
+        case .note(let file):
+            do { try NoteStore.shared.setLinks(file, links: links, tags: tags) } catch { show(error.localizedDescription) }
+        }
     }
 
     // MARK: recording
@@ -437,7 +496,7 @@ final class AppModel {
         }
         library.reload()
         await library.settle()
-        if sidebar == .openTasks || !(listed.contains { $0.id == id }) { sidebar = .all }
+        if !(listed.contains { $0.id == id }) { sidebar = .recordings }
         selectedID = id
         Task { await process(id) }
     }
@@ -556,7 +615,8 @@ final class AppModel {
         if FileManager.default.fileExists(atPath: audio.path) {
             stages[id] = .transcribing(0)
             do {
-                let transcript = try await Transcriber().transcribe(audio, names: vault.knownNames()) { event in
+                let names = studio.objects(.person).flatMap { [$0.name] + $0.aliases }
+                let transcript = try await Transcriber().transcribe(audio, names: names) { event in
                     Task { @MainActor in
                         guard self.stages[id] != nil else { return }
                         switch event {
@@ -591,7 +651,9 @@ final class AppModel {
         }
         library.reload()
         stages[id] = .linking
-        _ = try? await LinkSuggester().suggest(id, in: vault)
+        await reloadStudio()
+        let heard = (try? await LinkSuggester().hear(vault.transcript(id).plainText)) ?? Heard()
+        _ = try? vault.suggest(id, heard: heard, studio: studio)
         stages[id] = nil
         library.reload()
     }
@@ -612,6 +674,9 @@ final class AppModel {
     }
 
     // MARK: helpers
+
+    /// Running as a unit test's host: never write the installed app's settings.
+    static let testHost = ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
 
     static func parent(_ id: String) -> String {
         id.split(separator: "/").dropLast().joined(separator: "/")

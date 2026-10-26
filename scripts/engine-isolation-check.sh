@@ -27,7 +27,7 @@ enginepid() { pgrep -f "$app/Contents/Helpers/Glyph Jot Dictation.app" | head -1
 
 clip=$(pbpaste 2>/dev/null)
 vol=$(osascript -e 'output volume of (get volume settings)')
-installed=$(pgrep -f '^/Applications/Jot.app/Contents/MacOS/Jot$')
+installed=$(pgrep -f '^/Applications/Glyph Jot.app/Contents/MacOS/Jot$')
 oldNotes=$(defaults read dev.fru.jot.mac vaultPath 2>/dev/null || true)
 restore() {
   pkill -TERM -f "$app/Contents/MacOS/Jot" 2>/dev/null
@@ -36,7 +36,7 @@ restore() {
   if [[ -n $oldNotes ]]; then defaults write dev.fru.jot.mac vaultPath "$oldNotes"; else defaults delete dev.fru.jot.mac vaultPath 2>/dev/null; fi
   osascript -e "set volume output volume $vol"
   print -rn -- "$clip" | pbcopy
-  [[ -n $installed ]] && open -g /Applications/Jot.app
+  [[ -n $installed ]] && open -g "/Applications/Glyph Jot.app"
 }
 trap restore EXIT
 [[ -n $installed ]] && { kill $installed; sleep 2; }

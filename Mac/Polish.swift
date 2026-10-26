@@ -167,7 +167,7 @@ enum AI {
             return line
         }.joined(separator: "\n")
         let session = LanguageModelSession(instructions: """
-        You answer the user's question using only their own past dictations, listed below with when and where each was said.
+        You answer the user's question using only their own past dictations, notes and recordings, listed below with when and where each was said.
         Be short: one to three sentences. Say when it was said. Quote their words where it helps.
         If the dictations don't answer it, say you couldn't find it. Never make anything up.
         """)

@@ -21,11 +21,12 @@ extension Vault {
     /// A new conversation folder `<folder>/YYYY-MM-DD-kebab-title` (`-2`, `-3` when taken)
     /// with its `meta.json`. Returns the new meta; its `id` is the path.
     @discardableResult
-    public func createConversation(in folder: String, title: String, created: Date = .now) throws -> Conversation {
+    public func createConversation(in folder: String, title: String, created: Date = .now, device: String? = ThisDevice.name) throws -> Conversation {
         let stamp = Vault.iso(created)
         let id = Vault.join(folder, uniqueSlug(in: folder, title: title, created: stamp))
         try FileManager.default.createDirectory(at: url(id), withIntermediateDirectories: true)
-        let meta = Conversation(id: id, title: title, created: stamp)
+        var meta = Conversation(id: id, title: title, created: stamp)
+        meta.device = device
         try write(meta)
         return meta
     }

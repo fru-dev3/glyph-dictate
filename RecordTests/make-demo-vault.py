@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""A made-up vault for trying Glyph Record and taking its screenshots.
+"""A made-up recordings vault for trying Glyph Jot and taking its screenshots.
 
     python3 RecordTests/make-demo-vault.py <empty folder> [--audio]
 
-Every name here is invented. --audio speaks each transcript with `say` into audio.m4a,
-so the player and click-to-seek have something real to play.
+Every name here is invented. Calls are filed under Glyph Studio ids (make-demo-notes.py
+writes the Studio vault they point at). Lee Chen is not in Studio and stays in the older
+format (a name on the call, a People note), with the older People and Accounts notes, so
+the app's move onto Studio runs on every demo. --audio speaks each transcript with `say`
+into audio.m4a, so the player and click-to-seek have something real to play.
 """
 import json, os, subprocess, sys
 from datetime import datetime, timedelta, timezone
@@ -106,6 +109,14 @@ CONVS = [
 ]
 
 
+# Names Studio has (make-demo-notes.py), and where each folder's calls belong.
+STUDIO = {"Sam Lee": "person/sam-lee", "Kim Park": "person/kim-park", "Pat Doe": "person/pat-doe",
+          "Acme": "org/acme", "Globex": "org/globex", "Northwind": "org/northwind"}
+DOMAIN = {"Work": "domain/career", "Home": "domain/home"}
+PROJECT = {"Acme renewal kickoff": "mission/acme-renewal", "Acme pricing follow-up": "mission/acme-renewal",
+           "Call with the contractor": "mission/kitchen-remodel", "Counter stone options": "mission/kitchen-remodel"}
+
+
 def iso(dt):
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -150,10 +161,17 @@ def main():
             t += dur
         # Memos are as long as their audio; calls read like real meetings in the list.
         duration = int(t) if folder == "Recordings" else int(t * 37) + 60 * (days % 7)
+        links = [DOMAIN[folder.split("/")[0]]] if folder.split("/")[0] in DOMAIN else []
+        links += [STUDIO[n] for n in people + accounts if n in STUDIO] + ([PROJECT[title]] if title in PROJECT else [])
         meta = {"schema": 1, "id": cid, "title": title, "created": created, "duration_sec": duration,
-                "people": people, "accounts": accounts, "tags": tags}
+                "people": [n for n in people if n not in STUDIO], "accounts": [n for n in accounts if n not in STUDIO],
+                "tags": tags}
+        if links:
+            meta["links"] = links
         if sugg:
-            meta["suggested"] = {"people": sugg.get("people", []), "accounts": sugg.get("accounts", []),
+            guesses = sugg.get("people", []) + sugg.get("accounts", [])
+            meta["suggested"] = {"links": [STUDIO[n] for n in guesses if n in STUDIO],
+                                 "people": [n for n in sugg.get("people", []) if n not in STUDIO], "accounts": [],
                                  "tags": sugg.get("tags", []), "dismissed": []}
         meta.update({"source": "recording", "audio": "audio.m4a", "updated": created})
         write(os.path.join(d, "meta.json"), json.dumps(meta, indent=2))

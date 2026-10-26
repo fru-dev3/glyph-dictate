@@ -6,7 +6,10 @@
 #   scripts/shots.sh <out folder> [path/to/Debug/Jot.app]
 set -uo pipefail
 cd "${0:A:h}/.."
-out=${1:?out folder}; app=${2:-build/Build/Products/Debug/Jot.app}
+# The app by full path: cleanup kills by it, and must never match another copy (another
+# worktree's Debug build, or the installed /Applications/Jot.app).
+out=${1:?out folder}; app=${2:-$PWD/build/Build/Products/Debug/Jot.app}
+[[ $app == /Applications/* ]] && { echo "shots.sh runs a Debug build, never the installed app"; exit 2; }
 mkdir -p $out
 demo=$(mktemp -d /tmp/jot-shots.XXXXXX)
 python3 RecordTests/make-demo-vault.py $demo/rec >/dev/null
@@ -14,7 +17,25 @@ python3 RecordTests/make-demo-notes.py $demo/notes $demo/rec >/dev/null
 print 'import Foundation; let a = CommandLine.arguments; DistributedNotificationCenter.default().postNotificationName(.init(a[1]), object: a[2], userInfo: nil, deliverImmediately: true)' > $demo/post.swift
 swiftc -O -o $demo/post $demo/post.swift 2>/dev/null || exit 2
 hook() { $demo/post dev.fru.jot.mac.app.check "$1"; sleep ${2:-0.8}; }
-restore() { pkill -TERM -f "$app/Contents/MacOS/Jot"; sleep 2; pkill -9 -f "$app/Contents" 2>/dev/null; }
+# The Debug build shares the installed app's settings (one bundle id): put back the window
+# sizes, sidebar and filters it changed, so the shots never resize anyone's library.
+defaults export dev.fru.jot.mac $demo/prefs-before.plist 2>/dev/null
+restore() {
+  pkill -TERM -f "$app/Contents/MacOS/Jot"; sleep 2; pkill -9 -f "$app/Contents" 2>/dev/null
+  [[ -f $demo/prefs-before.plist ]] && python3 - $demo/prefs-before.plist <<'PY'
+import plistlib, subprocess, sys
+before = plistlib.load(open(sys.argv[1], "rb"))
+now = plistlib.loads(subprocess.run(["defaults", "export", "dev.fru.jot.mac", "-"], capture_output=True).stdout or plistlib.dumps({}))
+ui = lambda k: k.startswith(("NSWindow Frame", "NSSplitView")) or k in ("sidebar.closed", "historyFilter", "recordingsPath", "vaultPath")
+changed = [k for k in set(before) | set(now) if ui(k) and before.get(k) != now.get(k)]
+for k in changed:
+    if k in before: now[k] = before[k]
+    else: now.pop(k, None)
+if changed:
+    subprocess.run(["defaults", "import", "dev.fru.jot.mac", "-"], input=plistlib.dumps(now), check=True)
+    print("put back", len(changed), "settings")
+PY
+}
 trap restore EXIT
 open -g -n $app --args -quietEngine -recordingsPath $demo/rec -vaultPath $demo/notes
 sleep 5
@@ -37,18 +58,21 @@ for look in light dark; do
   hook "look:$look"
   for size in 1280x800 1728x1080 900x600; do
     hook "size:$size"
-    hook "side:all"; hook "conv:$conv"; hook "tab:summary" 1.2; shot "$look-$size-recording-summary"
+    hook "side:all" 1.5; shot "$look-$size-all"
+    hook "side:recordings"; hook "conv:$conv"; hook "tab:summary" 1.2; shot "$look-$size-recording-summary"
     hook "side:notes" 1.2; shot "$look-$size-notes"
     hook "side:dictations" 1.5; shot "$look-$size-dictations"
-    hook "side:person:Sam Lee" 1.2; shot "$look-$size-person"
+    hook "side:object:person/sam-lee" 1.2; shot "$look-$size-person"
     [[ $size == 1280x800 ]] || continue
-    hook "side:all"; hook "conv:$linked"; hook "tab:transcript" 1.2; shot "$look-$size-transcript-with-jots"
-    hook "side:tasks" 1.2; shot "$look-$size-open-tasks"
+    hook "side:object:org/acme" 1.2; shot "$look-$size-product"
+    hook "side:object:domain/career" 1.2; shot "$look-$size-domain"
+    hook "side:object:mission/kitchen-remodel" 1.2; shot "$look-$size-project"
+    hook "side:recordings"; hook "conv:$linked"; hook "tab:transcript" 1.2; shot "$look-$size-transcript-with-jots"
     # Settings and the recorder panel come to the front: only when nobody is at the Mac.
     idle=$(ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print int($NF/1000000000); exit}')
     (( idle >= 300 )) || { echo "skipped settings and recorder shots (Mac in use)"; continue; }
     hook "settings" 1.5; shot "$look-settings-jot" other; hook "closesettings"
-    hook "side:all"; hook "feed:/System/Library/Sounds/Submarine.aiff"; hook "record:start" 2.5
+    hook "side:recordings"; hook "feed:/System/Library/Sounds/Submarine.aiff"; hook "record:start" 2.5
     hook "jot:on" 1.2; shot "$look-recorder-jotting" panel
     hook "jot:off" 1; shot "$look-recorder-after-jot" panel
     hook "record:stop" 2

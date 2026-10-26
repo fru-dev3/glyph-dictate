@@ -1,7 +1,7 @@
 import GlyphCore
 import SwiftUI
 
-/// Command-K: type a few letters, jump to a conversation, person, account, tag or folder.
+/// Command-K: type a few letters, jump to a recording, or a Studio object or tag something is filed under.
 struct QuickOpen: View {
     @Environment(AppModel.self) private var model
     @State private var query = ""
@@ -23,24 +23,19 @@ struct QuickOpen: View {
         var out: [Hit] = []
         func conv(_ c: Conversation) -> Hit {
             Hit(id: "c:" + c.id, title: c.title, detail: Format.shortDate(c.created), symbol: "waveform") { m in
-                if !m.listed.contains(where: { $0.id == c.id }) { m.sidebar = .all }
+                if !m.listed.contains(where: { $0.id == c.id }) { m.sidebar = .recordings }
                 m.selectedID = c.id
             }
         }
         if q.isEmpty { return convs.prefix(8).map(conv) }
         out += convs.filter { $0.title.lowercased().contains(q) }.prefix(6).map(conv)
-        for row in model.library.directory.entities where ([row.entity.name] + row.entity.aliases).contains(where: { $0.lowercased().contains(q) }) {
-            let e = row.entity
-            out.append(Hit(id: "e:\(e.kind):\(e.name)", title: e.name, detail: e.kind == .person ? "Person" : "Account",
-                           symbol: e.kind == .person ? "person" : "building.2") { m in
-                m.sidebar = e.kind == .person ? .person(e.name) : .account(e.name)
-            })
+        let counts = model.linkCounts
+        for id in counts.objects.keys.sorted() {
+            guard let o = model.studio.object(id), ([o.name] + o.aliases).contains(where: { $0.lowercased().contains(q) }) else { continue }
+            out.append(Hit(id: "o:" + id, title: o.name, detail: o.kind.singular, symbol: o.kind.symbol) { $0.sidebar = .object(id) })
         }
-        for t in model.library.directory.tags where t.name.contains(q) {
-            out.append(Hit(id: "t:" + t.name, title: "#" + t.name, detail: "Tag", symbol: "number") { $0.sidebar = .tag(t.name) })
-        }
-        for f in model.folders where f.lowercased().contains(q) {
-            out.append(Hit(id: "f:" + f, title: f, detail: "Folder", symbol: "folder") { $0.sidebar = .folder(f) })
+        for t in counts.tags.keys.sorted() where t.contains(q) {
+            out.append(Hit(id: "t:" + t, title: "#" + t, detail: "Tag", symbol: "number") { $0.sidebar = .tag(t) })
         }
         let shown = Set(out.map(\.id))
         out += contentHits.compactMap { id in convs.first { $0.id == id } }.map(conv)
@@ -57,7 +52,7 @@ struct QuickOpen: View {
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
                     Image(systemName: "magnifyingglass").font(.system(size: 17)).foregroundStyle(.secondary)
-                    TextField("Go to a conversation, person, account or tag", text: $query)
+                    TextField("Go to a recording, person, product, project, domain or tag", text: $query)
                         .textFieldStyle(.plain)
                         .font(.system(size: 18))
                         .focused($focused)

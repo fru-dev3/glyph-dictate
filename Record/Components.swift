@@ -17,31 +17,27 @@ extension Animation {
 
 extension Link {
     var symbol: String {
-        switch self {
-        case .person: "person.fill"
-        case .account: "building.2.fill"
-        case .tag: "number"
-        }
+        if case .tag = self { return "number" }
+        return studioKind?.symbol ?? "link"
     }
 
-    var label: String {
-        if case .tag(let t) = self { return t }
+    /// What a chip says: the Studio object's name, the new name, or the tag.
+    @MainActor var label: String {
+        if case .object(let id) = self { return AppModel.shared.studio.name(id) }
         return name
     }
 
+    /// Studio's word for it, for help text and "New ..." rows.
     var kindName: String {
-        switch self {
-        case .person: "person"
-        case .account: "account"
-        case .tag: "tag"
-        }
+        if case .tag = self { return "tag" }
+        return studioKind?.singular.lowercased() ?? "link"
     }
 
-    var sidebarItem: SidebarItem {
+    var sidebarItem: SidebarItem? {
         switch self {
-        case .person(let n): .person(n)
-        case .account(let n): .account(n)
+        case .object(let id): .object(id)
         case .tag(let t): .tag(t)
+        default: nil
         }
     }
 }
@@ -82,7 +78,7 @@ struct LinkChip: View {
         .contentShape(Capsule())
         .onTapGesture { onOpen?() }
         .onHover { h in withAnimation(.snappy(duration: 0.18)) { hover = h } }
-        .help(onOpen == nil ? "" : "Show every conversation with \(link.label)")
+        .help(onOpen == nil ? "" : "Show everything filed under \(link.label)")
     }
 }
 
@@ -158,12 +154,13 @@ struct MetaChip: View {
 
 // MARK: the add field
 
-/// "+" that opens into a field which finds a person, account or #tag, or makes one.
+/// "+" that opens into a field which finds a Studio domain, person, product or project, or a
+/// #tag, or makes a new person or product in Studio.
 struct LinkAddField: View {
     enum Style { case overlay, inline }
 
     var style: Style = .overlay
-    var placeholder = "Add a person, account or #tag"
+    var placeholder = "File under a domain, person, product, project or #tag"
     var excluding: Set<Link> = []
     /// Opens with this text (from a request), when it changes.
     var request: (id: Int, prefix: String) = (0, "")
@@ -177,7 +174,7 @@ struct LinkAddField: View {
     @FocusState private var focused: Bool
 
     private var candidates: [Candidate] {
-        LinkMatcher.candidates(text, directory: model.library.directory, excluding: excluding)
+        LinkMatcher.candidates(text, studio: model.studio, counts: model.linkCounts, excluding: excluding)
     }
 
     var body: some View {
@@ -197,7 +194,7 @@ struct LinkAddField: View {
                         .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
-                .help("Add a person, account or #tag")
+                .help("File under a domain, person, product, project or #tag")
             }
         }
         .onChange(of: request.id) {

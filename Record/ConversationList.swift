@@ -1,30 +1,27 @@
 import GlyphCore
 import SwiftUI
 
-/// The middle column: a big header for what the sidebar chose (a person, account or
-/// tag gets its page here), then its conversations.
+/// The middle column: a big header for what the sidebar chose (a Studio object or a tag
+/// gets its page here), then its recordings and notes.
 struct ConversationList: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
         @Bindable var model = model
         let item = model.sidebar ?? .all
+        let list = model.listed
+        let notes = filedNotes(item)
         VStack(spacing: 0) {
             Group {
                 switch item {
-                case .person(let n): EntityPage(kind: .person, name: n)
-                case .account(let n): EntityPage(kind: .account, name: n)
+                case .object(let id): ObjectPage(id: id)
                 case .tag(let t): TagPage(tag: t)
                 default: ListHeader(item: item)
                 }
             }
             .id(item)
 
-            if item == .openTasks {
-                TaskList()
-            } else {
-                let list = model.listed
-                if list.isEmpty {
+                if list.isEmpty && notes.isEmpty {
                     emptyState(item)
                 } else {
                     List(selection: $model.selectedID) {
@@ -32,14 +29,12 @@ struct ConversationList: View {
                         ForEach(list, id: \.rowKey) { c in
                             ConversationRow(meta: c)
                                 .tag(c.id)
-                                .draggable(c.id)
                                 .contextMenu { ConversationMenu(id: c.id) }
                         }
-                        // A person's or an account's page also lists the notes that name them.
-                        let mentions = mentionNotes(item)
-                        if !mentions.isEmpty {
+                        // A page also lists its notes: filed under it, or (a person, a product) naming it.
+                        if !notes.isEmpty {
                             Section {
-                                ForEach(mentions) { note in
+                                ForEach(notes) { note in
                                     Button {
                                         model.openNote = note.file
                                         model.sidebar = .notes
@@ -49,7 +44,7 @@ struct ConversationList: View {
                                     .buttonStyle(.plain)
                                 }
                             } header: {
-                                Text(mentions.count == 1 ? "1 note" : "\(mentions.count) notes")
+                                Text(notes.count == 1 ? "1 note" : "\(notes.count) notes")
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundStyle(.secondary)
                             }
@@ -63,18 +58,18 @@ struct ConversationList: View {
                     .id(list.map(\.rowKey))
                     .animation(.glyph(false), value: list.map(\.id))
                 }
-            }
         }
         .background(Color(nsColor: .controlBackgroundColor).opacity(0.5))
     }
 
-    private func mentionNotes(_ item: SidebarItem) -> [JotNote] {
-        switch item {
-        // A person by full name, alias or first name ("Sam" for Sam Lee).
-        case .person(let n): notesMentioning([n, String(n.split(separator: " ").first ?? "")] + (model.entity(.person, n)?.aliases ?? []))
-        case .account(let n): notesMentioning([n] + (model.entity(.account, n)?.aliases ?? []))
-        default: []
+    private func filedNotes(_ item: SidebarItem) -> [JotNote] {
+        var notes = model.notes(for: item)
+        // A person by full name, alias or first name ("Sam" for Sam Lee); a product by name or alias.
+        if case .object(let id) = item, let o = model.studio.object(id), o.kind == .person || o.kind == .product {
+            let first = o.kind == .person ? [String(o.name.split(separator: " ").first ?? "")] : []
+            for n in notesMentioning([o.name] + first + o.aliases) where !notes.contains(n) { notes.append(n) }
         }
+        return notes.sorted { $0.date > $1.date }
     }
 
     @ViewBuilder private func emptyState(_ item: SidebarItem) -> some View {
@@ -82,10 +77,8 @@ struct ConversationList: View {
             EmptyState(symbol: "magnifyingglass", title: "No matches", message: "Nothing here says \u{201C}\(model.searchText)\u{201D}.")
         } else if model.library.conversations.isEmpty {
             EmptyState(symbol: "tray", title: "Nothing here yet")
-        } else if case .folder = item {
-            EmptyState(symbol: "folder", title: "An empty folder", message: "Record here, or drag a conversation onto it in the sidebar.")
         } else {
-            EmptyState(symbol: "person.crop.circle.badge.plus", title: "No conversations yet", message: "Add this name to a conversation and it shows up here.")
+            EmptyState(symbol: "tray", title: "Nothing filed here yet", message: "File a recording or a note under it and it shows up here.")
         }
     }
 }
@@ -96,23 +89,14 @@ struct ListHeader: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        let (title, symbol): (String, String) = switch item {
-        case .all: ("Recordings", "waveform")
-        case .openTasks: ("Open tasks", "checklist")
-        case .folder(let p): (p.split(separator: "/").last.map(String.init) ?? p, "folder")
-        default: ("", "")
-        }
-        let count = item == .openTasks ? model.openTasks.count : model.listed.count
+        let count = model.listed.count
         VStack(alignment: .leading, spacing: 4) {
-            Text(title)
+            Text("Recordings")
                 .font(.system(size: 22, weight: .bold))
                 .lineLimit(1)
             HStack(spacing: 6) {
-                Image(systemName: symbol).font(.system(size: 11))
-                Text(item == .openTasks ? "\(count) to do" : count == 1 ? "1 conversation" : "\(count) conversations")
-                if case .folder(let p) = item, p.contains("/") {
-                    Text(AppModel.parent(p)).lineLimit(1).truncationMode(.head)
-                }
+                Image(systemName: "waveform").font(.system(size: 11))
+                Text(count == 1 ? "1 recording" : "\(count) recordings")
             }
             .font(.system(size: 13))
             .foregroundStyle(.secondary)
@@ -160,7 +144,9 @@ struct ConversationRow: View {
             }
             .font(.system(size: 12))
             .foregroundStyle(.secondary)
-            let links: [Link] = meta.people.map { .person($0) } + meta.accounts.map { .account($0) }
+            // On an object's own page its chip would say the same thing on every row.
+            let here: String? = if case .object(let id) = model.sidebar { id } else { nil }
+            let links: [Link] = meta.links.filter { $0 != here }.map { .object($0) }
             if !links.isEmpty {
                 HStack(spacing: 4) {
                     ForEach(links.prefix(2), id: \.self) { LinkChip(link: $0, size: .small) }
@@ -179,78 +165,6 @@ struct ConversationRow: View {
     }
 }
 
-/// Every open action item; checking one writes notes.md, clicking one opens its call.
-struct TaskList: View {
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        let tasks = model.openTasks
-        if tasks.isEmpty {
-            EmptyState(symbol: "checkmark.circle", title: "All done", message: "Action items from your conversations land here.")
-        } else {
-            List {
-                ForEach(Array(tasks.enumerated()), id: \.offset) { _, t in
-                    TaskRow(task: t, selected: model.selectedID == t.conversation)
-                }
-            }
-            .listStyle(.inset)
-            .scrollContentBackground(.hidden)
-        }
-    }
-}
-
-struct TaskRow: View {
-    let task: VaultTask
-    let selected: Bool
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            CheckBox(done: task.item.done) { model.setTask(task.conversation, task.item, done: $0) }
-            VStack(alignment: .leading, spacing: 3) {
-                Text(task.item.text)
-                    .font(.system(size: 13.5))
-                    .fixedSize(horizontal: false, vertical: true)
-                HStack(spacing: 5) {
-                    Image(systemName: "waveform").font(.system(size: 10))
-                    Text(task.title).lineLimit(1)
-                    if let owner = task.item.owner { Text("\u{00B7} \(owner)").lineLimit(1) }
-                }
-                .font(.system(size: 12))
-                .foregroundStyle(.secondary)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(.vertical, 5)
-        .padding(.horizontal, 6)
-        .background(selected ? Color.accentColor.opacity(0.12) : .clear, in: RoundedRectangle(cornerRadius: 8))
-        .contentShape(Rectangle())
-        .onTapGesture {
-            model.selectedID = task.conversation
-            model.tab = .actions
-        }
-    }
-}
-
-/// A round checkbox that springs when ticked.
-struct CheckBox: View {
-    let done: Bool
-    var onChange: (Bool) -> Void
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    var body: some View {
-        Button { onChange(!done) } label: {
-            Image(systemName: done ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 17))
-                .foregroundStyle(done ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-                .contentTransition(.symbolEffect(.replace))
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(done ? "Done" : "Not done")
-        .animation(.glyph(reduceMotion), value: done)
-    }
-}
-
 /// The actions on a conversation, for its context menu and the detail's more menu.
 struct ConversationMenu: View {
     let id: String
@@ -260,12 +174,6 @@ struct ConversationMenu: View {
         Button("Rename") {
             model.selectedID = id
             model.renameRequest += 1
-        }
-        Menu("Move to") {
-            ForEach(model.folders, id: \.self) { f in
-                Button(f) { model.move(id, to: f) }
-                    .disabled(AppModel.parent(id) == f)
-            }
         }
         Divider()
         Button("Copy as Markdown") { model.copyMarkdown(id) }
@@ -280,5 +188,5 @@ struct ConversationMenu: View {
 }
 
 extension Conversation {
-    var rowKey: String { ([id, title, String(durationSec)] + people + accounts).joined(separator: "|") }
+    var rowKey: String { ([id, title, String(durationSec)] + links).joined(separator: "|") }
 }

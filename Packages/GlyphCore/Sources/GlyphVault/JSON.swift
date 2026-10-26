@@ -82,8 +82,10 @@ extension Conversation {
             ("people", .array(people.map(JSON.string))), ("accounts", .array(accounts.map(JSON.string))),
             ("tags", .array(tags.map(JSON.string))),
         ]
+        // Studio links only when there are some, so older files keep every byte.
+        if !links.isEmpty { pairs.append(("links", .array(links.map(JSON.string)))) }
         if !suggested.isEmpty {
-            pairs.append(("suggested", .object([
+            pairs.append(("suggested", .object((suggested.links.isEmpty ? [] : [("links", .array(suggested.links.map(JSON.string)))]) + [
                 ("people", .array(suggested.people.map(JSON.string))),
                 ("accounts", .array(suggested.accounts.map(JSON.string))),
                 ("tags", .array(suggested.tags.map(JSON.string))),
@@ -91,6 +93,7 @@ extension Conversation {
             ])))
         }
         pairs.append(("source", .string(source)))
+        if let device { pairs.append(("device", .string(device))) }
         if let calendarEventId { pairs.append(("calendar_event_id", .string(calendarEventId))) }
         pairs.append(("audio", .string(audio)))
         if let updated { pairs.append(("updated", .string(updated))) }

@@ -21,6 +21,8 @@ struct HistoryView: View {
         let app: String
         /// The repo or folder of a terminal or editor; nil when unknown and in older lines.
         let project: String?
+        /// The machine it was said on ("Studio Laptop"); nil in lines from before 2026-10-25.
+        let device: String?
         let seconds: Double
         var id: String { at.ISO8601Format() + text.prefix(20) }
     }
@@ -122,7 +124,7 @@ struct HistoryView: View {
                 Text(entry.text).textSelection(.enabled)
                 HStack(spacing: 5) {
                     if stars.contains(entry.id) { Image(systemName: "star.fill").foregroundStyle(.tint).accessibilityLabel("Starred") }
-                    Text([entry.app, entry.project, entry.mode == "thought" ? "Thought" : entry.mode == "command" ? "Command"
+                    Text([entry.app, entry.project, entry.device, entry.mode == "thought" ? "Thought" : entry.mode == "command" ? "Command"
                           : entry.mode == "ask" ? "Question" : entry.mode == "recovered" ? "Recovered" : nil]
                         .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
                 }
@@ -217,7 +219,7 @@ enum Stars {
 }
 
 /// The answer to a question about your history, with the dictations it came from.
-private struct AskCard: View {
+struct AskCard: View {
     private let ask = Ask.shared
     @Binding var copied: HistoryView.Entry.ID?
 
@@ -239,7 +241,8 @@ private struct AskCard: View {
                     .textSelection(.enabled)
             }
             if !ask.sources.isEmpty {
-                DisclosureGroup("From \(ask.sources.count) dictation\(ask.sources.count == 1 ? "" : "s")") {
+                let noun = ask.sources.allSatisfy { $0.mode != "note" && $0.mode != "recording" } ? "dictation" : "capture"
+                DisclosureGroup("From \(ask.sources.count) \(noun)\(ask.sources.count == 1 ? "" : "s")") {
                     ForEach(ask.sources.prefix(5)) { entry in
                         HStack(alignment: .top) {
                             Text(entry.at.formatted(date: .abbreviated, time: .shortened))

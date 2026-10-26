@@ -128,7 +128,11 @@ final class Engine {
     /// An engine still running from an earlier Glyph Jot (it crashed): ask it to quit, give it
     /// time to finish a dictation, then make sure.
     private static func retireOrphans() async {
+        // Only this copy's own engine: a Debug or test build must never stop the installed one
+        // (it did, 2026-10-25, and took typing away mid-dictation).
+        let mine = Bundle.main.bundleURL.standardizedFileURL.path + "/"
         let old = NSRunningApplication.runningApplications(withBundleIdentifier: JotIDs.engine)
+            .filter { $0.bundleURL?.standardizedFileURL.path.hasPrefix(mine) == true }
         guard !old.isEmpty else { return }
         jotLog.notice("engine: retiring \(old.count) left from before")
         for app in old { app.terminate() }

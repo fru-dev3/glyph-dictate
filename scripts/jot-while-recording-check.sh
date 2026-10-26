@@ -48,7 +48,7 @@ ffmpeg -v error -y -i $work/A.aiff -i $work/B.aiff -i $work/C.aiff -filter_compl
 # Put things back however this ends.
 clip=$(pbpaste 2>/dev/null)
 vol=$(osascript -e 'output volume of (get volume settings)')
-installed=$(pgrep -f '^/Applications/Jot.app/Contents/MacOS/Jot$')
+installed=$(pgrep -f '^/Applications/Glyph Jot.app/Contents/MacOS/Jot$')
 # The typing target is the debug app's own test window ("Jot test target"); the engine is
 # another process, so to it this is any other app.
 front() { hook scratch; sleep 0.3
@@ -65,7 +65,7 @@ restore() {
   defaults delete dev.fru.jot.mac recordingsPath 2>/dev/null
   osascript -e "set volume output volume $vol"
   print -rn -- "$clip" | pbcopy
-  [[ -n $installed ]] && open -g /Applications/Jot.app   # back in the background, as it was
+  [[ -n $installed ]] && open -g "/Applications/Glyph Jot.app"   # back in the background, as it was
 }
 trap restore EXIT
 

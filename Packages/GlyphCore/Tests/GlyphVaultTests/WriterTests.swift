@@ -291,3 +291,14 @@ func read(_ v: Vault, _ rel: String) throws -> String { try String(contentsOf: v
     #expect(!FileManager.default.fileExists(atPath: v.url(id).path))
     #expect(v.entities().count == 4, "notes are untouched")
 }
+
+@Test func everyNewRecordingSaysWhichMachineItCameFrom() throws {
+    let v = try scratchVault()
+    let made = try v.createConversation(in: "", title: "Weekly sync with Acme")
+    #expect(made.device == ThisDevice.name && !(made.device ?? "").isEmpty)
+    let json = try read(v, made.id + "/meta.json")
+    #expect(json.contains("\"device\""))
+    // A file from before the field reads fine, with no device.
+    let old = #"{"id": "a", "title": "Old", "created": "2026-01-01T00:00:00Z"}"#
+    #expect(try JSONDecoder().decode(Conversation.self, from: Data(old.utf8)).device == nil)
+}

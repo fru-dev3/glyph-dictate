@@ -17,6 +17,7 @@ struct LibraryWindow: View {
         } detail: {
             Group {
             switch model.sidebar {
+            case .all: AllPane()
             case .notes: NotesPane()
             case .dictations: DictationsPane()
             default:
@@ -89,7 +90,10 @@ struct LibraryWindow: View {
         .animation(.glyph(reduceMotion), value: model.columns)
         .animation(.glyph(reduceMotion), value: model.quickOpen)
         .task { NoteStore.shared.reload() }
-        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in NoteStore.shared.reload() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            NoteStore.shared.reload()
+            Task { await model.reloadStudio() }
+        }
     }
 
     @ViewBuilder private var appBanners: some View {

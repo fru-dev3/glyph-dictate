@@ -12,20 +12,21 @@ final class Ask {
     private(set) var sources: [HistoryView.Entry] = []
     private(set) var busy = false
 
-    func run(_ question: String) async {
+    /// Asks over `entries` (dictations when nil). `show` opens the library on Dictations.
+    func run(_ question: String, over entries: [HistoryView.Entry]? = nil, show: Bool = true) async {
         self.question = question
         answer = ""
         busy = true
         defer { busy = false }
-        MainWindow.show()
-        sources = Self.find(question, in: HistoryView.load())
-        guard !sources.isEmpty else { answer = "Nothing you've dictated matches that."; return }
+        if show { MainWindow.show() }
+        sources = Self.find(question, in: entries ?? HistoryView.load())
+        guard !sources.isEmpty else { answer = entries == nil ? "Nothing you've dictated matches that." : "Nothing you've captured matches that."; return }
         do {
             answer = try await AI.ask(question, from: sources)
         } catch {
             answer = error.localizedDescription
         }
-        log.info("ask: answered from \(self.sources.count) dictations")
+        log.info("ask: answered from \(self.sources.count) sources")
         #if DEBUG
         log.info("ask: \(self.answer, privacy: .public)")
         #endif

@@ -93,6 +93,14 @@ summarizes and reads the library. Tests: the `JotMac` scheme and `swift test` in
 
 ## Versions
 
+- **0.7.13** (2026-10-25): every capture says where it came from. A recording's `meta.json` keeps
+  the Mac's name as `device`, shown beside its date and length; each dictation line keeps it too.
+  The sidebar opens with the app's icon, name and "Personal context".
+- **0.7.12** (2026-10-25): Jot captures, Glyph Studio files. The sidebar is All (a summary with
+  Ask), Notes, Dictations, Recordings, then the Studio Domains, People, Products and Projects a
+  capture is filed under, with counts; tags stay plain. Recordings and notes link to Studio ids;
+  older People and Accounts move onto them at launch. No task list: action items read in a
+  recording's summary. Tests never touch the installed app's settings or its dictation engine.
 - **0.7.11** (2026-10-25): meeting notes keep only the action items the conversation states:
   no "None" or "No other action items mentioned" rows, no tasks the on-device model made up.
 - **0.7.10** (2026-10-25): design pass. A person's or an account's page lists the notes that name

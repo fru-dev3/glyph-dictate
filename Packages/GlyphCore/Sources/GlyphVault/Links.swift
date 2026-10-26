@@ -49,6 +49,7 @@ extension Vault {
         case .person: drop(&meta.suggested.people)
         case .account: drop(&meta.suggested.accounts)
         case .tag: drop(&meta.suggested.tags)
+        case .object: drop(&meta.suggested.links)
         }
         guard accept else {
             meta.suggested.dismissed.append(name)
@@ -60,6 +61,7 @@ extension Vault {
         case .person: people.append(name)
         case .account: accounts.append(name)
         case .tag: tags.append(name)
+        case .object: meta.links.append(name)
         }
         try write(meta)
         return try setLinks(id, people: people, accounts: accounts, tags: tags)
